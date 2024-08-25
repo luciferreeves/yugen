@@ -1,7 +1,7 @@
 import json
 from django.utils import timezone
 from datetime import timedelta
-from django.shortcuts import redirect
+from django.shortcuts import render
 from django.contrib.auth import logout
 from authentication.utils import (
     get_redirect_uri,
@@ -29,7 +29,9 @@ class AuthMiddleware:
             or not request.user.discord_access_token
         ):
             logout(request)
-            return redirect(get_redirect_uri())
+            request.session["next"] = request.get_full_path()
+            return render(request, "messages/unauthorized.html", {"redirect_uri": get_redirect_uri()})
+            # return redirect(get_redirect_uri())
 
         # Check the verification cookie
         verification_cookie = request.COOKIES.get("guild_verified")
@@ -57,7 +59,8 @@ class AuthMiddleware:
 
             if not user["is_authorized"]:
                 logout(request)
-                response = redirect(get_redirect_uri())
+                request.session["next"] = request.get_full_path()
+                response = render(request, "messages/unauthorized.html", {"redirect_uri": get_redirect_uri()})
                 response.delete_cookie("guild_verified")  # Ensure cookie is removed
                 return response
 

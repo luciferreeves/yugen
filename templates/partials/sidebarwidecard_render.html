@@ -1,6 +1,6 @@
 {% for anime in data %}
     {% if anime.title.english %}
-    <a href="#" class="flex flex-row w-full gap-4 bg-white bg-opacity-10 p-2 rounded hover:bg-opacity-20">
+    <a href="{% url "watch:watch" anime.id %}" class="flex flex-row w-full gap-4 bg-white bg-opacity-10 p-2 rounded hover:bg-opacity-20">
         <img src="{{ anime.image }}" alt="{{ anime.title.english }}" class="rounded-lg w-32 h-auto object-cover"/>
         <div class="flex flex-col gap-2">
         <span class="text-sm font-bold flex gap-1 flex-row items-start">

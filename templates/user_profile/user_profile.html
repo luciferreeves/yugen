@@ -1,0 +1,23 @@
+{% extends "partials/base.html" %}
+{% block content %}
+{% comment %} Avatar and Banner {% endcomment %}
+<div class="bg-white bg-opacity-10 rounded-lg bg-center bg-cover h-96 relative mt-4" {% if request.user.discord_banner %} style="background-image: url('https://cdn.discordapp.com/banners/{{ request.user.discord_id }}/{{ request.user.discord_banner }}?size=1024')" {% endif %}>
+    <div class="absolute inset-0" style="background: linear-gradient(45deg, rgb(8, 8, 8) 15%, transparent 60%), linear-gradient(0deg, rgb(8, 8, 8) 0%, transparent 60%);"></div>
+    <div class="flex flex-col items-center gap-2 absolute bottom-0 left-10">
+        <img src="https://cdn.discordapp.com/avatars/{{ request.user.discord_id }}/{{ request.user.discord_avatar }}?size=256" alt="avatar" class="rounded-full w-24 h-24">
+        <h1 class="text-2xl font-bold">{{ user.discord_global_name }}</h1>
+    </div>
+    <a href="{% url "auth:logout" %}" class="bg-white bg-opacity-10 text-white text-sm font-bold py-3 px-6 rounded-full flex items-center gap-2 absolute bottom-10 right-10">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-6">
+            <path fill-rule="evenodd" d="M14.47 2.47a.75.75 0 0 1 1.06 0l6 6a.75.75 0 0 1 0 1.06l-6 6a.75.75 0 1 1-1.06-1.06l4.72-4.72H9a5.25 5.25 0 1 0 0 10.5h3a.75.75 0 0 1 0 1.5H9a6.75 6.75 0 0 1 0-13.5h10.19l-4.72-4.72a.75.75 0 0 1 0-1.06Z" clip-rule="evenodd" />
+        </svg>          
+        Logout
+      </a>
+</div>
+
+
+
+
+
+{% endblock content %}
+
