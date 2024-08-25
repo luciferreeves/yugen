@@ -2,6 +2,33 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer utilities {
+  /* Hide scrollbar for Chrome, Safari and Opera */
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  /* Hide scrollbar for IE, Edge and Firefox */
+  .no-scrollbar {
+    -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: none; /* Firefox */
+  }
+}
+
 * {
   font-family: "Tsukimi Rounded", sans-serif;
+}
+
+/* Style for the active pagination bullet */
+.swiper-pagination-bullet-active {
+  background-color: white !important; /* Make active bullet white */
+}
+
+/* Optional: Style for inactive pagination bullets */
+.swiper-pagination-bullet {
+  background-color: rgba(
+    255,
+    255,
+    255,
+    0.5
+  ); /* Light gray for inactive bullets */
 }
