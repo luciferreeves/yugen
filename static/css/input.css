@@ -15,7 +15,11 @@
 }
 
 * {
-  font-family: "Lato", sans-serif;
+  font-family: "Karla", sans-serif;
+}
+
+main {
+  max-width: 1800px;
 }
 
 /* Style for the active pagination bullet */
@@ -29,6 +33,6 @@
     255,
     255,
     255,
-    0.5
-  ); /* Light gray for inactive bullets */
+    0.8
+  ) !important; /* Light gray for inactive bullets */
 }
