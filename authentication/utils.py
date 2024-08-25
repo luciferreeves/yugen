@@ -54,6 +54,9 @@ def get_discord_user(access_token, token_type):
             if guild["id"] in authorized_guilds:
                 user["is_authorized"] = True
                 break
+    else:
+        print(guilds)
+        print(user)
 
     return user
 
