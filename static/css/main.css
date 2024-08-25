@@ -666,6 +666,14 @@ video {
   height: 100%;
 }
 
+.h-40 {
+  height: 10rem;
+}
+
+.h-72 {
+  height: 18rem;
+}
+
 .max-h-24 {
   max-height: 6rem;
 }
