@@ -49,10 +49,11 @@ def get_discord_user(access_token, token_type):
 
     authorized_guilds = os.environ.get("DISCORD_AUTHORIZED_GUILDS").split(",")
     user["is_authorized"] = False
-    for guild in guilds:
-        if guild["id"] in authorized_guilds:
-            user["is_authorized"] = True
-            break
+    if isinstance(guilds, list):
+        for guild in guilds:
+            if guild["id"] in authorized_guilds:
+                user["is_authorized"] = True
+                break
 
     return user
 
