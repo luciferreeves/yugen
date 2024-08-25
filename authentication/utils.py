@@ -93,7 +93,9 @@ def authenticate_user(exchange_response):
             user.discord_token_type = token_type
             user.discord_username = discord_user["username"]
             user.discord_avatar = discord_user["avatar"]
-            user.discord_banner = discord_user["banner"]
+            user.discord_banner = (
+                discord_user["banner"] if "banner" in discord_user else ""
+            )
             user.discord_global_name = discord_user["global_name"]
             user.save()
 
