@@ -9,6 +9,6 @@ class User(AbstractUser):
     discord_refresh_token = models.CharField(max_length=255)
     discord_token_type = models.CharField(max_length=255)
     discord_username = models.CharField(max_length=255, unique=True)
-    discord_avatar = models.CharField(max_length=255)
-    discord_banner = models.CharField(max_length=255)
+    discord_avatar = models.CharField(max_length=255, null=True)
+    discord_banner = models.CharField(max_length=255, null=True)
     discord_global_name = models.CharField(max_length=255)
