@@ -6,10 +6,17 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="icon" href="{% static 'icons/favicon.ico' %}" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Tsukimi+Rounded&display=swap"
+      rel="stylesheet"
+    />
     <link rel="stylesheet" href="{% static 'css/main.css' %}" />
     <title>Yugen</title>
   </head>
-  <body>
+  <body class="bg-black text-white">
+    <header>{% include "partials/navbar.html" %}</header>
     <main>{% block content %} {% endblock %}</main>
   </body>
 </html>
