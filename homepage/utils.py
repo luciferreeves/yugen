@@ -48,35 +48,35 @@ def get_next_season_year():
         return current_year + 1
 
 
-def get_trending_anime():
-    request_url = f"{CONSUMET_URL}/meta/anilist/trending?page=1&perPage=34"
+def get_trending_anime(page=1, per_page=34):
+    request_url = f"{CONSUMET_URL}/meta/anilist/trending?page={page}&perPage={per_page}"
     response = requests.get(request_url)
     return response.json()
 
 
-def get_popular_anime():
-    request_url = f"{CONSUMET_URL}/meta/anilist/advanced-search?type=ANIME&sort=[%22POPULARITY_DESC%22]&?page=1&perPage=34"
+def get_popular_anime(page=1, per_page=34):
+    request_url = f"{CONSUMET_URL}/meta/anilist/advanced-search?type=ANIME&sort=[%22POPULARITY_DESC%22]&?page={page}&perPage={per_page}"
     response = requests.get(request_url)
     return response.json()
 
 
-def get_top_anime():
-    request_url = f"{CONSUMET_URL}/meta/anilist/advanced-search?type=ANIME&sort=[%22SCORE_DESC%22]&?page=1&perPage=34"
+def get_top_anime(page=1, per_page=34):
+    request_url = f"{CONSUMET_URL}/meta/anilist/advanced-search?type=ANIME&sort=[%22SCORE_DESC%22]&?page={page}&perPage={per_page}"
     response = requests.get(request_url)
     return response.json()
 
 
-def get_top_airing_anime():
+def get_top_airing_anime(page=1, per_page=6):
     season = get_current_season()
     year = get_current_year()
-    request_url = f"{CONSUMET_URL}/meta/anilist/advanced-search?type=ANIME&status=RELEASING&sort=[%22POPULARITY_DESC%22]&season={season}&year={year}&?page=1&perPage=6"
+    request_url = f"{CONSUMET_URL}/meta/anilist/advanced-search?type=ANIME&status=RELEASING&sort=[%22POPULARITY_DESC%22]&season={season}&year={year}&?page={page}&perPage={per_page}"
     response = requests.get(request_url)
     return response.json()
 
 
-def get_upcoming_anime():
+def get_upcoming_anime(page=1, per_page=6):
     season = get_next_season()
     year = get_next_season_year()
-    request_url = f"{CONSUMET_URL}/meta/anilist/advanced-search?type=ANIME&status=NOT_YET_RELEASED&sort=[%22POPULARITY_DESC%22]&season={season}&year={year}&?page=1&perPage=6"
+    request_url = f"{CONSUMET_URL}/meta/anilist/advanced-search?type=ANIME&status=NOT_YET_RELEASED&sort=[%22POPULARITY_DESC%22]&season={season}&year={year}&?page={page}&perPage={per_page}"
     response = requests.get(request_url)
     return response.json()

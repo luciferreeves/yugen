@@ -1,8 +1,6 @@
 {% extends "partials/base.html" %} {% block css %}
-<link
-  rel="stylesheet"
-  href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css"
-/>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
 {% endblock css %} {% block content %}
 <!-- Swiper: Trending Anime -->
 <section class="swiper rounded mt-2">
@@ -72,7 +70,6 @@
   </div>
   <div class="swiper-pagination"></div>
 </section>
-{% comment %} The genres you want to search for. Array Enum: "Action" "Adventure" "Cars" "Comedy" "Drama" "Fantasy" "Horror" "Mahou Shoujo" "Mecha" "Music" "Mystery" "Psychological" "Romance" "Sci-Fi" "Slice of Life" "Sports" "Supernatural" "Thriller" {% endcomment %}
 
 <!-- Genre Pills -->
 <section class="flex flex-row gap-2 mt-4 justify-center flex-wrap">
@@ -96,6 +93,140 @@
   <a href="#" class="bg-orange-100 bg-opacity-10 text-orange-300 text-sm font-bold py-2 px-4 rounded-full">Thriller</a>
 </section>
 
+<!-- Split: Anime List: Sidebar -->
+<section class="flex flex-col lg:flex-row mt-4 gap-4">
+  <section class="w-full lg:w-3/4 flex flex-col items-center">
+    <!-- Top Bar: Trending, Popular, Top Rated: Purple Text: Active Tab -->
+    <section class="inline-flex w-max flex-row gap-4 rounded-full bg-white bg-opacity-10 mx-auto">
+      <button class="flex flex-row items-center gap-2 text-sm font-bold py-2 px-4 rounded-full bg-purple-600 category-switch active-category" data-target="trending">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-4">
+          <path fill-rule="evenodd" d="M12.963 2.286a.75.75 0 0 0-1.071-.136 9.742 9.742 0 0 0-3.539 6.176 7.547 7.547 0 0 1-1.705-1.715.75.75 0 0 0-1.152-.082A9 9 0 1 0 15.68 4.534a7.46 7.46 0 0 1-2.717-2.248ZM15.75 14.25a3.75 3.75 0 1 1-7.313-1.172c.628.465 1.35.81 2.133 1a5.99 5.99 0 0 1 1.925-3.546 3.75 3.75 0 0 1 3.255 3.718Z" clip-rule="evenodd" />
+        </svg>
+        <span>Trending</span>
+      </button>
+      <button class="flex flex-row items-center gap-2 text-sm font-bold py-2 px-4 rounded-full category-switch" data-target="popular">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-4">
+          <path fill-rule="evenodd" d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.006 5.404.434c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.434 2.082-5.005Z" clip-rule="evenodd" />
+        </svg>        
+        <span>Popular</span>
+      </button>      
+      <button class="flex flex-row items-center gap-2 text-sm font-bold py-2 px-4 rounded-full category-switch" data-target="top_rated">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-4">
+          <path d="M18.375 2.25c-1.035 0-1.875.84-1.875 1.875v15.75c0 1.035.84 1.875 1.875 1.875h.75c1.035 0 1.875-.84 1.875-1.875V4.125c0-1.036-.84-1.875-1.875-1.875h-.75ZM9.75 8.625c0-1.036.84-1.875 1.875-1.875h.75c1.036 0 1.875.84 1.875 1.875v11.25c0 1.035-.84 1.875-1.875 1.875h-.75a1.875 1.875 0 0 1-1.875-1.875V8.625ZM3 13.125c0-1.036.84-1.875 1.875-1.875h.75c1.036 0 1.875.84 1.875 1.875v6.75c0 1.035-.84 1.875-1.875 1.875h-.75A1.875 1.875 0 0 1 3 19.875v-6.75Z" />
+        </svg>
+        <span>Top Rated</span>
+      </button>      
+    </section>
+    <!-- Data Cards: Trending Anime -->
+    <section id="trending" class="flex flex-wrap justify-center mt-4 animate__animated animate__slideInUp">
+      {% for anime in trending_anime %}
+      {% if anime.title.english %}
+        <a href="#" class="w-1/2 lg:w-1/6 px-4 pb-4 text-gray-500 hover:text-white flex flex-col gap-2">
+          <img src="{{ anime.image }}" alt="{{ anime.title.english }}" class="rounded-lg h-72 w-auto object-cover"/>
+          <span class="text-sm font-bold flex gap-1 flex-row items-start">
+            {% if anime.status == "Ongoing" %}
+              <span class="text-green-500 pt-1">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-3">
+                  <circle cx="12" cy="12" r="12" />
+                </svg>                
+              </span>
+            {% elif anime.status == "Not yet aired" %}
+              <span class="text-yellow-500 pt-1">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-3">
+                  <circle cx="12" cy="12" r="12" />
+                </svg>
+              </span>
+            {% else %}
+              <span class="text-blue-500 pt-1">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-3">
+                  <circle cx="12" cy="12" r="12" />
+                </svg>
+              </span>
+            {% endif %}
+            <span>
+              {{ anime.title.english }}
+            </span>
+          </span>
+        </a>
+      {% endif %}
+      {% endfor %}
+    </section>
+    <!-- Data Cards: Popular Anime -->
+    <section id="popular" class="flex-wrap justify-center mt-4 hidden animate__animated animate__slideInUp">
+      {% for anime in popular_anime %}
+      {% if anime.title.english %}
+        <a href="#" class="w-1/2 lg:w-1/6 px-4 pb-4 text-gray-500 hover:text-white flex flex-col gap-2">
+          <img src="{{ anime.image }}" alt="{{ anime.title.english }}" class="rounded-lg h-72 w-auto object-cover"/>
+          <span class="text-sm font-bold flex gap-1 flex-row items-start">
+            {% if anime.status == "Ongoing" %}
+              <span class="text-green-500 pt-1">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-3">
+                  <circle cx="12" cy="12" r="12" />
+                </svg>                
+              </span>
+            {% elif anime.status == "Not yet aired" %}
+              <span class="text-yellow-500 pt-1">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-3">
+                  <circle cx="12" cy="12" r="12" />
+                </svg>
+              </span>
+            {% else %}
+              <span class="text-blue-500 pt-1">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-3">
+                  <circle cx="12" cy="12" r="12" />
+                </svg>
+              </span>
+            {% endif %}
+            <span>
+              {{ anime.title.english }}
+            </span>
+          </span>
+        </a>
+      {% endif %}
+      {% endfor %}
+    </section>
+    <!-- Data Cards: Top Rated Anime -->
+    <section id="top_rated" class="flex-wrap justify-center mt-4 hidden animate__animated animate__slideInUp">
+      {% for anime in top_anime %}
+      {% if anime.title.english %}
+        <a href="#" class="w-1/2 lg:w-1/6 px-4 pb-4 text-gray-500 hover:text-white flex flex-col gap-2">
+          <img src="{{ anime.image }}" alt="{{ anime.title.english }}" class="rounded-lg h-72 w-auto object-cover"/>
+          <span class="text-sm font-bold flex gap-1 flex-row items-start">
+            {% if anime.status == "Ongoing" %}
+              <span class="text-green-500 pt-1">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-3">
+                  <circle cx="12" cy="12" r="12" />
+                </svg>                
+              </span>
+            {% elif anime.status == "Not yet aired" %}
+              <span class="text-yellow-500 pt-1">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-3">
+                  <circle cx="12" cy="12" r="12" />
+                </svg>
+              </span>
+            {% else %}
+              <span class="text-blue-500 pt-1">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-3">
+                  <circle cx="12" cy="12" r="12" />
+                </svg>
+              </span>
+            {% endif %}
+            <span>
+              {{ anime.title.english }}
+            </span>
+          </span>
+        </a>
+      {% endif %}
+      {% endfor %}
+    </section>
+  </section>
+  <section class="w-full lg:w-1/4">
+    <!-- Other content -->
+  </section>
+</section>
+
+
+
 
 {% endblock content %} {% block scripts %}
 <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
@@ -110,7 +241,7 @@
       slideShadows: false,
     },
     autoplay: {
-      delay: 60000,
+      delay: 5000,
     },
 
     // If we need pagination
@@ -118,6 +249,28 @@
       el: ".swiper-pagination",
       dynamicBullets: true,
     },
+  });
+</script>
+<script>
+  const categorySwitch = document.querySelectorAll(".category-switch");
+  categorySwitch.forEach((button) => {
+    button.addEventListener("click", () => {
+      categorySwitch.forEach((button) => {
+        button.classList.remove("active-category");
+        button.classList.remove("bg-purple-600");
+      });
+      button.classList.add("active-category");
+      button.classList.add("bg-purple-600");
+
+      const target = button.getAttribute("data-target");
+      const sections = [document.getElementById("trending"), document.getElementById("popular"), document.getElementById("top_rated")];
+      sections.forEach((section) => {
+        section.classList.add("hidden");
+        section.classList.remove("flex");
+      });
+      document.getElementById(target).classList.remove("hidden");
+      document.getElementById(target).classList.add("flex");
+    });
   });
 </script>
 {% endblock scripts %}
