@@ -5,6 +5,7 @@ from homepage.utils import (
     get_top_anime,
     get_top_airing_anime,
     get_upcoming_anime,
+    get_next_season,
 )
 
 
@@ -14,6 +15,7 @@ def index(request):
     top_anime = get_top_anime()
     top_airing_anime = get_top_airing_anime()
     upcoming_anime = get_upcoming_anime()
+    next_season = get_next_season()
 
     context = {
         "trending_anime": trending_anime["results"],
@@ -21,6 +23,7 @@ def index(request):
         "top_anime": top_anime["results"],
         "top_airing_anime": top_airing_anime["results"],
         "upcoming_anime": upcoming_anime["results"],
+        "next_season": next_season
     }
 
     return render(request, "home/index.html", context)

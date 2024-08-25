@@ -43,9 +43,9 @@ def get_next_season_year():
     current_season = get_current_season()
     current_year = get_current_year()
     if current_season == "WINTER":
-        return current_year
-    else:
         return current_year + 1
+    else:
+        return current_year
 
 
 def get_trending_anime(page=1, per_page=34):
