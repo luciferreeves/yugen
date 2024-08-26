@@ -14,7 +14,7 @@
     <title>Yugen</title>
   </head>
   <body class="bg-black text-white">
-    <header>{% include "partials/navbar.html" %}</header>
+    {% include "partials/navbar.html" %}
     <main class="mx-auto">{% block content %} {% endblock %}</main>
   </body>
   {% block scripts %} {% endblock %}
