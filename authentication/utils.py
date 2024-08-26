@@ -151,19 +151,25 @@ def get_discord_user(access_token, token_type):
             if guild["id"] in authorized_guilds:
                 # get the user's guild display name
                 member = requests.get(
-                    f"https://discord.com/api//users/@me/guilds/{guild['id']}/member",
+                    f"https://discord.com/api/users/@me/guilds/{guild['id']}/member",
                     headers={"Authorization": f"{token_type} {access_token}"},
                 ).json()
                 
                 user = member["user"]
                 user["is_authorized"] = True
+                user["rate_limited"] = False
                 user["guild_name"] = member["nick"] if member["nick"] is not None else ""
 
                 break
-
     else:
-        print(guilds)
-        print(user)
+        # maybe user is rate limited
+        # {'message': 'You are being rate limited.', 'retry_after': 0.3, 'global': False}
+        if guilds.get("message") == "You are being rate limited.":
+            user["is_authorized"] = True # Temporarily authorized
+            user["rate_limited"] = True
+        else:
+            user["is_authorized"] = False
+            user["rate_limited"] = False
 
     return user
 
@@ -191,7 +197,6 @@ def authenticate_user(exchange_response):
                 "discord_guild_name": discord_user["guild_name"],
             },
         )
-        print(discord_user["banner"])
 
         if not created:
             user.username = discord_user["username"]

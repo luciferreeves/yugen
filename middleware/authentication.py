@@ -69,7 +69,7 @@ class AuthMiddleware:
             response.set_cookie(
                 "guild_verified",
                 json.dumps({"verified_at": timezone.now().isoformat()}),
-                max_age=24 * 60 * 60,  # Cookie expires after 24 hours
+                max_age=24 * 60 * 60 if not user["rate_limited"] else 60 * 60,  # 24 hours or 1 hour if rate limited
                 httponly=True,  # Cookie cannot be accessed via JavaScript
                 secure=True,  # Ensure cookie is sent over HTTPS
             )
