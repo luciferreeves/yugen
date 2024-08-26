@@ -2,6 +2,7 @@ import dotenv
 import os
 import requests
 from authentication.models import User
+from user_profile.models import UserPreferences
 
 dotenv.load_dotenv()
 
@@ -10,7 +11,7 @@ def get_redirect_uri():
     # Only Authenticated Users who are in our Discord Server can access the website
     discord_client_id = os.environ.get("DISCORD_CLIENT_ID")
     discord_redirect_uri = os.environ.get("DISCORD_REDIRECT_URI")
-    discord_scope = "identify guilds email"
+    discord_scope = "identify guilds guilds.members.read"
     redirect_uri = f"https://discord.com/oauth2/authorize?client_id={discord_client_id}&response_type=code&redirect_uri={discord_redirect_uri}&scope={discord_scope}"
     return redirect_uri
 
@@ -26,7 +27,7 @@ def exchange_code(code):
         "grant_type": "authorization_code",
         "code": code,
         "redirect_uri": discord_redirect_uri,
-        "scope": "identify email guilds",
+        "scope": "identify guilds guilds.members.read",
     }
 
     headers = {"Content-Type": "application/x-www-form-urlencoded"}
@@ -38,22 +39,29 @@ def exchange_code(code):
 
 
 def get_discord_user(access_token, token_type):
-    user = requests.get(
-        "https://discord.com/api/users/@me",
-        headers={"Authorization": f"{token_type} {access_token}"},
-    ).json()
     guilds = requests.get(
         "https://discord.com/api/users/@me/guilds",
         headers={"Authorization": f"{token_type} {access_token}"},
     ).json()
 
     authorized_guilds = os.environ.get("DISCORD_AUTHORIZED_GUILDS").split(",")
+    user = {}
     user["is_authorized"] = False
     if isinstance(guilds, list):
         for guild in guilds:
             if guild["id"] in authorized_guilds:
+                # get the user's guild display name
+                member = requests.get(
+                    f"https://discord.com/api//users/@me/guilds/{guild['id']}/member",
+                    headers={"Authorization": f"{token_type} {access_token}"},
+                ).json()
+                
+                user = member["user"]
                 user["is_authorized"] = True
+                user["guild_name"] = member["nick"] if member["nick"] is not None else ""
+
                 break
+
     else:
         print(guilds)
         print(user)
@@ -73,31 +81,34 @@ def authenticate_user(exchange_response):
             discord_id=discord_user["id"],
             defaults={
                 "username": discord_user["username"],
-                "email": discord_user["email"],
                 "discord_id": discord_user["id"],
                 "discord_access_token": access_token,
                 "discord_refresh_token": refresh_token,
                 "discord_token_type": token_type,
                 "discord_username": discord_user["username"],
                 "discord_avatar": discord_user["avatar"],
-                "discord_banner": discord_user["banner"],
+                "discord_banner": discord_user["banner"] if discord_user["banner"] is not None else "",
                 "discord_global_name": discord_user["global_name"],
+                "discord_guild_name": discord_user["guild_name"],
             },
         )
+        print(discord_user["banner"])
 
         if not created:
             user.username = discord_user["username"]
-            user.email = discord_user["email"]
             user.discord_access_token = access_token
             user.discord_refresh_token = refresh_token
             user.discord_token_type = token_type
             user.discord_username = discord_user["username"]
             user.discord_avatar = discord_user["avatar"]
             user.discord_banner = (
-                discord_user["banner"] if "banner" in discord_user else ""
+                discord_user["banner"] if discord_user["banner"] is not None else ""
             )
             user.discord_global_name = discord_user["global_name"]
+            user.discord_guild_name = discord_user["guild_name"]
             user.save()
+
+        UserPreferences.objects.get_or_create(user=user)
 
         return user
 

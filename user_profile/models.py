@@ -8,12 +8,13 @@ class UserPreferences(models.Model):
     title_language = models.CharField(max_length=16, default="english") # english, romaji, native
     character_name_language = models.CharField(max_length=16, default="romaji") # romaji, native
     default_language = models.CharField(max_length=16, default="sub") # sub, dub
-    default_provider = models.CharField(max_length=16, default="gogoanime") # gogoanime, zoro
+    default_provider = models.CharField(max_length=16, default="zoro") # gogoanime, zoro
     default_watch_page = models.CharField(max_length=16, default="watch") # detail, watch
     show_history_on_home = models.BooleanField(default=True)
     auto_skip_intro = models.BooleanField(default=False)
     auto_play_video = models.BooleanField(default=False)
     auto_next_episode = models.BooleanField(default=False)
+    display_guild_name_instead_of_username = models.BooleanField(default=True)
 
     def __str__(self):
         return f"{self.user.username}'s preferences"

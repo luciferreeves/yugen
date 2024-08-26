@@ -14,10 +14,284 @@
         Logout
       </a>
 </div>
-
-
-
-
-
+<section class="w-full flex flex-col max-w-7xl mx-auto my-4 p-2">
+    <section class="inline-flex w-11/12 lg:w-max flex-row rounded-full bg-white bg-opacity-10 mx-auto">
+        <a class="flex flex-row items-center focus:outline-none gap-2 text-sm font-bold py-2 px-4 rounded-full {% if request.GET.category == "preferences" or not request.GET.category %}bg-purple-600{% endif %}" href="{% url "user_profile:user_profile" %}?category=preferences">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-4">
+                <path d="M18.75 12.75h1.5a.75.75 0 0 0 0-1.5h-1.5a.75.75 0 0 0 0 1.5ZM12 6a.75.75 0 0 1 .75-.75h7.5a.75.75 0 0 1 0 1.5h-7.5A.75.75 0 0 1 12 6ZM12 18a.75.75 0 0 1 .75-.75h7.5a.75.75 0 0 1 0 1.5h-7.5A.75.75 0 0 1 12 18ZM3.75 6.75h1.5a.75.75 0 1 0 0-1.5h-1.5a.75.75 0 0 0 0 1.5ZM5.25 18.75h-1.5a.75.75 0 0 1 0-1.5h1.5a.75.75 0 0 1 0 1.5ZM3 12a.75.75 0 0 1 .75-.75h7.5a.75.75 0 0 1 0 1.5h-7.5A.75.75 0 0 1 3 12ZM9 3.75a2.25 2.25 0 1 0 0 4.5 2.25 2.25 0 0 0 0-4.5ZM12.75 12a2.25 2.25 0 1 1 4.5 0 2.25 2.25 0 0 1-4.5 0ZM9 15.75a2.25 2.25 0 1 0 0 4.5 2.25 2.25 0 0 0 0-4.5Z" />
+            </svg>
+            <span>Preferences</span>
+        </a>
+        <a class="flex flex-row items-center focus:outline-none gap-2 text-sm font-bold py-2 px-4 rounded-full {% if request.GET.category == "anime_list" %}bg-purple-600{% endif %}" href="{% url "user_profile:user_profile" %}?category=anime_list">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-4">
+                <path d="M19.5 6h-15v9h15V6Z" />
+                <path fill-rule="evenodd" d="M3.375 3C2.339 3 1.5 3.84 1.5 4.875v11.25C1.5 17.16 2.34 18 3.375 18H9.75v1.5H6A.75.75 0 0 0 6 21h12a.75.75 0 0 0 0-1.5h-3.75V18h6.375c1.035 0 1.875-.84 1.875-1.875V4.875C22.5 3.839 21.66 3 20.625 3H3.375Zm0 13.5h17.25a.375.375 0 0 0 .375-.375V4.875a.375.375 0 0 0-.375-.375H3.375A.375.375 0 0 0 3 4.875v11.25c0 .207.168.375.375.375Z" clip-rule="evenodd" />
+            </svg>                
+            <span>Anime List</span>
+        </a>      
+        <a class="flex flex-row items-center focus:outline-none gap-2 text-sm font-bold py-2 px-4 rounded-full {% if request.GET.category == "user_directory" %}bg-purple-600{% endif %}" href="{% url "user_profile:user_profile" %}?category=user_directory">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-4">
+                <path d="M18.375 2.25c-1.035 0-1.875.84-1.875 1.875v15.75c0 1.035.84 1.875 1.875 1.875h.75c1.035 0 1.875-.84 1.875-1.875V4.125c0-1.036-.84-1.875-1.875-1.875h-.75ZM9.75 8.625c0-1.036.84-1.875 1.875-1.875h.75c1.036 0 1.875.84 1.875 1.875v11.25c0 1.035-.84 1.875-1.875 1.875h-.75a1.875 1.875 0 0 1-1.875-1.875V8.625ZM3 13.125c0-1.036.84-1.875 1.875-1.875h.75c1.036 0 1.875.84 1.875 1.875v6.75c0 1.035-.84 1.875-1.875 1.875h-.75A1.875 1.875 0 0 1 3 19.875v-6.75Z" />
+            </svg>
+            <span>User Directory</span>
+        </a>      
+    </section>
+    {% if request.GET.category == "anime_list" %}
+        {% comment %} TODO: anime list {% endcomment %}
+    {% elif request.GET.category == "user_directory" %}
+        {% comment %} TODO: user directory {% endcomment %}
+    {% else %}
+        <h2 class="text-2xl font-bold text-center mt-8 flex gap-2 items-center">
+            <svg stroke="currentColor" fill="none" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true" class="text-purple-500" height="1.4rem" width="1.4rem" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"></path></svg>
+            <span>Appearance</span>
+        </h2>
+        <div class="w-full py-4 flex flex-row justify-between items-center border-b border-white border-opacity-10">
+            <div>
+                <h3 class="text-xl">Card Appearance</h3>
+                <small class="text-gray-400 text-sm">Change the appearance of the cards in the anime list.</small>
+            </div>
+            <div class="relative w-64 custom-select text-sm" data-select="card_layout">
+                <div class="select-none cursor-pointer bg-neutral-900 py-2 px-4 pr-8 rounded leading-tight focus:outline-none capitalize" id="card_layout">
+                    {{ user.preferences.card_layout }}
+                </div>
+                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-white">
+                    <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                        <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/>
+                    </svg>
+                </div>
+                <div class="absolute z-10 w-full mt-1 bg-neutral-900 rounded shadow-lg hidden" id="card_layout_options">
+                    <div class="py-1">
+                        <div class="cursor-pointer px-4 py-2 text-white hover:bg-purple-600 capitalize" data-value="classic">classic</div>
+                        <div class="cursor-pointer px-4 py-2 text-white hover:bg-purple-600 capitalize" data-value="wide">wide</div>
+                        <div class="cursor-pointer px-4 py-2 text-white hover:bg-purple-600 capitalize" data-value="compact">compact</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <h2 class="text-2xl font-bold text-center mt-8 flex gap-2 items-center">
+            <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 640 512" class="text-blue-500" height="1.75rem" width="1.75rem" xmlns="http://www.w3.org/2000/svg"><path d="M152.1 236.2c-3.5-12.1-7.8-33.2-7.8-33.2h-.5s-4.3 21.1-7.8 33.2l-11.1 37.5H163zM616 96H336v320h280c13.3 0 24-10.7 24-24V120c0-13.3-10.7-24-24-24zm-24 120c0 6.6-5.4 12-12 12h-11.4c-6.9 23.6-21.7 47.4-42.7 69.9 8.4 6.4 17.1 12.5 26.1 18 5.5 3.4 7.3 10.5 4.1 16.2l-7.9 13.9c-3.4 5.9-10.9 7.8-16.7 4.3-12.6-7.8-24.5-16.1-35.4-24.9-10.9 8.7-22.7 17.1-35.4 24.9-5.8 3.5-13.3 1.6-16.7-4.3l-7.9-13.9c-3.2-5.6-1.4-12.8 4.2-16.2 9.3-5.7 18-11.7 26.1-18-7.9-8.4-14.9-17-21-25.7-4-5.7-2.2-13.6 3.7-17.1l6.5-3.9 7.3-4.3c5.4-3.2 12.4-1.7 16 3.4 5 7 10.8 14 17.4 20.9 13.5-14.2 23.8-28.9 30-43.2H412c-6.6 0-12-5.4-12-12v-16c0-6.6 5.4-12 12-12h64v-16c0-6.6 5.4-12 12-12h16c6.6 0 12 5.4 12 12v16h64c6.6 0 12 5.4 12 12zM0 120v272c0 13.3 10.7 24 24 24h280V96H24c-13.3 0-24 10.7-24 24zm58.9 216.1L116.4 167c1.7-4.9 6.2-8.1 11.4-8.1h32.5c5.1 0 9.7 3.3 11.4 8.1l57.5 169.1c2.6 7.8-3.1 15.9-11.4 15.9h-22.9a12 12 0 0 1-11.5-8.6l-9.4-31.9h-60.2l-9.1 31.8c-1.5 5.1-6.2 8.7-11.5 8.7H70.3c-8.2 0-14-8.1-11.4-15.9z"></path></svg>
+            <span>Display Language</span>
+        </h2>
+        <div class="w-full py-4 flex flex-row justify-between items-center border-b border-white border-opacity-10">
+            <div>
+                <h3 class="text-xl">Title Language</h3>
+                <small class="text-gray-400 text-sm">Change the language in which the titles are displayed.</small>
+            </div>
+            <div class="relative w-64 custom-select text-sm" data-select="title_language">
+                <div class="select-none cursor-pointer bg-neutral-900 py-2 px-4 pr-8 rounded leading-tight focus:outline-none capitalize" id="title_language">
+                    {{ user.preferences.title_language }}
+                </div>
+                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-white">
+                    <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                        <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/>
+                    </svg>
+                </div>
+                <div class="absolute z-10 w-full mt-1 bg-neutral-900 rounded shadow-lg hidden" id="title_language_options">
+                    <div class="py-1">
+                        <div class="cursor-pointer px-4 py-2 text-white hover:bg-purple-600 capitalize" data-value="english">english (Attack on Titan)</div>
+                        <div class="cursor-pointer px-4 py-2 text-white hover:bg-purple-600 capitalize" data-value="romaji">romaji (Shingeki no Kyojin)</div>
+                        <div class="cursor-pointer px-4 py-2 text-white hover:bg-purple-600 capitalize" data-value="native">native (進撃の巨人)</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="w-full py-4 flex flex-row justify-between items-center border-b border-white border-opacity-10">
+            <div>
+                <h3 class="text-xl">Character Name Language</h3>
+                <small class="text-gray-400 text-sm">Change the language in which the character names are displayed.</small>
+            </div>
+            <div class="relative w-64 custom-select text-sm" data-select="character_name_language">
+                <div class="select-none cursor-pointer bg-neutral-900 py-2 px-4 pr-8 rounded leading-tight focus:outline-none capitalize" id="character_name_language">
+                    {{ user.preferences.character_name_language }}
+                </div>
+                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-white">
+                    <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                        <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/>
+                    </svg>
+                </div>
+                <div class="absolute z-10 w-full mt-1 bg-neutral-900 rounded shadow-lg hidden" id="character_name_language_options">
+                    <div class="py-1">
+                        <div class="cursor-pointer px-4 py-2 text-white hover:bg-purple-600 capitalize" data-value="romaji">romaji</div>
+                        <div class="cursor-pointer px-4 py-2 text-white hover:bg-purple-600 capitalize" data-value="native">native</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <h2 class="text-2xl font-bold text-center mt-8 flex gap-2 items-center">
+            <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 24 24" class="text-red-500" height="1.4rem" width="1.4rem" xmlns="http://www.w3.org/2000/svg"><path fill="none" d="M0 0h24v24H0V0z"></path><path d="M13.05 9.79 10 7.5v9l3.05-2.29L16 12l-2.95-2.21zm0 0L10 7.5v9l3.05-2.29L16 12l-2.95-2.21zm0 0L10 7.5v9l3.05-2.29L16 12l-2.95-2.21zM11 4.07V2.05c-2.01.2-3.84 1-5.32 2.21L7.1 5.69A7.941 7.941 0 0 1 11 4.07zM5.69 7.1 4.26 5.68A9.949 9.949 0 0 0 2.05 11h2.02c.18-1.46.76-2.79 1.62-3.9zM4.07 13H2.05c.2 2.01 1 3.84 2.21 5.32l1.43-1.43A7.868 7.868 0 0 1 4.07 13zm1.61 6.74A9.981 9.981 0 0 0 11 21.95v-2.02a7.941 7.941 0 0 1-3.9-1.62l-1.42 1.43zM22 12c0 5.16-3.92 9.42-8.95 9.95v-2.02C16.97 19.41 20 16.05 20 12s-3.03-7.41-6.95-7.93V2.05C18.08 2.58 22 6.84 22 12z"></path></svg>
+            <span>Media Settings</span>
+        </h2>
+        <div class="w-full py-4 flex flex-row justify-between items-center border-b border-white border-opacity-10">
+            <div>
+                <h3 class="text-xl">Playback Language</h3>
+                <small class="text-gray-400 text-sm">Change the default language for media playback.</small>
+            </div>
+            <div class="relative w-64 custom-select text-sm" data-select="default_language">
+                <div class="select-none cursor-pointer bg-neutral-900 py-2 px-4 pr-8 rounded leading-tight focus:outline-none capitalize" id="default_language">
+                    {{ user.preferences.default_language }}
+                </div>
+                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-white">
+                    <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                        <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/>
+                    </svg>
+                </div>
+                <div class="absolute z-10 w-full mt-1 bg-neutral-900 rounded shadow-lg hidden" id="default_language_options">
+                    <div class="py-1">
+                        <div class="cursor-pointer px-4 py-2 text-white hover:bg-purple-600 capitalize" data-value="sub">sub</div>
+                        <div class="cursor-pointer px-4 py-2 text-white hover:bg-purple-600 capitalize" data-value="dub">dub</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="w-full py-4 flex flex-row justify-between items-center border-b border-white border-opacity-10">
+            <div>
+                <h3 class="text-xl">Default Provider</h3>
+                <small class="text-gray-400 text-sm">Change the preferred media provider.</small>
+            </div>
+            <div class="relative w-64 custom-select text-sm" data-select="default_provider">
+                <div class="select-none cursor-pointer bg-neutral-900 py-2 px-4 pr-8 rounded leading-tight focus:outline-none capitalize" id="default_provider">
+                    {{ user.preferences.default_provider }}
+                </div>
+                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-white">
+                    <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                        <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/>
+                    </svg>
+                </div>
+                <div class="absolute z-10 w-full mt-1 bg-neutral-900 rounded shadow-lg hidden" id="default_provider_options">
+                    <div class="py-1">
+                        <div class="cursor-pointer px-4 py-2 text-white hover:bg-purple-600 capitalize" data-value="zoro">zoro</div>
+                        <div class="cursor-pointer px-4 py-2 text-white hover:bg-purple-600 capitalize" data-value="gogoanime">gogoanime</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="w-full py-4 flex flex-row justify-between items-center border-b border-white border-opacity-10">
+            <div>
+                <h3 class="text-xl">Default Media Page</h3>
+                <small class="text-gray-400 text-sm">Choose whether to go to the watch page or the anime detail page when clicking on a card.</small>
+            </div>
+            <div class="relative w-64 custom-select text-sm" data-select="default_watch_page">
+                <div class="select-none cursor-pointer bg-neutral-900 py-2 px-4 pr-8 rounded leading-tight focus:outline-none capitalize" id="default_watch_page">
+                    {{ user.preferences.default_watch_page }}
+                </div>
+                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-white">
+                    <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                        <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/>
+                    </svg>
+                </div>
+                <div class="absolute z-10 w-full mt-1 bg-neutral-900 rounded shadow-lg hidden" id="default_watch_page_options">
+                    <div class="py-1">
+                        <div class="cursor-pointer px-4 py-2 text-white hover:bg-purple-600 capitalize" data-value="watch">watch</div>
+                        <div class="cursor-pointer px-4 py-2 text-white hover:bg-purple-600 capitalize" data-value="detail">detail</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="w-full py-4 flex flex-row justify-between items-center border-b border-white border-opacity-10">
+            <div>
+                <h3 class="text-xl">Show History on Home</h3>
+                <small class="text-gray-400 text-sm">Display your watch history on the home page.</small>
+            </div>
+            <div class="relative">
+                <label class="flex items-center cursor-pointer">
+                    <input type="checkbox" class="hidden peer" id="show_history_on_home_checkbox" {% if user.preferences.show_history_on_home %}checked{% endif %}>
+                    <div class="w-10 h-6 bg-neutral-700 rounded-full p-1 flex items-center peer-checked:bg-purple-600 transition-colors duration-300">
+                        <div class="toggle-dot w-4 h-4 bg-white rounded-full shadow-md transform duration-100 ease-in-out"></div>
+                    </div>
+                </label>
+            </div>
+        </div>
+        <div class="w-full py-4 flex flex-row justify-between items-center border-b border-white border-opacity-10">
+            <div>
+                <h3 class="text-xl">Automatically Skip Intro</h3>
+                <small class="text-gray-400 text-sm">Automatically skip the intro and outro of episodes.</small>
+            </div>
+            <div class="relative">
+                <label class="flex items-center cursor-pointer">
+                    <input type="checkbox" class="hidden peer" id="auto_skip_intro_checkbox" {% if user.preferences.auto_skip_intro %}checked{% endif %}>
+                    <div class="w-10 h-6 bg-neutral-700 rounded-full p-1 flex items-center peer-checked:bg-purple-600 transition-colors duration-300">
+                        <div class="toggle-dot w-4 h-4 bg-white rounded-full shadow-md transform duration-100 ease-in-out"></div>
+                    </div>
+                </label>
+            </div>
+        </div>
+        <div class="w-full py-4 flex flex-row justify-between items-center border-b border-white border-opacity-10">
+            <div>
+                <h3 class="text-xl">Automatically Play Video</h3>
+                <small class="text-gray-400 text-sm">Automatically start the media playback when opening the watch page.</small>
+            </div>
+            <div class="relative">
+                <label class="flex items-center cursor-pointer">
+                    <input type="checkbox" class="hidden peer" id="auto_play_video_checkbox" {% if user.preferences.auto_play_video %}checked{% endif %}>
+                    <div class="w-10 h-6 bg-neutral-700 rounded-full p-1 flex items-center peer-checked:bg-purple-600 transition-colors duration-300">
+                        <div class="toggle-dot w-4 h-4 bg-white rounded-full shadow-md transform duration-100 ease-in-out"></div>
+                    </div>
+                </label>
+            </div>
+        </div>
+        <div class="w-full py-4 flex flex-row justify-between items-center border-b border-white border-opacity-10">
+            <div>
+                <h3 class="text-xl">Automatically Play Next Episode</h3>
+                <small class="text-gray-400 text-sm">Automatically start the next episode when the current one ends.</small>
+            </div>
+            <div class="relative">
+                <label class="flex items-center cursor-pointer">
+                    <input type="checkbox" class="hidden peer" id="auto_next_episode_checkbox" {% if user.preferences.auto_next_episode %}checked{% endif %}>
+                    <div class="w-10 h-6 bg-neutral-700 rounded-full p-1 flex items-center peer-checked:bg-purple-600 transition-colors duration-300">
+                        <div class="toggle-dot w-4 h-4 bg-white rounded-full shadow-md transform duration-100 ease-in-out"></div>
+                    </div>
+                </label>
+            </div>
+        </div>
+        <h2 class="text-2xl font-bold text-center mt-8 flex gap-2 items-center">
+            <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 24 24" class="text-orange-500" height="1.4rem" width="1.4rem" xmlns="http://www.w3.org/2000/svg"><path d="M5.32943 3.27152C6.56252 2.83314 7.9923 3.10743 8.97927 4.0944C9.96652 5.08165 10.2407 6.51196 9.80178 7.74529L20.6465 18.5901L18.5252 20.7114L7.67936 9.86703C6.44627 10.3054 5.01649 10.0311 4.02952 9.04415C3.04227 8.0569 2.7681 6.62659 3.20701 5.39326L5.44373 7.62994C6.02952 8.21572 6.97927 8.21572 7.56505 7.62994C8.15084 7.04415 8.15084 6.0944 7.56505 5.50862L5.32943 3.27152ZM15.6968 5.15506L18.8788 3.38729L20.293 4.80151L18.5252 7.98349L16.7574 8.33704L14.6361 10.4584L13.2219 9.04415L15.3432 6.92283L15.6968 5.15506ZM8.62572 12.9332L10.747 15.0546L5.79729 20.0043C5.2115 20.5901 4.26175 20.5901 3.67597 20.0043C3.12464 19.453 3.09221 18.5792 3.57867 17.99L3.67597 17.883L8.62572 12.9332Z"></path></svg>
+            <span>Site Settings</span>
+        </h2>
+        <div class="w-full py-4 flex flex-row justify-between items-center border-b border-white border-opacity-10">
+            <div>
+                <h3 class="text-xl">Display Guild Nickname Instead of Username</h3>
+                <small class="text-gray-400 text-sm">Display your guild nickname instead of your username in profile and other places.</small>
+            </div>
+            <div class="relative">
+                <label class="flex items-center cursor-pointer">
+                    <input type="checkbox" class="hidden peer" id="display_guild_name_instead_of_username_checkbox" {% if user.preferences.display_guild_name_instead_of_username %}checked{% endif %}>
+                    <div class="w-10 h-6 bg-neutral-700 rounded-full p-1 flex items-center peer-checked:bg-purple-600 transition-colors duration-300">
+                        <div class="toggle-dot w-4 h-4 bg-white rounded-full shadow-md transform duration-100 ease-in-out"></div>
+                    </div>
+                </label>
+            </div>
+        </div>
+    {% endif %}
+</section>
 {% endblock content %}
+{% block scripts %}
+<script>
+    const customSelects = document.querySelectorAll('.custom-select')
+    customSelects.forEach(customSelect => {
+        const selectId = customSelect.getAttribute('data-select')
+        const customSelectDisplay = document.getElementById(selectId)
+        const customSelectOptions = document.getElementById(`${selectId}_options`)
+        let selectedValue = '';
+
+        customSelectDisplay.addEventListener('click', function() {
+            customSelectOptions.classList.toggle('hidden');
+        });
+
+        customSelectOptions.addEventListener('click', function(e) {
+            if (e.target.hasAttribute('data-value')) {
+                selectedValue = e.target.getAttribute('data-value');
+                customSelectDisplay.textContent = selectedValue;
+                customSelectOptions.classList.add('hidden');
+            }
+        });
+
+        // Close the dropdown when clicking outside
+        document.addEventListener('click', function(e) {
+            if (!customSelectDisplay.contains(e.target) && !customSelectOptions.contains(e.target)) {
+                customSelectOptions.classList.add('hidden');
+            }
+        });
+    });
+</script>
+{% endblock scripts %}
 

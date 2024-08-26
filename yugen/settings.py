@@ -58,6 +58,7 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "django.middleware.gzip.GZipMiddleware",
     "middleware.authentication.AuthMiddleware",
+    "middleware.preferences.PreferencesMiddleware",
 ]
 
 ROOT_URLCONF = "yugen.urls"

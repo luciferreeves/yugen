@@ -18,6 +18,7 @@ class AuthMiddleware:
         if (
             "admin" in request.path
             or "auth" in request.path
+            or "favicon.ico" in request.path
             or not hasattr(request, "user")
         ):
             response = self.get_response(request)
@@ -31,7 +32,6 @@ class AuthMiddleware:
             logout(request)
             request.session["next"] = request.get_full_path()
             return render(request, "messages/unauthorized.html", {"redirect_uri": get_redirect_uri()})
-            # return redirect(get_redirect_uri())
 
         # Check the verification cookie
         verification_cookie = request.COOKIES.get("guild_verified")
