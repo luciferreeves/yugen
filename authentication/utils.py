@@ -75,6 +75,67 @@ def exchange_code(code):
     )
     return response.json()
 
+def get_user_mal_list(access_token, limit=10, offset=0):
+    base_url = f"https://api.myanimelist.net/v2/users/@me/animelist?limit={limit}&offset={offset}&fields=my_list_status,anime&sort=list_updated_at"
+    headers = {"Authorization": f"Bearer {access_token}"}
+    response = requests.get(base_url, headers=headers)
+
+    if response.status_code == 200:
+        data = response.json()
+        if data["data"] and "paging" in data:
+            if "next" in data["paging"]:
+                page_next = data["paging"]["next"]
+            else:
+                page_next = None
+            
+            if "previous" in data["paging"]:
+                page_previous = data["paging"]["previous"]
+            else:
+                page_previous = None
+        mal_ids = [anime["node"]["id"] for anime in data["data"]]
+        user_list = {anime["node"]["id"]: anime["node"]["my_list_status"] for anime in data["data"]}
+
+    query = f'''
+        query {{
+            Page {{
+                media(idMal_in: {mal_ids}) {{
+                    id
+                    title {{
+                        romaji
+                        english
+                        native
+                    }}
+                    idMal
+                    status
+                    coverImage {{
+                        large
+                    }}
+                    episodes
+                    duration
+                    averageScore
+                    genres
+                    seasonYear
+                }}
+            }}
+        }}
+    '''
+    response = requests.post(
+        "https://graphql.anilist.co",
+        json={"query": query},
+    )
+
+    user_anime_list = []
+    if response.status_code == 200:
+        data = response.json()
+        for anime in data["data"]["Page"]["media"]:
+            anime["my_list_status"] = user_list[anime["idMal"]]
+            user_anime_list.append(anime)
+    else:
+        print(response.json(), "Error in fetching Anilist Anime Details")
+            
+    return user_anime_list, page_previous, page_next
+
+    
 
 def get_discord_user(access_token, token_type):
     guilds = requests.get(

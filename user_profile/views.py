@@ -2,7 +2,7 @@ import json
 from django.shortcuts import render
 from django.http import JsonResponse
 from user_profile.models import UserPreferences
-from authentication.utils import get_mal_redirect_uri
+from authentication.utils import get_mal_redirect_uri, get_user_mal_list
 
 def user_profile(request):
     category = request.GET.get("category", "preferences")
@@ -19,7 +19,14 @@ def user_profile(request):
     if category == "anime_list" and not request.user.mal_access_token:
         mal_auth_uri, code_challenge = get_mal_redirect_uri()
         context["mal_auth_uri"] = mal_auth_uri
-
+    else:
+        offset = request.GET.get("offset", 0)
+        mal_list, prev, next = get_user_mal_list(request.user.mal_access_token, limit=24, offset=offset)
+        context["mal_list"] = mal_list
+        if prev:
+            context["prev_offset"] = prev.split("offset=")[1].split("&")[0]
+        if next:
+            context["next_offset"] = next.split("offset=")[1].split("&")[0]
 
     return render(request, "user_profile/user_profile.html", context)
 

@@ -6,7 +6,7 @@
 <section class="swiper rounded mt-2">
   <div class="swiper-wrapper">
     {% for anime in trending_anime %} 
-    {% if anime.title.english and anime.duration %}
+    {% if anime.duration %}
     <div class="swiper-slide">
       <div style="background-image: url('{{ anime.cover }}')" class="bg-center bg-cover h-96 relative">
         <div class="absolute inset-0" style="background: linear-gradient(45deg, rgb(8, 8, 8) 15%, transparent 60%), linear-gradient(0deg, rgb(8, 8, 8) 0%, transparent 60%);"></div>
@@ -41,7 +41,13 @@
               </span>
             </div>
             <h2 class="text-4xl font-bold text-transparent bg-clip-text mb-2" style="background: linear-gradient(-45deg, {{ anime.color }}, white); -webkit-background-clip: text; background-clip: text;">
+              {% if user.preferences.title_language == "english" and anime.title.english %}
               {{ anime.title.english }}
+              {% elif user.preferences.title_language == "native" and anime.title.native %}
+              {{ anime.title.native }}
+              {% else %}
+              {{ anime.title.romaji }}
+              {% endif %}
             </h2>
             <p class="max-h-24 overflow-auto text-sm text-white mb-4 no-scrollbar">
               {{ anime.description|safe }}
