@@ -16,7 +16,7 @@ def user_profile(request):
         "req_category": category
     }
 
-    if category == "anime_list" and (not request.user.mal_access_token or not request.user.mal_access_token_expires_at):
+    if category == "anime_list" and (not request.user.mal_access_token):
         mal_auth_uri, code_challenge = get_mal_redirect_uri()
         context["mal_auth_uri"] = mal_auth_uri
     else:
