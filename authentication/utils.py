@@ -76,6 +76,9 @@ def exchange_code(code):
     return response.json()
 
 def get_user_mal_list(access_token, limit=10, offset=0):
+    if not access_token or access_token == "":
+        return [], None, None
+
     base_url = f"https://api.myanimelist.net/v2/users/@me/animelist?limit={limit}&offset={offset}&fields=my_list_status,anime&sort=list_updated_at"
     headers = {"Authorization": f"Bearer {access_token}"}
     response = requests.get(base_url, headers=headers)
