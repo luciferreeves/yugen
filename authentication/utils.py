@@ -95,6 +95,9 @@ def get_user_mal_list(access_token, limit=10, offset=0):
         mal_ids = [anime["node"]["id"] for anime in data["data"]]
         user_list = {anime["node"]["id"]: anime["node"]["my_list_status"] for anime in data["data"]}
 
+    if not mal_ids:
+        return [], None, None
+
     query = f'''
         query {{
             Page {{
