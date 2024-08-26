@@ -1,6 +1,8 @@
+import datetime
 from django.http import HttpResponseRedirect
 from django.contrib.auth import login, logout
-from authentication.utils import exchange_code, authenticate_user, get_redirect_uri
+from django.urls import reverse
+from authentication.utils import exchange_code, authenticate_user, exchange_mal_code, get_redirect_uri
 from django.shortcuts import redirect, render
 
 
@@ -26,6 +28,31 @@ def callback(request):
     # login the user and redirect to the referrer
     login(request, user)
     return redirect(next_url if next_url else "home:index")
+
+def MALSync(request):
+    if not request.user.is_authenticated:
+        return redirect("auth:unauthorized")
+    
+    code = request.GET.get("code")
+    state = request.GET.get("state")
+    if not code or not state:
+        return redirect(reverse("user_profile:user_profile") + "?category=anime_list")
+    
+    response = exchange_mal_code(code=code, code_verifier=state)
+
+    if "error" in response:
+        return redirect(reverse("user_profile:user_profile") + "?category=anime_list")
+    
+    user = request.user
+    user.mal_token_type = response.get("token_type")
+    user.mal_access_token = response.get("access_token")
+    user.mal_refresh_token = response.get("refresh_token")
+    user.mal_token_expires_in = datetime.datetime.now() + datetime.timedelta(seconds=response.get("expires_in"))
+
+    user.save()
+
+    return redirect(reverse("user_profile:user_profile") + "?category=anime_list")
+
 
 def logout_user(request):
     logout(request)

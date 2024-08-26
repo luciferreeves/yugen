@@ -2,19 +2,24 @@ import json
 from django.shortcuts import render
 from django.http import JsonResponse
 from user_profile.models import UserPreferences
+from authentication.utils import get_mal_redirect_uri
 
 def user_profile(request):
     category = request.GET.get("category", "preferences")
 
-    supported_categories = ["preferences", "anime_list", "user_directory"]
+    supported_categories = ["preferences", "anime_list"]
     if category not in supported_categories:
         category = "preferences"
 
-    print(category)
 
     context = {
         "req_category": category
     }
+
+    if category == "anime_list" and not request.user.mal_access_token:
+        mal_auth_uri, code_challenge = get_mal_redirect_uri()
+        context["mal_auth_uri"] = mal_auth_uri
+
 
     return render(request, "user_profile/user_profile.html", context)
 
@@ -37,6 +42,7 @@ def save_user_preferences(request):
     auto_play_video = data.get("autoPlayVideo")
     auto_next_episode = data.get("autoNextEpisode")
     display_guild_name_instead_of_username = data.get("displayGuildNameInsteadOfUsername")
+    smart_mal_sync = data.get("smartMALSync")
 
     user_preferences, created = UserPreferences.objects.get_or_create(user=user)
     user_preferences.card_layout = card_layout
@@ -50,6 +56,7 @@ def save_user_preferences(request):
     user_preferences.auto_play_video = auto_play_video
     user_preferences.auto_next_episode = auto_next_episode
     user_preferences.display_guild_name_instead_of_username = display_guild_name_instead_of_username
+    user_preferences.smart_mal_sync = smart_mal_sync
 
     try:
         user_preferences.save()

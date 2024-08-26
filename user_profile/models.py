@@ -15,6 +15,7 @@ class UserPreferences(models.Model):
     auto_play_video = models.BooleanField(default=False)
     auto_next_episode = models.BooleanField(default=False)
     display_guild_name_instead_of_username = models.BooleanField(default=True)
+    smart_mal_sync = models.BooleanField(default=False)
 
     def __str__(self):
         return f"{self.user.username}'s preferences"

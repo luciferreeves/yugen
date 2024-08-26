@@ -1,11 +1,28 @@
 import dotenv
 import os
 import requests
+import secrets
 from authentication.models import User
 from user_profile.models import UserPreferences
 
 dotenv.load_dotenv()
 
+def generate_mal_code_challenge():
+    # 128 bytes PKCE code challenge
+    token = secrets.token_urlsafe(128)
+    return token[:128]
+
+def get_mal_redirect_uri():
+    mal_client_id = os.environ.get("MAL_CLIENT_ID")
+    # mal_client_secret = os.environ.get("MAL_CLIENT_SECRET")
+    mal_redirect_uri = os.environ.get("MAL_REDIRECT_URI")
+
+    code_challenge = generate_mal_code_challenge()
+    code_challenge_method = "plain"
+
+    redirect_uri = f"https://myanimelist.net/v1/oauth2/authorize?response_type=code&client_id={mal_client_id}&code_challenge={code_challenge}&code_challenge_method={code_challenge_method}&redirect_uri={mal_redirect_uri}&state={code_challenge}"
+
+    return redirect_uri, code_challenge
 
 def get_redirect_uri():
     # Only Authenticated Users who are in our Discord Server can access the website
@@ -15,6 +32,27 @@ def get_redirect_uri():
     redirect_uri = f"https://discord.com/oauth2/authorize?client_id={discord_client_id}&response_type=code&redirect_uri={discord_redirect_uri}&scope={discord_scope}"
     return redirect_uri
 
+def exchange_mal_code(code, code_verifier):
+    mal_client_id = os.environ.get("MAL_CLIENT_ID")
+    mal_client_secret = os.environ.get("MAL_CLIENT_SECRET")
+    mal_redirect_uri = os.environ.get("MAL_REDIRECT_URI")
+
+    data = {
+        "client_id": mal_client_id,
+        "client_secret": mal_client_secret,
+        "grant_type": "authorization_code",
+        "code": code,
+        "code_verifier": code_verifier,
+        "grant_type": "authorization_code",
+        "redirect_uri": mal_redirect_uri,
+    }
+
+    headers = {"Content-Type": "application/x-www-form-urlencoded"}
+
+    response = requests.post(
+        "https://myanimelist.net/v1/oauth2/token", data=data, headers=headers
+    )
+    return response.json()
 
 def exchange_code(code):
     discord_client_id = os.environ.get("DISCORD_CLIENT_ID")

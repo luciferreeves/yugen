@@ -17,6 +17,11 @@ class UserAdmin(BaseUserAdmin):
                     "discord_avatar",
                     "discord_banner",
                     "discord_global_name",
+                    "discord_guild_name",
+                    "mal_token_type",
+                    "mal_token_expires_in",
+                    "mal_access_token",
+                    "mal_refresh_token",
                 )
             },
         ),

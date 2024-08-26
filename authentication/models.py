@@ -13,3 +13,7 @@ class User(AbstractUser):
     discord_banner = models.CharField(max_length=255, blank=True)
     discord_global_name = models.CharField(max_length=255)
     discord_guild_name = models.CharField(max_length=255, blank=True)
+    mal_token_type = models.CharField(max_length=255, blank=True)
+    mal_token_expires_in = models.DateTimeField(null=True, blank=True)
+    mal_access_token = models.CharField(max_length=1024, blank=True)
+    mal_refresh_token = models.CharField(max_length=1024, blank=True)
