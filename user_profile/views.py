@@ -51,6 +51,9 @@ def save_user_preferences(request):
     user_preferences.auto_next_episode = auto_next_episode
     user_preferences.display_guild_name_instead_of_username = display_guild_name_instead_of_username
 
-    user_preferences.save()
-
-    return JsonResponse({"success": "User preferences saved"}, status=200)
+    try:
+        user_preferences.save()
+        return JsonResponse({"success": "User preferences saved"}, status=200)
+    except Exception as e:
+        print(e)
+        return JsonResponse({"error": "Failed to save user preferences"}, status=500)
