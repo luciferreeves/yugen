@@ -162,8 +162,10 @@
           <span class="text-xs {% if request.path == "/profile/" %}text-purple-400{% endif %}">
             {% if request.user.preferences.display_guild_name_instead_of_username and request.user.discord_guild_name %}
               {{ request.user.discord_guild_name }}
-            {% else %}
+            {% elif request.user.discord_global_name%}
               {{ request.user.discord_global_name }}
+            {% else %}
+              {{ request.user.username }}
             {% endif %}
           </span>
           {% else %}
@@ -389,8 +391,10 @@
           <span class="text-xs {% if request.path == "/profile/" %}text-purple-400{% endif %}">
             {% if request.user.preferences.display_guild_name_instead_of_username and request.user.discord_guild_name %}
               {{ request.user.discord_guild_name }}
-            {% else %}
+            {% elif request.user.discord_global_name%}
               {{ request.user.discord_global_name }}
+            {% else %}
+              {{ request.user.username }}
             {% endif %}
           </span>
           {% else %}

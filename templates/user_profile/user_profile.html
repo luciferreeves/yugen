@@ -7,8 +7,10 @@
         <h1 class="text-2xl font-bold">
             {% if request.user.preferences.display_guild_name_instead_of_username and request.user.discord_guild_name %}
               {{ request.user.discord_guild_name }}
-            {% else %}
+            {% elif request.user.discord_global_name%}
               {{ request.user.discord_global_name }}
+            {% else %}
+              {{ request.user.username }}
             {% endif %}
         </h1>
     </div>
