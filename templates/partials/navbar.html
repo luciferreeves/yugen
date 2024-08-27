@@ -11,7 +11,7 @@
           xmlns="http://www.w3.org/2000/svg"
           viewBox="0 0 24 24"
           fill="currentColor"
-          class="size-6 text-purple-400"
+          class="size-6 text-{{ user.preferences.accent_colour }}-400"
         >
           <path
             d="M11.47 3.841a.75.75 0 0 1 1.06 0l8.69 8.69a.75.75 0 1 0 1.06-1.061l-8.689-8.69a2.25 2.25 0 0 0-3.182 0l-8.69 8.69a.75.75 0 1 0 1.061 1.06l8.69-8.689Z"
@@ -20,7 +20,7 @@
             d="m12 5.432 8.159 8.159c.03.03.06.058.091.086v6.198c0 1.035-.84 1.875-1.875 1.875H15a.75.75 0 0 1-.75-.75v-4.5a.75.75 0 0 0-.75-.75h-3a.75.75 0 0 0-.75.75V21a.75.75 0 0 1-.75.75H5.625a1.875 1.875 0 0 1-1.875-1.875v-6.198a2.29 2.29 0 0 0 .091-.086L12 5.432Z"
           />
         </svg>
-        <span class="text-xs text-purple-400">Home</span>
+        <span class="text-xs text-{{ user.preferences.accent_colour }}-400">Home</span>
         {% else %}
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -47,7 +47,7 @@
           xmlns="http://www.w3.org/2000/svg"
           viewBox="0 0 24 24"
           fill="currentColor"
-          class="size-6 text-purple-400"
+          class="size-6 text-{{ user.preferences.accent_colour }}-400"
         >
           <path
             fill-rule="evenodd"
@@ -55,7 +55,7 @@
             clip-rule="evenodd"
           />
         </svg>
-        <span class="text-xs text-purple-400">Trending</span>
+        <span class="text-xs text-{{ user.preferences.accent_colour }}-400">Trending</span>
         {% else %}
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -87,7 +87,7 @@
           xmlns="http://www.w3.org/2000/svg"
           viewBox="0 0 24 24"
           fill="currentColor"
-          class="size-6 text-purple-400"
+          class="size-6 text-{{ user.preferences.accent_colour }}-400"
         >
           <path
             d="M12.75 12.75a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0ZM7.5 15.75a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5ZM8.25 17.25a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0ZM9.75 15.75a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5ZM10.5 17.25a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0ZM12 15.75a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5ZM12.75 17.25a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0ZM14.25 15.75a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5ZM15 17.25a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0ZM16.5 15.75a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5ZM15 12.75a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0ZM16.5 13.5a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5Z"
@@ -98,7 +98,7 @@
             clip-rule="evenodd"
           />
         </svg>
-        <span class="text-xs text-purple-400">Schedule</span>
+        <span class="text-xs text-{{ user.preferences.accent_colour }}-400">Schedule</span>
         {% else %}
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -125,13 +125,13 @@
           xmlns="http://www.w3.org/2000/svg"
           viewBox="0 0 24 24"
           fill="currentColor"
-          class="size-6 text-purple-400"
+          class="size-6 text-{{ user.preferences.accent_colour }}-400"
         >
           <path
             d="M4.5 4.5a3 3 0 0 0-3 3v9a3 3 0 0 0 3 3h8.25a3 3 0 0 0 3-3v-9a3 3 0 0 0-3-3H4.5ZM19.94 18.75l-2.69-2.69V7.94l2.69-2.69c.944-.945 2.56-.276 2.56 1.06v11.38c0 1.336-1.616 2.005-2.56 1.06Z"
           />
         </svg>
-        <span class="text-xs text-purple-400">Watchlist</span>
+        <span class="text-xs text-{{ user.preferences.accent_colour }}-400">Watchlist</span>
         {% else %}
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -159,7 +159,7 @@
             alt="Profile"
             class="h-8 w-8 rounded-full"
             />
-          <span class="text-xs {% if request.path == "/profile/" %}text-purple-400{% endif %}">
+          <span class="text-xs {% if request.path == "/profile/" %}text-{{ user.preferences.accent_colour }}-400{% endif %}">
             {% if request.user.preferences.display_guild_name_instead_of_username and request.user.discord_guild_name %}
               {{ request.user.discord_guild_name }}
             {% elif request.user.discord_global_name%}
@@ -172,7 +172,7 @@
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-6">
             <path fill-rule="evenodd" d="M7.5 6a4.5 4.5 0 1 1 9 0 4.5 4.5 0 0 1-9 0ZM3.751 20.105a8.25 8.25 0 0 1 16.498 0 .75.75 0 0 1-.437.695A18.683 18.683 0 0 1 12 22.5c-2.786 0-5.433-.608-7.812-1.7a.75.75 0 0 1-.437-.695Z" clip-rule="evenodd" />
           </svg>
-          <span class="text-xs {% if request.path == "/profile/" %}text-purple-400{% endif %}">Profile</span>
+          <span class="text-xs {% if request.path == "/profile/" %}text-{{ user.preferences.accent_colour }}-400{% endif %}">Profile</span>
         {% endif %}
       </a>
     </div>
@@ -256,7 +256,7 @@
               xmlns="http://www.w3.org/2000/svg"
               viewBox="0 0 24 24"
               fill="currentColor"
-              class="size-6 text-purple-400"
+              class="size-6 text-{{ user.preferences.accent_colour }}-400"
             >
               <path
                 d="M11.47 3.841a.75.75 0 0 1 1.06 0l8.69 8.69a.75.75 0 1 0 1.06-1.061l-8.689-8.69a2.25 2.25 0 0 0-3.182 0l-8.69 8.69a.75.75 0 1 0 1.061 1.06l8.69-8.689Z"
@@ -265,7 +265,7 @@
                 d="m12 5.432 8.159 8.159c.03.03.06.058.091.086v6.198c0 1.035-.84 1.875-1.875 1.875H15a.75.75 0 0 1-.75-.75v-4.5a.75.75 0 0 0-.75-.75h-3a.75.75 0 0 0-.75.75V21a.75.75 0 0 1-.75.75H5.625a1.875 1.875 0 0 1-1.875-1.875v-6.198a2.29 2.29 0 0 0 .091-.086L12 5.432Z"
               />
             </svg>
-            <span class="text-xs text-purple-400">Home</span>
+            <span class="text-xs text-{{ user.preferences.accent_colour }}-400">Home</span>
             {% else %}
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -292,7 +292,7 @@
               xmlns="http://www.w3.org/2000/svg"
               viewBox="0 0 24 24"
               fill="currentColor"
-              class="size-6 text-purple-400"
+              class="size-6 text-{{ user.preferences.accent_colour }}-400"
             >
               <path
                 fill-rule="evenodd"
@@ -300,7 +300,7 @@
                 clip-rule="evenodd"
               />
             </svg>
-            <span class="text-xs text-purple-400">Trending</span>
+            <span class="text-xs text-{{ user.preferences.accent_colour }}-400">Trending</span>
             {% else %}
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -332,7 +332,7 @@
               xmlns="http://www.w3.org/2000/svg"
               viewBox="0 0 24 24"
               fill="currentColor"
-              class="size-6 text-purple-400"
+              class="size-6 text-{{ user.preferences.accent_colour }}-400"
             >
               <path
                 d="M12.75 12.75a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0ZM7.5 15.75a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5ZM8.25 17.25a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0ZM9.75 15.75a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5ZM10.5 17.25a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0ZM12 15.75a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5ZM12.75 17.25a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0ZM14.25 15.75a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5ZM15 17.25a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0ZM16.5 15.75a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5ZM15 12.75a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0ZM16.5 13.5a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5Z"
@@ -343,7 +343,7 @@
                 clip-rule="evenodd"
               />
             </svg>
-            <span class="text-xs text-purple-400">Schedule</span>
+            <span class="text-xs text-{{ user.preferences.accent_colour }}-400">Schedule</span>
             {% else %}
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -370,13 +370,13 @@
               xmlns="http://www.w3.org/2000/svg"
               viewBox="0 0 24 24"
               fill="currentColor"
-              class="size-6 text-purple-400"
+              class="size-6 text-{{ user.preferences.accent_colour }}-400"
             >
               <path
                 d="M4.5 4.5a3 3 0 0 0-3 3v9a3 3 0 0 0 3 3h8.25a3 3 0 0 0 3-3v-9a3 3 0 0 0-3-3H4.5ZM19.94 18.75l-2.69-2.69V7.94l2.69-2.69c.944-.945 2.56-.276 2.56 1.06v11.38c0 1.336-1.616 2.005-2.56 1.06Z"
               />
             </svg>
-            <span class="text-xs text-purple-400">Watchlist</span>
+            <span class="text-xs text-{{ user.preferences.accent_colour }}-400">Watchlist</span>
             {% else %}
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -408,7 +408,7 @@
             alt="Profile"
             class="h-8 w-8 rounded-full"
             />
-          <span class="text-xs {% if request.path == "/profile/" %}text-purple-400{% endif %}">
+          <span class="text-xs {% if request.path == "/profile/" %}text-{{ user.preferences.accent_colour }}-400{% endif %}">
             {% if request.user.preferences.display_guild_name_instead_of_username and request.user.discord_guild_name %}
               {{ request.user.discord_guild_name }}
             {% elif request.user.discord_global_name%}
@@ -421,7 +421,7 @@
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-6">
             <path fill-rule="evenodd" d="M7.5 6a4.5 4.5 0 1 1 9 0 4.5 4.5 0 0 1-9 0ZM3.751 20.105a8.25 8.25 0 0 1 16.498 0 .75.75 0 0 1-.437.695A18.683 18.683 0 0 1 12 22.5c-2.786 0-5.433-.608-7.812-1.7a.75.75 0 0 1-.437-.695Z" clip-rule="evenodd" />
           </svg>
-          <span class="text-xs {% if request.path == "/profile/" %}text-purple-400{% endif %}">Profile</span>
+          <span class="text-xs {% if request.path == "/profile/" %}text-{{ user.preferences.accent_colour }}-400{% endif %}">Profile</span>
           {% endif %}
         </a>
       </div>

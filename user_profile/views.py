@@ -89,6 +89,7 @@ def save_user_preferences(request):
     user = request.user
 
     data = json.loads(request.body)
+    accent_colour = data.get("accentColour")
     card_layout = data.get("cardLayout")
     title_language = data.get("titleLanguage")
     character_name_language = data.get("characterNameLanguage")
@@ -103,6 +104,7 @@ def save_user_preferences(request):
     smart_mal_sync = data.get("smartMALSync")
 
     user_preferences, created = UserPreferences.objects.get_or_create(user=user)
+    user_preferences.accent_colour = accent_colour
     user_preferences.card_layout = card_layout
     user_preferences.title_language = title_language
     user_preferences.character_name_language = character_name_language

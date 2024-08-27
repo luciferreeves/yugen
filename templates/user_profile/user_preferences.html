@@ -1,10 +1,87 @@
 {% block css %}
+{% comment %} Load all Important Profile Preferences Colors {% endcomment %}
+<div class="accent_color_compilations">
+    <!-- 400 Colors -->
+    <div class="bg-purple-400 hover:bg-purple-400 text-purple-400"></div>
+    <div class="bg-blue-400 hover:bg-blue-400 text-blue-400"></div>
+    <div class="bg-green-400 hover:bg-green-400 text-green-400"></div>
+    <div class="bg-yellow-400 hover:bg-yellow-400 text-yellow-400"></div>
+    <div class="bg-red-400 hover:bg-red-400 text-red-400"></div>
+    <div class="bg-pink-400 hover:bg-pink-400 text-pink-400"></div>
+    <div class="bg-indigo-400 hover:bg-indigo-400 text-indigo-400"></div>
+    <div class="bg-cyan-400 hover:bg-cyan-400 text-cyan-400"></div>
+    <div class="bg-orange-400 hover:bg-orange-400 text-orange-400"></div>
+    <div class="bg-teal-400 hover:bg-teal-400 text-teal-400"></div>
+    <div class="bg-lime-400 hover:bg-lime-400 text-lime-400"></div>
+    <div class="bg-amber-400 hover:bg-amber-400 text-amber-400"></div>
+    
+    <!-- 600 Colors + Checkboxes-->
+    <div class="bg-purple-600 hover:bg-purple-600 text-purple-600 peer-checked:bg-purple-600"></div>
+    <div class="bg-blue-600 hover:bg-blue-600 text-blue-600 peer-checked:bg-blue-600"></div>
+    <div class="bg-green-600 hover:bg-green-600 text-green-600 peer-checked:bg-green-600"></div>
+    <div class="bg-yellow-600 hover:bg-yellow-600 text-yellow-600 peer-checked:bg-yellow-600"></div>
+    <div class="bg-red-600 hover:bg-red-600 text-red-600 peer-checked:bg-red-600"></div>
+    <div class="bg-pink-600 hover:bg-pink-600 text-pink-600 peer-checked:bg-pink-600"></div>
+    <div class="bg-indigo-600 hover:bg-indigo-600 text-indigo-600 peer-checked:bg-indigo-600"></div>
+    <div class="bg-cyan-600 hover:bg-cyan-600 text-cyan-600 peer-checked:bg-cyan-600"></div>
+    <div class="bg-orange-600 hover:bg-orange-600 text-orange-600 peer-checked:bg-orange-600"></div>
+    <div class="bg-teal-600 hover:bg-teal-600 text-teal-600 peer-checked:bg-teal-600"></div>
+    <div class="bg-lime-600 hover:bg-lime-600 text-lime-600 peer-checked:bg-lime-600"></div>
+    <div class="bg-amber-600 hover:bg-amber-600 text-amber-600 peer-checked:bg-amber-600"></div>
+
+    <!-- 700 Colors -->
+    <div class="bg-purple-700 hover:bg-purple-700 text-purple-700"></div>
+    <div class="bg-blue-700 hover:bg-blue-700 text-blue-700"></div>
+    <div class="bg-green-700 hover:bg-green-700 text-green-700"></div>
+    <div class="bg-yellow-700 hover:bg-yellow-700 text-yellow-700"></div>
+    <div class="bg-red-700 hover:bg-red-700 text-red-700"></div>
+    <div class="bg-pink-700 hover:bg-pink-700 text-pink-700"></div>
+    <div class="bg-indigo-700 hover:bg-indigo-700 text-indigo-700"></div>
+    <div class="bg-cyan-700 hover:bg-cyan-700 text-cyan-700"></div>
+    <div class="bg-orange-700 hover:bg-orange-700 text-orange-700"></div>
+    <div class="bg-teal-700 hover:bg-teal-700 text-teal-700"></div>
+    <div class="bg-lime-700 hover:bg-lime-700 text-lime-700"></div>
+    <div class="bg-amber-700 hover:bg-amber-700 text-amber-700"></div>
+</div>
+
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
 {% endblock css %}
 <h2 class="text-2xl font-bold text-center mt-8 flex gap-2 items-center">
     <svg stroke="currentColor" fill="none" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true" class="text-purple-500" height="1.4rem" width="1.4rem" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"></path></svg>
     <span>Appearance</span>
 </h2>
+<div class="w-full py-4 flex flex-row justify-between items-center border-b border-white border-opacity-10">
+    <div>
+        <h3 class="text-xl">Accent Colour</h3>
+        <small class="text-gray-400 text-sm">Change the accent colour for various UI elements.</small>
+    </div>
+    <div class="relative w-64 custom-select text-sm" data-select="accent_colour">
+        <div class="select-none cursor-pointer bg-neutral-900 py-2 px-4 pr-8 rounded leading-tight focus:outline-none capitalize" id="accent_colour">
+            {{ user.preferences.accent_colour }}
+        </div>
+        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-white">
+            <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/>
+            </svg>
+        </div>
+        <div class="absolute z-10 w-full mt-1 bg-neutral-900 rounded shadow-lg hidden" id="accent_colour_options">
+            <div class="py-1">
+                <div class="font-bold cursor-pointer px-4 py-2 text-purple-600 hover:bg-purple-600 hover:text-white capitalize" data-value="purple">purple</div>
+                <div class="font-bold cursor-pointer px-4 py-2 text-blue-600 hover:bg-blue-600 hover:text-white capitalize" data-value="blue">blue</div>
+                <div class="font-bold cursor-pointer px-4 py-2 text-green-600 hover:bg-green-600 hover:text-white capitalize" data-value="green">green</div>
+                <div class="font-bold cursor-pointer px-4 py-2 text-yellow-600 hover:bg-yellow-600 hover:text-white capitalize" data-value="yellow">yellow</div>
+                <div class="font-bold cursor-pointer px-4 py-2 text-red-600 hover:bg-red-600 hover:text-white capitalize" data-value="red">red</div>
+                <div class="font-bold cursor-pointer px-4 py-2 text-pink-600 hover:bg-pink-600 hover:text-white capitalize" data-value="pink">pink</div>
+                <div class="font-bold cursor-pointer px-4 py-2 text-indigo-600 hover:bg-indigo-600 hover:text-white capitalize" data-value="indigo">indigo</div>
+                <div class="font-bold cursor-pointer px-4 py-2 text-cyan-600 hover:bg-cyan-600 hover:text-white capitalize" data-value="cyan">cyan</div>
+                <div class="font-bold cursor-pointer px-4 py-2 text-orange-600 hover:bg-orange-600 hover:text-white capitalize" data-value="orange">orange</div>
+                <div class="font-bold cursor-pointer px-4 py-2 text-teal-600 hover:bg-teal-600 hover:text-white capitalize" data-value="teal">teal</div>
+                <div class="font-bold cursor-pointer px-4 py-2 text-lime-600 hover:bg-lime-600 hover:text-white capitalize" data-value="lime">lime</div>
+                <div class="font-bold cursor-pointer px-4 py-2 text-amber-600 hover:bg-amber-600 hover:text-white capitalize" data-value="amber">amber</div>
+            </div>
+        </div>
+    </div>
+</div>
 <div class="w-full py-4 flex flex-row justify-between items-center border-b border-white border-opacity-10">
     <div>
         <h3 class="text-xl">Card Appearance</h3>
@@ -21,9 +98,9 @@
         </div>
         <div class="absolute z-10 w-full mt-1 bg-neutral-900 rounded shadow-lg hidden" id="card_layout_options">
             <div class="py-1">
-                <div class="cursor-pointer px-4 py-2 text-white hover:bg-purple-600 capitalize" data-value="classic">classic</div>
-                <div class="cursor-pointer px-4 py-2 text-white hover:bg-purple-600 capitalize" data-value="wide">wide</div>
-                <div class="cursor-pointer px-4 py-2 text-white hover:bg-purple-600 capitalize" data-value="compact">compact</div>
+                <div class="cursor-pointer px-4 py-2 text-white hover:bg-{{ user.preferences.accent_colour }}-600 capitalize" data-value="classic">classic</div>
+                <div class="cursor-pointer px-4 py-2 text-white hover:bg-{{ user.preferences.accent_colour }}-600 capitalize" data-value="wide">wide</div>
+                <div class="cursor-pointer px-4 py-2 text-white hover:bg-{{ user.preferences.accent_colour }}-600 capitalize" data-value="compact">compact</div>
             </div>
         </div>
     </div>
@@ -48,9 +125,9 @@
         </div>
         <div class="absolute z-10 w-full mt-1 bg-neutral-900 rounded shadow-lg hidden" id="title_language_options">
             <div class="py-1">
-                <div class="cursor-pointer px-4 py-2 text-white hover:bg-purple-600 capitalize" data-value="english">english (Attack on Titan)</div>
-                <div class="cursor-pointer px-4 py-2 text-white hover:bg-purple-600 capitalize" data-value="romaji">romaji (Shingeki no Kyojin)</div>
-                <div class="cursor-pointer px-4 py-2 text-white hover:bg-purple-600 capitalize" data-value="native">native (進撃の巨人)</div>
+                <div class="cursor-pointer px-4 py-2 text-white hover:bg-{{ user.preferences.accent_colour }}-600 capitalize" data-value="english">english (Attack on Titan)</div>
+                <div class="cursor-pointer px-4 py-2 text-white hover:bg-{{ user.preferences.accent_colour }}-600 capitalize" data-value="romaji">romaji (Shingeki no Kyojin)</div>
+                <div class="cursor-pointer px-4 py-2 text-white hover:bg-{{ user.preferences.accent_colour }}-600 capitalize" data-value="native">native (進撃の巨人)</div>
             </div>
         </div>
     </div>
@@ -71,8 +148,8 @@
         </div>
         <div class="absolute z-10 w-full mt-1 bg-neutral-900 rounded shadow-lg hidden" id="character_name_language_options">
             <div class="py-1">
-                <div class="cursor-pointer px-4 py-2 text-white hover:bg-purple-600 capitalize" data-value="romaji">romaji</div>
-                <div class="cursor-pointer px-4 py-2 text-white hover:bg-purple-600 capitalize" data-value="native">native</div>
+                <div class="cursor-pointer px-4 py-2 text-white hover:bg-{{ user.preferences.accent_colour }}-600 capitalize" data-value="romaji">romaji</div>
+                <div class="cursor-pointer px-4 py-2 text-white hover:bg-{{ user.preferences.accent_colour }}-600 capitalize" data-value="native">native</div>
             </div>
         </div>
     </div>
@@ -97,8 +174,8 @@
         </div>
         <div class="absolute z-10 w-full mt-1 bg-neutral-900 rounded shadow-lg hidden" id="default_language_options">
             <div class="py-1">
-                <div class="cursor-pointer px-4 py-2 text-white hover:bg-purple-600 capitalize" data-value="sub">sub</div>
-                <div class="cursor-pointer px-4 py-2 text-white hover:bg-purple-600 capitalize" data-value="dub">dub</div>
+                <div class="cursor-pointer px-4 py-2 text-white hover:bg-{{ user.preferences.accent_colour }}-600 capitalize" data-value="sub">sub</div>
+                <div class="cursor-pointer px-4 py-2 text-white hover:bg-{{ user.preferences.accent_colour }}-600 capitalize" data-value="dub">dub</div>
             </div>
         </div>
     </div>
@@ -119,8 +196,8 @@
         </div>
         <div class="absolute z-10 w-full mt-1 bg-neutral-900 rounded shadow-lg hidden" id="default_provider_options">
             <div class="py-1">
-                <div class="cursor-pointer px-4 py-2 text-white hover:bg-purple-600 capitalize" data-value="zoro">zoro</div>
-                <div class="cursor-pointer px-4 py-2 text-white hover:bg-purple-600 capitalize" data-value="gogoanime">gogoanime</div>
+                <div class="cursor-pointer px-4 py-2 text-white hover:bg-{{ user.preferences.accent_colour }}-600 capitalize" data-value="zoro">zoro</div>
+                <div class="cursor-pointer px-4 py-2 text-white hover:bg-{{ user.preferences.accent_colour }}-600 capitalize" data-value="gogoanime">gogoanime</div>
             </div>
         </div>
     </div>
@@ -141,8 +218,8 @@
         </div>
         <div class="absolute z-10 w-full mt-1 bg-neutral-900 rounded shadow-lg hidden" id="default_watch_page_options">
             <div class="py-1">
-                <div class="cursor-pointer px-4 py-2 text-white hover:bg-purple-600 capitalize" data-value="watch">watch</div>
-                <div class="cursor-pointer px-4 py-2 text-white hover:bg-purple-600 capitalize" data-value="detail">detail</div>
+                <div class="cursor-pointer px-4 py-2 text-white hover:bg-{{ user.preferences.accent_colour }}-600 capitalize" data-value="watch">watch</div>
+                <div class="cursor-pointer px-4 py-2 text-white hover:bg-{{ user.preferences.accent_colour }}-600 capitalize" data-value="detail">detail</div>
             </div>
         </div>
     </div>
@@ -155,7 +232,7 @@
     <div class="relative">
         <label class="flex items-center cursor-pointer">
             <input type="checkbox" class="hidden peer" id="show_history_on_home_checkbox" {% if user.preferences.show_history_on_home %}checked{% endif %}>
-            <div class="w-10 h-6 bg-neutral-700 rounded-full p-1 flex items-center peer-checked:bg-purple-600 transition-colors duration-100">
+            <div class="w-10 h-6 bg-neutral-700 rounded-full p-1 flex items-center peer-checked:bg-{{ user.preferences.accent_colour }}-600 transition-colors duration-100">
                 <div class="toggle-dot w-4 h-4 bg-white rounded-full shadow-md transform duration-100 ease-in-out"></div>
             </div>
         </label>
@@ -169,7 +246,7 @@
     <div class="relative">
         <label class="flex items-center cursor-pointer">
             <input type="checkbox" class="hidden peer" id="auto_skip_intro_checkbox" {% if user.preferences.auto_skip_intro %}checked{% endif %}>
-            <div class="w-10 h-6 bg-neutral-700 rounded-full p-1 flex items-center peer-checked:bg-purple-600 transition-colors duration-100">
+            <div class="w-10 h-6 bg-neutral-700 rounded-full p-1 flex items-center peer-checked:bg-{{ user.preferences.accent_colour }}-600 transition-colors duration-100">
                 <div class="toggle-dot w-4 h-4 bg-white rounded-full shadow-md transform duration-100 ease-in-out"></div>
             </div>
         </label>
@@ -183,7 +260,7 @@
     <div class="relative">
         <label class="flex items-center cursor-pointer">
             <input type="checkbox" class="hidden peer" id="auto_play_video_checkbox" {% if user.preferences.auto_play_video %}checked{% endif %}>
-            <div class="w-10 h-6 bg-neutral-700 rounded-full p-1 flex items-center peer-checked:bg-purple-600 transition-colors duration-100">
+            <div class="w-10 h-6 bg-neutral-700 rounded-full p-1 flex items-center peer-checked:bg-{{ user.preferences.accent_colour }}-600 transition-colors duration-100">
                 <div class="toggle-dot w-4 h-4 bg-white rounded-full shadow-md transform duration-100 ease-in-out"></div>
             </div>
         </label>
@@ -197,7 +274,7 @@
     <div class="relative">
         <label class="flex items-center cursor-pointer">
             <input type="checkbox" class="hidden peer" id="auto_next_episode_checkbox" {% if user.preferences.auto_next_episode %}checked{% endif %}>
-            <div class="w-10 h-6 bg-neutral-700 rounded-full p-1 flex items-center peer-checked:bg-purple-600 transition-colors duration-100">
+            <div class="w-10 h-6 bg-neutral-700 rounded-full p-1 flex items-center peer-checked:bg-{{ user.preferences.accent_colour }}-600 transition-colors duration-100">
                 <div class="toggle-dot w-4 h-4 bg-white rounded-full shadow-md transform duration-100 ease-in-out"></div>
             </div>
         </label>
@@ -215,7 +292,7 @@
     <div class="relative">
         <label class="flex items-center cursor-pointer">
             <input type="checkbox" class="hidden peer" id="display_guild_name_instead_of_username_checkbox" {% if user.preferences.display_guild_name_instead_of_username %}checked{% endif %}>
-            <div class="w-10 h-6 bg-neutral-700 rounded-full p-1 flex items-center peer-checked:bg-purple-600 transition-colors duration-100">
+            <div class="w-10 h-6 bg-neutral-700 rounded-full p-1 flex items-center peer-checked:bg-{{ user.preferences.accent_colour }}-600 transition-colors duration-100">
                 <div class="toggle-dot w-4 h-4 bg-white rounded-full shadow-md transform duration-100 ease-in-out"></div>
             </div>
         </label>
@@ -229,7 +306,7 @@
     <div class="relative">
         <label class="flex items-center cursor-pointer">
             <input type="checkbox" class="hidden peer" id="smart_mal_sync_checkbox" {% if user.preferences.smart_mal_sync %}checked{% endif %}>
-            <div class="w-10 h-6 bg-neutral-700 rounded-full p-1 flex items-center peer-checked:bg-purple-600 transition-colors duration-100">
+            <div class="w-10 h-6 bg-neutral-700 rounded-full p-1 flex items-center peer-checked:bg-{{ user.preferences.accent_colour }}-600 transition-colors duration-100">
                 <div class="toggle-dot w-4 h-4 bg-white rounded-full shadow-md transform duration-100 ease-in-out"></div>
             </div>
         </label>
@@ -237,7 +314,7 @@
 </div>
 <!-- Save Button -->
 <div class="w-full py-4 flex flex-row justify-start items-center">
-    <button id="saveButton" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-full focus:outline-none flex items-center transition-colors duration-100 ease-in-out" onclick="handleSave()">
+    <button id="saveButton" class="bg-{{ user.preferences.accent_colour }}-600 hover:bg-{{ user.preferences.accent_colour }}-700 text-white font-bold py-2 px-4 rounded-full focus:outline-none flex items-center transition-colors duration-100 ease-in-out" onclick="handleSave()">
         <svg id="spinner" class="hidden animate-spin mr-2 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
             <path d="M12,1A11,11,0,1,0,23,12,11,11,0,0,0,12,1Zm0,19a8,8,0,1,1,8-8A8,8,0,0,1,12,20Z" class="opacity-25 fill-current"/>
             <path d="M10.14,1.16a11,11,0,0,0-9,8.92A1.59,1.59,0,0,0,2.46,12,1.52,1.52,0,0,0,4.11,10.7a8,8,0,0,1,6.66-6.61A1.42,1.42,0,0,0,12,2.69h0A1.57,1.57,0,0,0,10.14,1.16Z" class="fill-current"/>
@@ -258,10 +335,11 @@
         spinner.classList.remove('hidden');
         buttonText.textContent = 'Saving...';
         button.classList.add('bg-white', 'bg-opacity-20', 'cursor-not-allowed');
-        button.classList.remove('bg-purple-600', 'hover:bg-purple-700');
+        button.classList.remove('bg-{{ user.preferences.accent_colour }}-600', 'hover:bg-{{ user.preferences.accent_colour }}-700');
         button.disabled = true;
 
         // Gather preferences
+        const accentColour = document.getElementById('accent_colour').textContent.trim().toLowerCase();
         const cardLayout = document.getElementById('card_layout').textContent.trim().toLowerCase();
         const titleLanguage = document.getElementById('title_language').textContent.trim().toLowerCase();
         const characterNameLanguage = document.getElementById('character_name_language').textContent.trim().toLowerCase();
@@ -276,6 +354,7 @@
         const smartMALSync = document.getElementById('smart_mal_sync_checkbox').checked;
 
         const body = {
+            accentColour,
             cardLayout,
             titleLanguage,
             characterNameLanguage,
@@ -311,7 +390,7 @@
             spinner.classList.add('hidden');
             buttonText.textContent = 'Save Preferences';
             button.classList.remove('bg-white', 'bg-opacity-20', 'cursor-not-allowed');
-            button.classList.add('bg-purple-600', 'hover:bg-purple-700');
+            button.classList.add('bg-{{ user.preferences.accent_colour }}-600', 'hover:bg-{{ user.preferences.accent_colour }}-700');
             button.disabled = false;
         });
     }

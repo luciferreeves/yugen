@@ -171,11 +171,11 @@
                     </div>
                     <div class="absolute z-10 w-full mt-1 bg-neutral-900 rounded shadow-lg hidden" id="status_options">
                         <div class="py-1">
-                            <div class="cursor-pointer px-4 py-2 text-white hover:bg-purple-600 capitalize" data-value="watching">watching</div>
-                            <div class="cursor-pointer px-4 py-2 text-white hover:bg-purple-600 capitalize" data-value="completed">completed</div>
-                            <div class="cursor-pointer px-4 py-2 text-white hover:bg-purple-600 capitalize" data-value="on hold">on hold</div>
-                            <div class="cursor-pointer px-4 py-2 text-white hover:bg-purple-600 capitalize" data-value="dropped">dropped</div>
-                            <div class="cursor-pointer px-4 py-2 text-white hover:bg-purple-600 capitalize" data-value="plan to watch">plan to watch</div>
+                            <div class="cursor-pointer px-4 py-2 text-white hover:bg-{{ user.preferences.accent_colour }}-600 capitalize" data-value="watching">watching</div>
+                            <div class="cursor-pointer px-4 py-2 text-white hover:bg-{{ user.preferences.accent_colour }}-600 capitalize" data-value="completed">completed</div>
+                            <div class="cursor-pointer px-4 py-2 text-white hover:bg-{{ user.preferences.accent_colour }}-600 capitalize" data-value="on hold">on hold</div>
+                            <div class="cursor-pointer px-4 py-2 text-white hover:bg-{{ user.preferences.accent_colour }}-600 capitalize" data-value="dropped">dropped</div>
+                            <div class="cursor-pointer px-4 py-2 text-white hover:bg-{{ user.preferences.accent_colour }}-600 capitalize" data-value="plan to watch">plan to watch</div>
                         </div>
                     </div>
                 </div>
@@ -197,17 +197,17 @@
                     </div>
                     <div class="absolute z-10 w-full mt-1 bg-neutral-900 rounded shadow-lg hidden" id="score_options">
                         <div class="py-1">
-                            <div class="cursor-pointer px-4 py-2 text-white hover:bg-purple-600" data-value="10">10</div>
-                            <div class="cursor-pointer px-4 py-2 text-white hover:bg-purple-600" data-value="9">9</div>
-                            <div class="cursor-pointer px-4 py-2 text-white hover:bg-purple-600" data-value="8">8</div>
-                            <div class="cursor-pointer px-4 py-2 text-white hover:bg-purple-600" data-value="7">7</div>
-                            <div class="cursor-pointer px-4 py-2 text-white hover:bg-purple-600" data-value="6">6</div>
-                            <div class="cursor-pointer px-4 py-2 text-white hover:bg-purple-600" data-value="5">5</div>
-                            <div class="cursor-pointer px-4 py-2 text-white hover:bg-purple-600" data-value="4">4</div>
-                            <div class="cursor-pointer px-4 py-2 text-white hover:bg-purple-600" data-value="3">3</div>
-                            <div class="cursor-pointer px-4 py-2 text-white hover:bg-purple-600" data-value="2">2</div>
-                            <div class="cursor-pointer px-4 py-2 text-white hover:bg-purple-600" data-value="1">1</div>
-                            <div class="cursor-pointer px-4 py-2 text-white hover:bg-purple-600" data-value="Score">0</div>
+                            <div class="cursor-pointer px-4 py-2 text-white hover:bg-{{ user.preferences.accent_colour }}-600" data-value="10">10</div>
+                            <div class="cursor-pointer px-4 py-2 text-white hover:bg-{{ user.preferences.accent_colour }}-600" data-value="9">9</div>
+                            <div class="cursor-pointer px-4 py-2 text-white hover:bg-{{ user.preferences.accent_colour }}-600" data-value="8">8</div>
+                            <div class="cursor-pointer px-4 py-2 text-white hover:bg-{{ user.preferences.accent_colour }}-600" data-value="7">7</div>
+                            <div class="cursor-pointer px-4 py-2 text-white hover:bg-{{ user.preferences.accent_colour }}-600" data-value="6">6</div>
+                            <div class="cursor-pointer px-4 py-2 text-white hover:bg-{{ user.preferences.accent_colour }}-600" data-value="5">5</div>
+                            <div class="cursor-pointer px-4 py-2 text-white hover:bg-{{ user.preferences.accent_colour }}-600" data-value="4">4</div>
+                            <div class="cursor-pointer px-4 py-2 text-white hover:bg-{{ user.preferences.accent_colour }}-600" data-value="3">3</div>
+                            <div class="cursor-pointer px-4 py-2 text-white hover:bg-{{ user.preferences.accent_colour }}-600" data-value="2">2</div>
+                            <div class="cursor-pointer px-4 py-2 text-white hover:bg-{{ user.preferences.accent_colour }}-600" data-value="1">1</div>
+                            <div class="cursor-pointer px-4 py-2 text-white hover:bg-{{ user.preferences.accent_colour }}-600" data-value="Score">0</div>
                         </div>
                     </div>
                 </div>
@@ -229,9 +229,9 @@
                     </div>
                     <div class="absolute z-10 w-full mt-1 bg-neutral-900 rounded shadow-lg hidden" id="episodes_options">
                         <div class="py-1">
-                            <div class="cursor-pointer px-4 py-2 text-white hover:bg-purple-600" data-value="Episodes">0</div>
+                            <div class="cursor-pointer px-4 py-2 text-white hover:bg-{{ user.preferences.accent_colour }}-600" data-value="Episodes">0</div>
                             {% for i in mal_episode_range %}
-                                <div class="cursor-pointer px-4 py-2 text-white hover:bg-purple-600" data-value="{{ i }}">{{ i }}</div>
+                                <div class="cursor-pointer px-4 py-2 text-white hover:bg-{{ user.preferences.accent_colour }}-600" data-value="{{ i }}">{{ i }}</div>
                             {% endfor %}
                         </div>
                     </div>

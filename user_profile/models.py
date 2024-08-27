@@ -4,6 +4,7 @@ from django.conf import settings
 # Create your models here.
 class UserPreferences(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    accent_colour = models.CharField(max_length=16, default="purple") # purple, blue, green, yellow, red, pink, indigo, cyan, orange, teal, lime, amber
     card_layout = models.CharField(max_length=16, default="classic") # classic, wide, compact
     title_language = models.CharField(max_length=16, default="english") # english, romaji, native
     character_name_language = models.CharField(max_length=16, default="romaji") # romaji, native
