@@ -11,9 +11,9 @@
     </a>
 </div>
 {% else %}
-<section class="flex flex-row justify-between my-4">
+<section class="flex flex-col lg:flex-row gap-2 justify-between my-4">
     {% if prev_offset %}
-        <a href="{% url 'user_profile:user_profile' %}?category=anime_list&offset={{ prev_offset }}" class="bg-purple-600 text-sm font-bold py-3 px-6 rounded-full flex items-center gap-2">
+        <a href="{% url 'user_profile:user_profile' %}?category=anime_list&offset={{ prev_offset }}{% if filter %}&filter={{ filter }}{% endif %}" class="bg-purple-600 text-sm font-bold py-3 px-6 rounded-full flex items-center gap-2">
             <span>Load Previous</span>
         </a>
     {% else %}
@@ -21,8 +21,46 @@
             <span>Load Previous</span>
         </a>
     {% endif %}
+    <div class="flex flex-row">
+        <div class="flex flex-row items-center gap-2">
+            <span class="font-bold">Filter:</span>
+            <div class="relative w-64 custom-select text-sm" data-select="list_filter">
+                <div class="select-none cursor-pointer bg-neutral-900 py-2 px-4 pr-8 rounded leading-tight focus:outline-none capitalize" id="list_filter">
+                    {% if filter == "completed" %}
+                        completed
+                    {% elif filter == "watching" %}
+                        watching
+                    {% elif filter == "on_hold" %}
+                        on hold
+                    {% elif filter == "dropped" %}
+                        dropped
+                    {% elif filter == "plan_to_watch" %}
+                        plan to watch
+                    {% else %}
+                        all
+                    {% endif %}
+                </div>
+                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-white">
+                    <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                        <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/>
+                    </svg>
+                </div>
+                <div class="absolute z-10 w-full mt-1 bg-neutral-900 rounded shadow-lg hidden" id="list_filter_options">
+                    <div class="py-1">
+                        <div class="cursor-pointer px-4 py-2 text-white hover:bg-purple-600 capitalize" data-value="all">all</div>
+                        <div class="cursor-pointer px-4 py-2 text-white hover:bg-purple-600 capitalize" data-value="watching">watching</div>
+                        <div class="cursor-pointer px-4 py-2 text-white hover:bg-purple-600 capitalize" data-value="completed">completed</div>
+                        <div class="cursor-pointer px-4 py-2 text-white hover:bg-purple-600 capitalize" data-value="on hold">on hold</div>
+                        <div class="cursor-pointer px-4 py-2 text-white hover:bg-purple-600 capitalize" data-value="dropped">dropped</div>
+                        <div class="cursor-pointer px-4 py-2 text-white hover:bg-purple-600 capitalize" data-value="plan to watch">plan to watch</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     {% if next_offset %}
-        <a href="{% url 'user_profile:user_profile' %}?category=anime_list&offset={{ next_offset }}" class="bg-purple-600 text-sm font-bold py-3 px-6 rounded-full flex items-center gap-2">
+        <a href="{% url 'user_profile:user_profile' %}?category=anime_list&offset={{ next_offset }}{% if filter %}&filter={{ filter }}{% endif %}" class="bg-purple-600 text-sm font-bold py-3 px-6 rounded-full flex items-center gap-2">
             <span>Load Next</span>
         </a>
     {% else %}
@@ -33,7 +71,7 @@
 </section>
 <section class="flex flex-wrap justify-center mt-4 animate__animated animate__slideInUp">
 {% for anime in mal_list %}
-    <a href="#" class="w-1/2 lg:w-1/4 xl:w-1/6 text-gray-500 px-1 mb-4 hover:text-white flex flex-col gap-2">
+    <a href="{% url 'user_profile:user_profile' %}?category=update&mal_id={{ anime.node.id }}" class="w-1/2 lg:w-1/4 xl:w-1/6 text-gray-500 px-1 mb-4 hover:text-white flex flex-col gap-2">
         <img src="{{ anime.node.main_picture.large }}" alt="{{ anime.node.title }}" class="rounded-lg w-56 h-72 mx-auto object-cover"/>
         <div class="inline-flex gap-2 flex-wrap">
             <span class="text-xs font-bold bg-white bg-opacity-10 p-1 rounded flex items-center gap-1 capitalize">
@@ -42,7 +80,17 @@
                 <path d="M15 4h1a1 1 0 0 1 1 1v3.5"></path>
                 <path d="M20 6c.264 .112 .52 .217 .768 .315a1 1 0 0 1 .53 1.311l-2.298 5.374"></path>
                 </svg>
-                {{ anime.node.my_list_status.status }}
+                {% if anime.node.my_list_status.status == "watching" %}
+                    Watching
+                {% elif anime.node.my_list_status.status == "completed" %}
+                    Completed
+                {% elif anime.node.my_list_status.status == "on_hold" %}
+                    On Hold
+                {% elif anime.node.my_list_status.status == "dropped" %}
+                    Dropped
+                {% elif anime.node.my_list_status.status == "plan_to_watch" %}
+                    Plan to Watch
+                {% endif %}
             </span>
             <span class="text-xs font-bold bg-white bg-opacity-10 p-1 rounded flex items-center gap-1">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4">
@@ -92,7 +140,7 @@
 </section>
 <section class="flex flex-row justify-between my-4">
     {% if prev_offset %}
-        <a href="{% url 'user_profile:user_profile' %}?category=anime_list&offset={{ prev_offset }}" class="bg-purple-600 text-sm font-bold py-3 px-6 rounded-full flex items-center gap-2">
+        <a href="{% url 'user_profile:user_profile' %}?category=anime_list&offset={{ prev_offset }}{% if filter %}&filter={{ filter }}{% endif %}" class="bg-purple-600 text-sm font-bold py-3 px-6 rounded-full flex items-center gap-2">
             <span>Load Previous</span>
         </a>
     {% else %}
@@ -101,7 +149,7 @@
         </a>
     {% endif %}
     {% if next_offset %}
-        <a href="{% url 'user_profile:user_profile' %}?category=anime_list&offset={{ next_offset }}" class="bg-purple-600 text-sm font-bold py-3 px-6 rounded-full flex items-center gap-2">
+        <a href="{% url 'user_profile:user_profile' %}?category=anime_list&offset={{ next_offset }}{% if filter %}&filter={{ filter }}{% endif %}" class="bg-purple-600 text-sm font-bold py-3 px-6 rounded-full flex items-center gap-2">
             <span>Load Next</span>
         </a>
     {% else %}
@@ -111,4 +159,28 @@
     {% endif %}
 </section>
 {% endif %}
-<!-- 
+{% block scripts %}
+<script>
+    // On change of list_filter text content
+    const listFilter = document.getElementById('list_filter');
+
+    const observer = new MutationObserver(function(mutations) {
+        mutations.forEach(function(mutation) {
+            if (mutation.type === 'characterData' || mutation.type === 'childList') {
+                // console.log(listFilter.textContent);
+                const selectedOption = listFilter.textContent.trim().toLowerCase().replace(/\s/g, '_');
+                // refresh the page with the selected filter
+                const currentLocation = new URL(window.location.href);
+                currentLocation.searchParams.set('filter', selectedOption);
+                window.location.href = currentLocation.href;
+            }
+        });
+    });
+
+    observer.observe(listFilter, {
+        characterData: true,
+        childList: true,
+        subtree: true
+    });
+</script>
+{% endblock scripts %}

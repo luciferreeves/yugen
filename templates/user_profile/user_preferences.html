@@ -246,63 +246,6 @@
 
 {% block scripts %}
 <script>
-    const customSelects = document.querySelectorAll('.custom-select')
-    customSelects.forEach(customSelect => {
-        const selectId = customSelect.getAttribute('data-select')
-        const customSelectDisplay = document.getElementById(selectId)
-        const customSelectOptions = document.getElementById(`${selectId}_options`)
-        let selectedValue = '';
-
-        customSelectDisplay.addEventListener('click', function() {
-            customSelectOptions.classList.toggle('hidden');
-        });
-
-        customSelectOptions.addEventListener('click', function(e) {
-            if (e.target.hasAttribute('data-value')) {
-                selectedValue = e.target.getAttribute('data-value');
-                customSelectDisplay.textContent = selectedValue;
-                customSelectOptions.classList.add('hidden');
-            }
-        });
-
-        // Close the dropdown when clicking outside
-        document.addEventListener('click', function(e) {
-            if (!customSelectDisplay.contains(e.target) && !customSelectOptions.contains(e.target)) {
-                customSelectOptions.classList.add('hidden');
-            }
-        });
-    });
-</script>
-<script>
-    function showToast(message, isSuccess) {
-        const toast = document.createElement('div');
-        toast.className = `flex items-center p-4 rounded-md shadow-lg transition-opacity duration-500 ease-in-out animate__animated ${
-            isSuccess ? 'bg-green-100 text-green-700 animate__fadeInUp' : 'bg-red-100 text-red-700 animate__fadeInUp'
-        }`;
-
-        const checkSVG = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4"><path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" /></svg>`
-
-        const errorSVG = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6"> <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" /></svg>`
-
-        toast.innerHTML = `
-            <div class="flex items-center">
-                ${isSuccess ? checkSVG : errorSVG}
-                <span class="ml-2">${message}</span>
-            </div>
-        `;
-
-        // Append the toast to the container
-        toastContainer.appendChild(toast);
-
-        // Remove the toast after 3 seconds
-        setTimeout(() => {
-            toast.classList.add('animate__fadeOutDown');
-            setTimeout(() => {
-                toastContainer.removeChild(toast);
-            }, 500);
-        }, 3000);
-    }
-
     function handleSave() {
         const button = document.getElementById('saveButton');
         const spinner = document.getElementById('spinner');
@@ -345,7 +288,7 @@
         };
 
         // Send a POST request to save the preferences
-        fetch('{% url "profile:save_user_preferences" %}', {
+        fetch('{% url "user_profile:save_user_preferences" %}', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

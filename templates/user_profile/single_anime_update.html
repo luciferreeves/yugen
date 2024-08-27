@@ -1,0 +1,307 @@
+<section class="flex flex-col xl:flex-row mt-8 gap-4">
+    <section class="xl:w-1/4">
+        <img class="w-full h-auto object-cover object-center rounded-lg" src="{{ mal_data.main_picture.large }}" alt="{{ mal_data.title }}">
+        <h1 class="font-bold mt-4 border-b border-white border-opacity-10">Alternative Titles</h1>
+        <ul class="list-inside text-sm">
+            <li class="mt-2 ml-2"><span class="font-bold">Synonyms: </span>{{ mal_data.alternative_titles.synonyms|join:", " }}</li>
+            {% if user.preferences.title_language == "english" %}
+                <li class="mt-2 ml-2"><span class="font-bold">Romaji: </span>{{ mal_data.title }}</li> 
+                <li class="mt-2 ml-2"><span class="font-bold">Native: </span>{{ mal_data.alternative_titles.ja }}</li>
+            {% elif user.preferences.title_language == "romaji" %}
+                <li class="mt-2 ml-2"><span class="font-bold">English: </span>{{ mal_data.alternative_titles.en }}</li>
+                <li class="mt-2 ml-2"><span class="font-bold">Native: </span>{{ mal_data.alternative_titles.ja }}</li>
+            {% else %}
+                <li class="mt-2 ml-2"><span class="font-bold">Romaji: </span>{{ mal_data.title }}</li>
+                <li class="mt-2 ml-2"><span class="font-bold">English: </span>{{ mal_data.alternative_titles.en }}</li>
+            {% endif %}
+        </ul>
+        <h1 class="font-bold mt-4 border-b border-white border-opacity-10">Information</h1>
+        <ul class="list-inside text-sm">
+            <li class="mt-2 ml-2"><span class="font-bold">Type: </span>
+                {% if mal_data.media_type == "tv" %}
+                    TV
+                {% elif mal_data.media_type == "movie" %}
+                    Movie
+                {% elif mal_data.media_type == "ova" %}
+                    OVA
+                {% elif mal_data.media_type == "ona" %}
+                    ONA
+                {% elif mal_data.media_type == "special" %}
+                    Special
+                {% elif mal_data.media_type == "music" %}
+                    Music
+                {% else %}
+                    Unknown
+                {% endif %}
+            </li>
+            <li class="mt-2 ml-2"><span class="font-bold">Episodes: </span>{{ mal_data.num_episodes }}</li>
+            <li class="mt-2 ml-2"><span class="font-bold">Status: </span>
+                {% if mal_data.status == "finished_airing" %}
+                    Finished Airing
+                {% elif mal_data.status == "currently_airing" %}
+                    Currently Airing
+                {% elif mal_data.status == "not_yet_aired" %}
+                    Not Yet Aired
+                {% else %}
+                    Unknown
+                {% endif %}
+            </li>
+            <li class="mt-2 ml-2"><span class="font-bold">Aired: </span>{{ mal_data.start_date }} to {{ mal_data.end_date }}</li>
+            <li class="mt-2 ml-2"><span class="font-bold">Broadcast: </span><span class="capitalize">{{ mal_data.broadcast.day_of_the_week }}</span> at {{ mal_data.broadcast.start_time }}</li>
+            <li class="mt-2 ml-2"><span class="font-bold">Source: </span>
+                {% if mal_data.source == "original" %}
+                    Original
+                {% elif mal_data.source == "manga" %}
+                    Manga
+                {% elif mal_data.source == "4_koma_manga" %}
+                    4-koma Manga
+                {% elif mal_data.source == "web_manga" %}
+                    Web Manga
+                {% elif mal_data.source == "digital_manga" %}
+                    Digital Manga
+                {% elif mal_data.source == "novel" %}
+                    Novel
+                {% elif mal_data.source == "light_novel" %}
+                    Light Novel
+                {% elif mal_data.source == "visual_novel" %}
+                    Visual Novel
+                {% elif mal_data.source == "game" %}
+                    Game
+                {% elif mal_data.source == "card_game" %}
+                    Card Game
+                {% elif mal_data.source == "book" %}
+                    Book
+                {% elif mal_data.source == "picture_book" %}
+                    Picture Book
+                {% elif mal_data.source == "radio" %}
+                    Radio
+                {% elif mal_data.source == "music" %}
+                    Music
+                {% else %}
+                    Other
+                {% endif %}
+            </li>
+            <li class="mt-2 ml-2"><span class="font-bold">Genres: </span>
+                {% for genre in mal_data.genres %}
+                    {{ genre.name }}{% if not forloop.last %}, {% endif %}
+                {% endfor %}
+            </li>
+            <li class="mt-2 ml-2"><span class="font-bold">Duration: </span>{{ mal_data.average_episode_duration }} minutes</li>
+            <li class="mt-2 ml-2"><span class="font-bold">Studios: </span>
+                {% for studio in mal_data.studios %}
+                    {{ studio.name }}{% if not forloop.last %}, {% endif %}
+                {% endfor %}
+            </li>
+            <li class="mt-2 ml-2"><span class="font-bold">Rating: </span>
+                {% if mal_data.rating == "g" %}
+                    G - All Ages
+                {% elif mal_data.rating == "pg" %}
+                    PG - Children
+                {% elif mal_data.rating == "pg_13" %}
+                    PG-13 - Teens 13 or older
+                {% elif mal_data.rating == "r" %}
+                    R - 17+ (violence & profanity)
+                {% elif mal_data.rating == "r_plus" %}
+                    R+ - Mild Nudity
+                {% elif mal_data.rating == "rx" %}
+                    Rx - Hentai
+                {% else %}
+                    Unknown
+                {% endif %}
+            </li>
+        </ul>
+    </section>
+    <section class="xl:w-3/4 flex flex-col">
+        <h1 class="font-bold text-4xl pb-4 border-b border-white border-opacity-10">
+            {% if user.preferences.title_language == "english" and mal_data.alternative_titles and mal_data.alternative_titles.en %}
+            {{ mal_data.alternative_titles.en }}
+            {% elif user.preferences.title_language == "native" and mal_data.alternative_titles and mal_data.alternative_titles.ja %}
+            {{ mal_data.alternative_titles.ja }}
+            {% else %}
+            {{ mal_data.title }}
+            {% endif %}
+        </h1>
+        <p class="mt-4" style="text-align: justify;">{{ mal_data.synopsis|safe }}</p>
+        <div class="flex flex-row gap-4 my-4 items-center">
+            <div class="flex flex-col w-full md:w-1/3 items-center">
+                <h1 class="font-bold text-lg">Score</h1>
+                <p class="text-2xl">{{ mal_data.mean }}</p>
+            </div>
+            <div class="flex flex-col w-full md:w-1/3 items-center">
+                <h1 class="font-bold text-lg">Rank</h1>
+                <p class="text-2xl">#{{ mal_data.rank }}</p>
+            </div>
+            <div class="flex flex-col w-full md:w-1/3 items-center">
+                <h1 class="font-bold text-lg">Popularity</h1>
+                <p class="text-2xl">#{{ mal_data.popularity }}</p>
+            </div>
+            <div class="flex flex-col w-full md:w-1/3 items-center">
+                <h1 class="font-bold text-lg">Members</h1>
+                <p class="text-2xl">{{ mal_data.num_list_users }}</p>
+            </div>
+        </div>
+
+        {% comment %} User List Controls: Status, Score, Episodes {% endcomment %}
+        <section class="flex flex-col lg:flex-row my-8 gap-4 justify-around">
+            <div class="flex flex-col w-full md:w-64 gap-2">
+                <span>Status</span>
+                <div class="relative w-full md:w-64 custom-select text-sm" data-select="status">
+                    <div class="select-none cursor-pointer bg-neutral-900 py-2 px-4 pr-8 rounded leading-tight focus:outline-none capitalize" id="status">
+                        {% if mal_data.my_list_status.status == "completed" %}
+                            completed
+                        {% elif mal_data.my_list_status.status == "watching" %}
+                            watching
+                        {% elif mal_data.my_list_status.status == "on_hold" %}
+                            on hold
+                        {% elif mal_data.my_list_status.status == "dropped" %}
+                            dropped
+                        {% elif mal_data.my_list_status.status == "plan_to_watch" %}
+                            plan to watch
+                        {% else %}
+                            Add to List
+                        {% endif %}
+                    </div>
+                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-white">
+                        <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                            <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/>
+                        </svg>
+                    </div>
+                    <div class="absolute z-10 w-full mt-1 bg-neutral-900 rounded shadow-lg hidden" id="status_options">
+                        <div class="py-1">
+                            <div class="cursor-pointer px-4 py-2 text-white hover:bg-purple-600 capitalize" data-value="watching">watching</div>
+                            <div class="cursor-pointer px-4 py-2 text-white hover:bg-purple-600 capitalize" data-value="completed">completed</div>
+                            <div class="cursor-pointer px-4 py-2 text-white hover:bg-purple-600 capitalize" data-value="on hold">on hold</div>
+                            <div class="cursor-pointer px-4 py-2 text-white hover:bg-purple-600 capitalize" data-value="dropped">dropped</div>
+                            <div class="cursor-pointer px-4 py-2 text-white hover:bg-purple-600 capitalize" data-value="plan to watch">plan to watch</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="flex flex-col w-full md:w-64 gap-2">
+                <span>Score</span>
+                <div class="relative w-full md:w-64 custom-select text-sm" data-select="score">
+                    <div class="select-none cursor-pointer bg-neutral-900 py-2 px-4 pr-8 rounded leading-tight focus:outline-none" id="score">
+                        {% if mal_data.my_list_status.score %}
+                            {{ mal_data.my_list_status.score }}
+                        {% else %}
+                            Score
+                        {% endif %}
+                    </div>
+                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-white">
+                        <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                            <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/>
+                        </svg>
+                    </div>
+                    <div class="absolute z-10 w-full mt-1 bg-neutral-900 rounded shadow-lg hidden" id="score_options">
+                        <div class="py-1">
+                            <div class="cursor-pointer px-4 py-2 text-white hover:bg-purple-600" data-value="10">10</div>
+                            <div class="cursor-pointer px-4 py-2 text-white hover:bg-purple-600" data-value="9">9</div>
+                            <div class="cursor-pointer px-4 py-2 text-white hover:bg-purple-600" data-value="8">8</div>
+                            <div class="cursor-pointer px-4 py-2 text-white hover:bg-purple-600" data-value="7">7</div>
+                            <div class="cursor-pointer px-4 py-2 text-white hover:bg-purple-600" data-value="6">6</div>
+                            <div class="cursor-pointer px-4 py-2 text-white hover:bg-purple-600" data-value="5">5</div>
+                            <div class="cursor-pointer px-4 py-2 text-white hover:bg-purple-600" data-value="4">4</div>
+                            <div class="cursor-pointer px-4 py-2 text-white hover:bg-purple-600" data-value="3">3</div>
+                            <div class="cursor-pointer px-4 py-2 text-white hover:bg-purple-600" data-value="2">2</div>
+                            <div class="cursor-pointer px-4 py-2 text-white hover:bg-purple-600" data-value="1">1</div>
+                            <div class="cursor-pointer px-4 py-2 text-white hover:bg-purple-600" data-value="Score">0</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="flex flex-col w-full md:w-64 gap-2">
+                <span>Episodes</span>
+                <div class="relative w-full md:w-64 custom-select text-sm" data-select="episodes">
+                    <div class="select-none cursor-pointer bg-neutral-900 py-2 px-4 pr-8 rounded leading-tight focus:outline-none" id="episodes">
+                        {% if mal_data.my_list_status.num_episodes_watched %}
+                            {{ mal_data.my_list_status.num_episodes_watched }}
+                        {% else %}
+                            Episodes
+                        {% endif %}
+                    </div>
+                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-white">
+                        <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                            <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/>
+                        </svg>
+                    </div>
+                    <div class="absolute z-10 w-full mt-1 bg-neutral-900 rounded shadow-lg hidden" id="episodes_options">
+                        <div class="py-1">
+                            <div class="cursor-pointer px-4 py-2 text-white hover:bg-purple-600" data-value="Episodes">0</div>
+                            {% for i in mal_episode_range %}
+                                <div class="cursor-pointer px-4 py-2 text-white hover:bg-purple-600" data-value="{{ i }}">{{ i }}</div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </section>
+
+
+        <h1 class="font-bold text-xl mt-4 py-2 border-b border-white border-opacity-10">Related Anime</h1>
+        <div class="flex flex-wrap -mx-4 mt-4">
+            {% for related_anime in mal_data.related_anime %}
+            <div class="w-full md:w-1/3 px-4 mb-4">
+                <div class="flex gap-4 items-start">
+                    <img class="w-24 object-cover object-center rounded-lg" src="{{ related_anime.node.main_picture.medium }}" alt="{{ related_anime.node.title }}">
+                    <div class="flex flex-col w-full">
+                        <h3 class="font-bold uppercase">{{ related_anime.relation_type_formatted }}</h3>
+                        <a class="hover:text-purple-600 break-words" href="{% url 'user_profile:user_profile' %}?category=update&mal_id={{ related_anime.node.id }}">{{ related_anime.node.title }}</a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+</section>
+<div id="toastContainer" class="fixed bottom-4 left-1/2 transform -translate-x-1/2 z-50 flex flex-col space-y-2"></div>
+{% block scripts %}
+<script>
+    const statusSelect = document.getElementById('status');
+    const scoreSelect = document.getElementById('score');
+    const episodesSelect = document.getElementById('episodes');
+
+    // Call the API to update the user's list
+    const observer = new MutationObserver(function(mutations){
+        mutations.forEach(function(mutation){
+            if (mutation.type === 'characterData' || mutation.type === 'childList') {
+                const statusSelectedOption = statusSelect.textContent.trim().toLowerCase().replace(/\s/g, '_');
+                const scoreSelectedOption = scoreSelect.textContent.trim();
+                const episodesSelectedOption = episodesSelect.textContent.trim();
+
+                const data = {
+                    'status': statusSelectedOption === 'Add to List' ? 'add_to_list' : statusSelectedOption,
+                    'score': scoreSelectedOption === 'Score' ? 0 : parseInt(scoreSelectedOption),
+                    'episodes': episodesSelectedOption === 'Episodes' ? 0 : parseInt(episodesSelectedOption),
+                    'mal_id': {{ mal_data.id }},
+                };
+
+                fetch('{% url "user_profile:update_user_mal_list" %}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': '{{ csrf_token }}',
+                    },
+                    body: JSON.stringify(data),
+                }).then(response => {
+                    if (response.ok) {
+                        return response.json();
+                    } else {
+                        return response.json().then(data => {
+                            throw new Error(data.error);
+                        });
+                    }
+                }).then(data => {
+                    showToast(data.success, true);
+                }).catch(error => {
+                    showToast(error, false);
+                });
+            }
+        });
+    });
+
+    observer.observe(statusSelect, {childList: true, characterData: true});
+    observer.observe(scoreSelect, {childList: true, characterData: true});
+    observer.observe(episodesSelect, {childList: true, characterData: true});
+</script>
+{% endblock scripts %}

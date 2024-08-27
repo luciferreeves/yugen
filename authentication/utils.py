@@ -75,11 +75,15 @@ def exchange_code(code):
     )
     return response.json()
 
-def get_user_mal_list(access_token, limit=10, offset=0):
+def get_user_mal_list(access_token, limit=10, offset=0, filter=""):
     if not access_token or access_token == "":
         return [], None, None
 
     base_url = f"https://api.myanimelist.net/v2/users/@me/animelist?limit={limit}&offset={offset}&fields=my_list_status,alternative_titles,anime&sort=list_updated_at"
+
+    if filter:
+        base_url += f"&status={filter}"
+
     headers = {"Authorization": f"Bearer {access_token}"}
     response = requests.get(base_url, headers=headers)
 
@@ -107,7 +111,21 @@ def get_user_mal_list(access_token, limit=10, offset=0):
             
     return user_anime_list, page_previous, page_next
 
-    
+def get_single_anime_mal(access_token, mal_id):
+    if not access_token or access_token == "":
+        return None
+
+    base_url = f"https://api.myanimelist.net/v2/anime/{mal_id}?fields=alternative_titles,average_episode_duration,broadcast,created_at,end_date,genres,id,main_picture,media_type,nsfw,num_episodes,num_favorites,num_list_users,num_scoring_users,popularity,rank,start_date,start_season,status,synopsis,source,studios,title,updated_at,my_list_status,background,related_anime,rating,mean"
+
+    headers = {"Authorization": f"Bearer {access_token}"}
+    response = requests.get(base_url, headers=headers)
+
+    if response.status_code == 200:
+        data = response.json()
+        return data
+    else:
+        print(response.json(), "MAL API Error")
+        return None
 
 def get_discord_user(access_token, token_type):
     guilds = requests.get(
