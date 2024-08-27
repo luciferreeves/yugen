@@ -1,5 +1,8 @@
-<section class="flex flex-col xl:flex-row mt-8 gap-4">
-    <section class="xl:w-1/4">
+{% block css %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+{% endblock css %}
+<section class="flex flex-col lg:flex-row mt-8 gap-4">
+    <section class="lg:w-1/4">
         <img class="w-full h-auto object-cover object-center rounded-lg" src="{{ mal_data.main_picture.large }}" alt="{{ mal_data.title }}">
         <h1 class="font-bold mt-4 border-b border-white border-opacity-10">Alternative Titles</h1>
         <ul class="list-inside text-sm">
@@ -111,7 +114,7 @@
             </li>
         </ul>
     </section>
-    <section class="xl:w-3/4 flex flex-col">
+    <section class="lg:w-3/4 flex flex-col">
         <h1 class="font-bold text-4xl pb-4 border-b border-white border-opacity-10">
             {% if user.preferences.title_language == "english" and mal_data.alternative_titles and mal_data.alternative_titles.en %}
             {{ mal_data.alternative_titles.en }}

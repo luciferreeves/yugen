@@ -1,7 +1,7 @@
 {% load static %}
 <nav class="bg-neutral-950 px-4 py-3 border-b border-neutral-800 sticky top-0 z-50 shadow-lg">
   <!-- Mobile UI: Icons (Top) Search (Botton)-->
-  <div class="xl:hidden flex flex-col gap-4">
+  <div class="lg:hidden flex flex-col gap-4">
     <!-- Icons (Top) with Hidden Logo -->
     <div class="flex flex-row items-center justify-around gap-8">
       <a href="{% url 'home:index' %}" class="flex flex-col gap-2 items-center">
@@ -180,14 +180,24 @@
     <div class="w-full">
       <input
         type="text"
+        id="mobile-search"
         placeholder="Search Anime"
         class="bg-neutral-900 text-white text-sm w-full outline-none focus:outline-none border border-neutral-800 rounded-lg pl-4 py-3 pr-12"
+        onfocus="toggleDropdown(true, 'mobile')"
+        onblur="toggleDropdown(false, 'mobile')"
       />
+    </div>
+    <!-- Mobile Full-Width Dropdown -->
+    <div id="mobile-dropdown" class="absolute top-full left-0 rounded-lg w-full bg-neutral-800 border border-neutral-700 hidden">
+      <!-- Sample anime list -->
+      {% comment %} <a href="#" class="block px-4 py-2 text-white hover:bg-neutral-700">Anime 1</a>
+      <a href="#" class="block px-4 py-2 text-white hover:bg-neutral-700">Anime 2</a> {% endcomment %}
+      <!-- Add more anime items here -->
     </div>
   </div>
 
   <!-- Desktop UI: Icons (Left) Search (Center) Profile (Right)-->
-  <div class="hidden xl:block">
+  <div class="hidden lg:block">
     <div class="relative justify-between items-center flex">
       <!-- Logo and Search on the Left -->
       <div class="flex items-center">
@@ -199,11 +209,14 @@
           />
           <span class="text-base">Yugen</span>
         </a>
-        <div class="ml-4">
+        <div class="relative ml-4">
           <input
+            id="desktop-search"
             type="text"
             placeholder="Search Anime"
-            class="bg-neutral-900 text-white text-sm w-96 outline-none focus:outline-none border border-neutral-800 rounded-lg pl-4 py-3 pr-12"
+            class="bg-neutral-900 text-white text-sm lg:w-60 xl:w-96 outline-none focus:outline-none border border-neutral-800 rounded-lg pl-4 py-3 pr-12"
+            onfocus="toggleDropdown(true, 'desktop')"
+            onblur="toggleDropdown(false, 'desktop')"
           />
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -219,6 +232,13 @@
               d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"
             />
           </svg>
+          <!-- Desktop Dropdown -->
+          <div id="desktop-dropdown" class="absolute top-full left-0 mt-1 rounded-lg w-96 bg-neutral-800 border border-neutral-700 hidden">
+            <!-- Sample anime list -->
+            {% comment %} <a href="#" class="block px-4 py-2 text-white hover:bg-neutral-700">Anime 1</a>
+            <a href="#" class="block px-4 py-2 text-white hover:bg-neutral-700">Anime 2</a> {% endcomment %}
+            <!-- Add more anime items here -->
+          </div>
         </div>
       </div>
 
@@ -408,3 +428,55 @@
     </div>
   </div>
 </nav>
+<script>
+  // Example function to populate the dropdown with API data
+  function populateDropdown(items, platform) {
+    const dropdown = document.getElementById(platform);
+    dropdown.innerHTML = ''; // Clear existing items
+
+    items.forEach((item, index) => {
+      const link = document.createElement('a');
+      link.href = '#';
+      link.className = 'block px-4 py-2 text-white hover:bg-neutral-700';
+      link.textContent = item.name; // Assuming 'name' is the property you want to display
+
+      // Add specific rounding based on the item's position
+      if (index === 0) {
+        link.classList.add('hover:rounded-t-lg');
+      } else if (index === items.length - 1) {
+        link.classList.add('hover:rounded-b-lg');
+      }
+
+      dropdown.appendChild(link);
+    });
+  }
+
+  // Example usage
+  const sampleItems = [
+    { name: 'Anime 1' },
+    { name: 'Anime 2' },
+    { name: 'Anime 3' },
+    // Add more items here...
+  ];
+
+  function toggleDropdown(show, platform) {
+    switch (platform) {
+      case 'mobile':
+        // Populate the dropdown with sample items
+        if (show) {
+          populateDropdown(sampleItems, 'mobile-dropdown');
+        }
+        document.getElementById('mobile-dropdown').classList.toggle('hidden', !show);
+        break;
+      case 'desktop':
+        // Populate the dropdown with sample items
+        if (show) {
+          populateDropdown(sampleItems, 'desktop-dropdown');
+        }
+        document.getElementById('desktop-dropdown').classList.toggle('hidden', !show);
+        break;
+      default:
+        break;
+    }
+  }
+</script>

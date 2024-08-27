@@ -1,6 +1,6 @@
 {% extends "partials/base.html" %}
 {% block content %}
-<div class="bg-white bg-opacity-10 rounded-lg bg-center bg-cover h-96 relative mt-4" {% if request.user.discord_banner %} style="background-image: url('https://cdn.discordapp.com/banners/{{ request.user.discord_id }}/{{ request.user.discord_banner }}?size=1024')" {% endif %}>
+<div class="bg-white bg-opacity-10 rounded-lg bg-center bg-cover h-96 relative mt-4" {% if request.user.discord_banner %} style="background-image: url('https://cdn.discordapp.com/banners/{{ request.user.discord_id }}/{{ request.user.discord_banner }}?size=1024')" {% else %} style="background-image: url('https://giffiles.alphacoders.com/132/13250.gif')" {% endif %}>
     <div class="absolute inset-0" style="background: linear-gradient(45deg, rgb(8, 8, 8) 15%, transparent 60%), linear-gradient(0deg, rgb(8, 8, 8) 0%, transparent 60%);"></div>
     <div class="flex flex-col items-center gap-2 absolute bottom-0 left-10">
         <img src="https://cdn.discordapp.com/avatars/{{ request.user.discord_id }}/{{ request.user.discord_avatar }}?size=256" alt="avatar" class="rounded-full w-24 h-24">

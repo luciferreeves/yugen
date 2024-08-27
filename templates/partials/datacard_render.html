@@ -1,6 +1,6 @@
 {% for anime in data %}
 <a href="{% url "watch:watch" anime.id %}" class="w-1/2 lg:w-1/4 xl:w-1/6 text-gray-500 px-1 mb-4 hover:text-white flex flex-col gap-2">
-    <img src="{{ anime.image }}" alt="{{ anime.title.english }}" class="rounded-lg w-56 h-72 mx-auto object-cover"/>
+    <img src="{{ anime.image }}" alt="{{ anime.title.english }}" class="rounded-lg w-56 h-80 mx-auto object-cover"/>
     <div class="inline-flex gap-2 flex-wrap">
         <span class="text-xs font-bold bg-white bg-opacity-10 p-1 rounded flex items-center gap-1">
             <svg stroke="currentColor" fill="none" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg" class="mr-1">
