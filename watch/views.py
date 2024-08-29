@@ -17,9 +17,15 @@ def watch(request, anime_id, episode=None):
 
     base_url = f"{os.getenv("ZORO_URL")}/anime/search?q={anime_data["title"]["english"]}&page=1"
     response = requests.get(base_url)
-    anime_search_result = response.json()["animes"][0]
+    anime_search_result = response.json()
+    anime_selected = [a for a in anime_search_result["animes"] if a["name"] == anime_data["title"]["english"]]
 
-    base_url = f"{os.getenv("ZORO_URL")}/anime/episodes/{anime_search_result["id"]}"
+    if not anime_selected:
+        anime_selected = anime_search_result["animes"][0]
+    else:
+        anime_selected = anime_selected[0]
+
+    base_url = f"{os.getenv("ZORO_URL")}/anime/episodes/{anime_selected["id"]}"
     response = requests.get(base_url)
     anime_episodes = response.json()
 
@@ -32,11 +38,9 @@ def watch(request, anime_id, episode=None):
     response = requests.get(base_url)
     episode_data = response.json()
 
-    print(episode_data)
-
     return render(request, "watch/watch.html", {
         "anime_data": anime_data,
-        "anime_search_result": anime_search_result,
+        "anime_selected": anime_selected,
         "anime_episodes": anime_episodes,
         "episode_data": episode_data,
         "current_episode": episode,
