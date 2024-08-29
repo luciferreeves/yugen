@@ -1,5 +1,99 @@
 {% extends "partials/base.html" %}
+{% block css %}
+<link rel="stylesheet" href="https://cdn.vidstack.io/player/theme.css" />
+<link rel="stylesheet" href="https://cdn.vidstack.io/player/audio.css" />
+<link rel="stylesheet" href="https://cdn.vidstack.io/player/video.css" />
+{% endblock css %}
 {% block content %}
-Watch {{ anime_id }}/{{ episode }}
-{% endblock content %}
+<div class="flex flex-col lg:flex-row mt-4 gap-2">
+    <!-- Video Player Section (75%) -->
+    <div class="w-full lg:w-3/4">
+      <!-- Set a fixed height based on the 16:9 aspect ratio -->
+      <!-- This grey div is a placeholder for the video player -->
+      {% comment %} <div class="w-full h-0 lg:h-auto aspect-video bg-gray-500 flex items-center justify-center rounded"> {% endcomment %}
+      <div id="video-player" class="aspect-video">
+      </div>
+    </div>
+  
+    <!-- Episode List Section (25%) -->
+    <div class="w-full lg:w-1/4 px-2 overflow-y-auto">
+      <h2 class="text-white text-xl font-bold mb-4">Episodes</h2>
+      <ul class="space-y-2">
+        <!-- Example Episode Items -->
+        <li class="bg-gray-700 text-white p-2 rounded">Episode 1: The Beginning</li>
+        <li class="bg-gray-700 text-white p-2 rounded">Episode 2: The Journey</li>
+        <li class="bg-gray-700 text-white p-2 rounded">Episode 3: The Encounter</li>
+        <!-- Add more episodes here -->
+      </ul>
+    </div>
+</div>
 
+{{ anime }}
+
+{% endblock content %}
+{% block scripts %}
+<script type="module">
+    import { VidstackPlayer, VidstackPlayerLayout } from 'https://cdn.vidstack.io/player';
+
+    const layout = new VidstackPlayerLayout({
+        {% for track in episode.subtitles %}
+        {% if track.lang == "Thumbnails" %}
+        thumbnails: '{{ track.url }}',
+        {% endif %}
+        {% endfor %}
+    });
+    
+    // thumbnails: 'https://files.vidstack.io/sprite-fight/thumbnails.vtt',
+    const player = await VidstackPlayer.create({
+        target: '#video-player',
+        autoStartLoad: true,
+        src: '{{ stream_url }}',
+        viewType: 'video',
+        streamType: 'on-demand',
+        logLevel: 'warn',
+        crossOrigin: true,
+        playsInline: true,
+        title: '{% if user.preferences.title_language == "english" and anime.title.english %}{{ anime.title.english }}{% elif user.preferences.title_language == "native" and anime.title.native %}{{ anime.title.native }}{% else %}{{ anime.title.romaji }}{% endif %} — Episode {{ current_episode }} ({% if request.GET.mode == "dub" %}Dub{% else %}Sub{% endif %})',
+        subtitlePreference: {
+            lang: 'English',
+        },
+        layout,
+        tracks: [
+            {% for track in episode.subtitles %}
+            {% if track.lang != "Thumbnails" %}
+            {
+                src: '{{ track.url }}',
+                label: '{{ track.lang }}',
+                kind: 'subtitles',
+                type: 'vtt',
+                lang: '{{ track.lang }}',
+                default: {% if forloop.first %}true{% else %}false{% endif %},
+            },
+            {% endif %}
+            {% endfor %}
+        ],
+    });
+
+    player.addEventListener('auto-play', (event) => {
+        const requestEvent = event.request;
+    });
+    
+    // autoplay has failed.
+    player.addEventListener('auto-play-fail', (event) => {
+        const requestEvent = event.request;
+        console.log(event.detail.muted); // was media muted?
+        console.log(event.detail.error); // media error
+    });
+
+    /*const url = '{{ stream_url }}';
+  
+    const player = await VidstackPlayer.create({
+        target: '#video-player',
+        title: '{{ anime.title }}',
+        src: url,
+        layout: new VidstackPlayerLayout({
+            thumbnails: 'https://files.vidstack.io/sprite-fight/thumbnails.vtt',
+        }),
+    });*/
+  </script>
+{% endblock scripts %}
