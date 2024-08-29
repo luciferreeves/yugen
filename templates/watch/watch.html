@@ -28,17 +28,15 @@
     </div>
 </div>
 
-{{ anime }}
-
 {% endblock content %}
 {% block scripts %}
 <script type="module">
     import { VidstackPlayer, VidstackPlayerLayout } from 'https://cdn.vidstack.io/player';
 
     const layout = new VidstackPlayerLayout({
-        {% for track in episode.subtitles %}
-        {% if track.lang == "Thumbnails" %}
-        thumbnails: '{{ track.url }}',
+        {% for track in episode_data.subtitles %}
+        {% if track.kind == "thumbnails" %}
+        thumbnails: '{{ track.file }}',
         {% endif %}
         {% endfor %}
     });
@@ -53,21 +51,21 @@
         logLevel: 'warn',
         crossOrigin: true,
         playsInline: true,
-        title: '{% if user.preferences.title_language == "english" and anime.title.english %}{{ anime.title.english }}{% elif user.preferences.title_language == "native" and anime.title.native %}{{ anime.title.native }}{% else %}{{ anime.title.romaji }}{% endif %} — Episode {{ current_episode }} ({% if request.GET.mode == "dub" %}Dub{% else %}Sub{% endif %})',
+        title: '{% if user.preferences.title_language == "english" and anime_data.title.english %}{{ anime_data.title.english }}{% elif user.preferences.title_language == "native" and anime_data.title.native %}{{ anime_data.title.native }}{% else %}{{ anime_data.title.romaji }}{% endif %} — Episode {{ current_episode }} ({% if request.GET.mode == "dub" %}Dub{% else %}Sub{% endif %})',
         subtitlePreference: {
             lang: 'English',
         },
         layout,
         tracks: [
-            {% for track in episode.subtitles %}
-            {% if track.lang != "Thumbnails" %}
+            {% for track in episode_data.tracks %}
+            {% if track.kind == "captions" %}
             {
-                src: '{{ track.url }}',
-                label: '{{ track.lang }}',
+                src: '{{ track.file }}',
+                label: '{{ track.label }}',
                 kind: 'subtitles',
                 type: 'vtt',
-                lang: '{{ track.lang }}',
-                default: {% if forloop.first %}true{% else %}false{% endif %},
+                lang: '{{ track.label }}',
+                default: {% if track.label == "English" %}true{% else %}false{% endif %},
             },
             {% endif %}
             {% endfor %}

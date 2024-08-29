@@ -15,31 +15,31 @@ def watch(request, anime_id, episode=None):
     response = requests.get(base_url)
     anime_data = response.json()
 
-    base_url = f"{os.getenv("CONSUMET_URL")}/anime/zoro/{anime_data["title"]["english"]}?page=1"
+    base_url = f"{os.getenv("ZORO_URL")}/anime/search?q={anime_data["title"]["english"]}&page=1"
     response = requests.get(base_url)
-    anime_search_result = response.json()["results"][0]
-    anime_fetch_id = anime_search_result["id"]
+    anime_search_result = response.json()["animes"][0]
 
-    base_url = f"{os.getenv("CONSUMET_URL")}/anime/zoro/info?id={anime_fetch_id}"
+    base_url = f"{os.getenv("ZORO_URL")}/anime/episodes/{anime_search_result["id"]}"
     response = requests.get(base_url)
-    anime_info = response.json()
-    episodes = anime_info["episodes"]
+    anime_episodes = response.json()
 
-    if episode > anime_info["totalEpisodes"]:
-        return redirect("watch:watch_episode", anime_id=anime_id, episode=episodes)
+    if episode > anime_episodes["totalEpisodes"]:
+        return redirect("watch:watch_episode", anime_id=anime_id, episode=anime_episodes["totalEpisodes"])
     
-    # episode_d = [episode for episode in episodes if episode["number"] == episode]
+    episode_d = [e for e in anime_episodes["episodes"] if e["number"] == episode][0]
 
-    ed = None
-    for e in episodes:
-        if e["number"] == episode:
-            ed = e
-            break
-
-    base_url = f"{os.getenv("CONSUMET_URL")}/anime/zoro/watch?episodeId={ed['id'].replace("sub", "").replace("dub", "").replace("both", "")}{mode}"
+    base_url = f"{os.getenv("ZORO_URL")}/anime/episode-srcs?id={episode_d["episodeId"]}?server&category={mode}"
     response = requests.get(base_url)
     episode_data = response.json()
 
     print(episode_data)
 
-    return render(request, "watch/watch.html", { "anime": anime_data, "episode": episode_data, "episodes": episodes, "current_episode": episode, "stream_url": episode_data["sources"][0]["url"] })
+    return render(request, "watch/watch.html", {
+        "anime_data": anime_data,
+        "anime_search_result": anime_search_result,
+        "anime_episodes": anime_episodes,
+        "episode_data": episode_data,
+        "current_episode": episode,
+        "stream_url": episode_data["sources"][0]["url"],
+        "mode": mode,
+    })
