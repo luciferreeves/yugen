@@ -25,7 +25,7 @@
         <div class="flex flex-col gap-2">
             {% for episode in anime_episodes.episodes %}
             {% if episode.number == current_episode %}
-            <a href="{% url "watch:watch_episode" anime_id episode.number %}" class="flex flex-row justify-between items-center w-full gap-4 bg-{{ user.preferences.accent_colour }}-600 p-2 rounded hover:bg-{{ user.preferences.accent_colour }}-600 hover:bg-opacity-30">
+            <a id="selected-episode" href="{% url "watch:watch_episode" anime_id episode.number %}" class="flex flex-row justify-between items-center w-full gap-4 bg-{{ user.preferences.accent_colour }}-600 p-2 rounded hover:bg-{{ user.preferences.accent_colour }}-600 hover:bg-opacity-30">
                 <span class="truncate max-w-full overflow-hidden text-ellipsis whitespace-nowrap">{{ episode.number }}. {{ episode.title }}</span>
                 
                 <span class="flex flex-row item-center gap-2">
@@ -67,9 +67,17 @@
         </div>
     </div>
 </div>
-
 {% endblock content %}
 {% block scripts %}
+<script>
+    window.addEventListener('DOMContentLoaded', (event) => {
+        const selectedEpisode = document.getElementById('selected-episode');
+        if (selectedEpisode) {
+            selectedEpisode.scrollIntoView({ block: 'center' });
+        }
+    });
+</script>
+
 <script type="module">
     const introStart = {{ episode_data.intro.start }};
     const introEnd = {{ episode_data.intro.end }};
@@ -80,6 +88,7 @@
     const introOverlay = document.getElementById('intro-overlay');
     const outroOverlay = document.getElementById('outro-overlay');
     const autoSkipIntro = {% if user.preferences.auto_skip_intro %}true{% else %}false{% endif %};
+    console.log(introStart, introEnd, outroStart, outroEnd);
 
     import { VidstackPlayer, VidstackPlayerLayout, TextTrack } from 'https://cdn.vidstack.io/player';
 
@@ -121,38 +130,43 @@
         ],
     });
 
-    
+    var chaptersLoaded = false;    
     player.addEventListener('duration-change', (event) => {
+        const duration = event.detail;
+
+        if (duration === 0 || chaptersLoaded) {
+            return;
+        }
+
         const chapters = [
             { startTime: introStart, endTime: introEnd, title: 'Intro' },
+            { startTime: introEnd, endTime: outroStart, title: '{% if user.preferences.title_language == "english" and anime_data.title.english %}{{ anime_data.title.english }}{% elif user.preferences.title_language == "native" and anime_data.title.native %}{{ anime_data.title.native }}{% else %}{{ anime_data.title.romaji }}{% endif %} — Episode {{ current_episode }} — {{current_episode_name}}' },
             { startTime: outroStart, endTime: outroEnd, title: 'Outro' }
         ];
     
+        if (introStart > 0 && introStart < introEnd) {
+            chapters.unshift({ startTime: 0, endTime: introStart, title: '{% if user.preferences.title_language == "english" and anime_data.title.english %}{{ anime_data.title.english }}{% elif user.preferences.title_language == "native" and anime_data.title.native %}{{ anime_data.title.native }}{% else %}{{ anime_data.title.romaji }}{% endif %} — Episode {{ current_episode }} — {{current_episode_name}}' });
+        }
+
+        if (outroEnd > 0 && outroStart < outroEnd && duration > outroEnd) {
+            chapters.push({ startTime: outroEnd, endTime: duration, title: '{% if user.preferences.title_language == "english" and anime_data.title.english %}{{ anime_data.title.english }}{% elif user.preferences.title_language == "native" and anime_data.title.native %}{{ anime_data.title.native }}{% else %}{{ anime_data.title.romaji }}{% endif %} — Episode {{ current_episode }} — {{current_episode_name}}' });
+        }
+        
         const chaptersTrack = new TextTrack({
             kind: "chapters",
             default: true,
         });
     
         for (const chapter of chapters) {
-            if (chapter.startTime === chapter.endTime) {
+            if (chapter.startTime === chapter.endTime || chapter.endTime === 0) {
                 continue;
             }
+            console.log(`Adding chapter at ${chapter.startTime} for ${chapter.title}`);
             chaptersTrack.addCue(new VTTCue(chapter.startTime, chapter.endTime, chapter.title));
         }
-    
-        if (introStart !== 0) {
-            chaptersTrack.addCue(new VTTCue(0, introStart, '{% if user.preferences.title_language == "english" and anime_data.title.english %}{{ anime_data.title.english }}{% elif user.preferences.title_language == "native" and anime_data.title.native %}{{ anime_data.title.native }}{% else %}{{ anime_data.title.romaji }}{% endif %} — Episode {{ current_episode }} — {{current_episode_name}}'));
-        }
-    
-        if (introStart === 0 && introStart != introEnd && introEnd != outroStart) {
-            chaptersTrack.addCue(new VTTCue(introEnd, outroStart, '{% if user.preferences.title_language == "english" and anime_data.title.english %}{{ anime_data.title.english }}{% elif user.preferences.title_language == "native" and anime_data.title.native %}{{ anime_data.title.native }}{% else %}{{ anime_data.title.romaji }}{% endif %} — Episode {{ current_episode }} — {{current_episode_name}}'));
-        }
-        const duration = event.detail;
-        if (duration > 0 && outroEnd < duration && outroEnd !== 0) {
-            console.log(outroEnd, duration)
-            chaptersTrack.addCue(new VTTCue(outroEnd, duration, '{% if user.preferences.title_language == "english" and anime_data.title.english %}{{ anime_data.title.english }}{% elif user.preferences.title_language == "native" and anime_data.title.native %}{{ anime_data.title.native }}{% else %}{{ anime_data.title.romaji }}{% endif %} — Episode {{ current_episode }} — {{current_episode_name}}'));
-        }
+        
         player.textTracks.add(chaptersTrack);
+        chaptersLoaded = true;
     });
     
     player.addEventListener('time-update', (event) => {

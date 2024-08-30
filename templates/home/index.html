@@ -1,4 +1,5 @@
 {% extends "partials/base.html" %} {% block css %}
+{% load custom_filters %}
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css"/>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
 {% endblock css %} {% block content %}
@@ -40,20 +41,21 @@
                 {{ anime.duration }} mins
               </span>
             </div>
-            <h2 class="text-4xl font-bold text-transparent bg-clip-text mb-2" style="background: linear-gradient(-45deg, {{ anime.color }}, white); -webkit-background-clip: text; background-clip: text;">
-              {% if user.preferences.title_language == "english" and anime.title.english %}
-              {{ anime.title.english }}
-              {% elif user.preferences.title_language == "native" and anime.title.native %}
-              {{ anime.title.native }}
-              {% else %}
-              {{ anime.title.romaji }}
-              {% endif %}
-            </h2>
-            <p class="max-h-24 overflow-auto text-sm text-white mb-4 no-scrollbar">
-              {{ anime.description|safe }}
-            </p>
+            <div>
+              <h2 class="text-4xl font-bold text-transparent bg-clip-text mb-2" style="background: linear-gradient(-45deg, {% if anime.color %}{{ anime.color }}{% else %}white{% endif %}, white); -webkit-background-clip: text; background-clip: text;">
+                {% if user.preferences.title_language == "english" and anime.title.english %}
+                {{ anime.title.english }}
+                {% elif user.preferences.title_language == "native" and anime.title.native %}
+                {{ anime.title.native }}
+                {% else %}
+                {{ anime.title.romaji }}
+                {% endif %}
+              </h2>
+              <p class="max-h-24 overflow-auto text-sm text-white mb-4 no-scrollbar">
+                {{ anime.description|strip_html }}
+              </p>
+            </div>
           </div>
-          <!-- Buttons -->
           <div class="flex flex-row w-full lg:w-1/2 gap-2 lg:justify-end items-end">
             <a href="#future_anime_details" class="bg-white bg-opacity-10 text-white text-sm font-bold py-3 px-6 rounded-full flex items-center gap-2">
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
@@ -72,7 +74,8 @@
         </div>
       </div>
     </div>
-    {% endif %} {% endfor %}
+    {% endif %}
+    {% endfor %}
   </div>
   <div class="swiper-pagination"></div>
 </section>
