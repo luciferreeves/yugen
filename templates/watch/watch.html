@@ -20,18 +20,24 @@
         </div>
     </div>
 
-    <div class="w-full lg:w-1/4 px-2 overflow-y-auto">
-      <h2 class="text-white text-xl font-bold mb-4">Episodes</h2>
-      <ul class="space-y-2">
-        <li class="bg-gray-700 text-white p-2 rounded">Episode 1: The Beginning</li>
-        <li class="bg-gray-700 text-white p-2 rounded">Episode 2: The Journey</li>
-        <li class="bg-gray-700 text-white p-2 rounded">Episode 3: The Encounter</li>
-      </ul>
+    <div class="w-full lg:w-1/4 flex flex-col overflow-y-auto px-2 lg:px-0" style="height: 42vw; max-height: 806px;">
+        <h2 class="text-white text-xl font-bold mb-4">Episodes</h2>
+        <div class="flex flex-col gap-2">
+            {% for episode in anime_episodes.episodes %}
+            {% if episode.number == current_episode %}
+            <a href="{% url "watch:watch_episode" anime_id episode.number %}" class="flex flex-row w-full gap-4 bg-{{ user.preferences.accent_colour }}-600 p-2 rounded hover:bg-{{ user.preferences.accent_colour }}-600 hover:bg-opacity-30">
+                {{ episode.number }}. {{ episode.title }}
+            </a>
+            {% else %}
+            <a href="{% url "watch:watch_episode" anime_id episode.number %}" class="flex flex-row w-full gap-4 bg-white bg-opacity-10 p-2 rounded hover:bg-{{ user.preferences.accent_colour }}-600 hover:bg-opacity-30">
+                {{ episode.number }}. {{ episode.title }}
+            </a>
+            {% endif %}
+            {% endfor %}
+        </div>
     </div>
 </div>
-{% comment %} {{ anime_data.totalEpisodes > current_episode }} {% endcomment %}
-{{ anime_episodes.totalEpisodes }}
-{{ current_episode }}
+
 {% endblock content %}
 {% block scripts %}
 <script type="module">
@@ -99,6 +105,14 @@
             continue;
         }
         chaptersTrack.addCue(new VTTCue(chapter.startTime, chapter.endTime, chapter.title));
+    }
+
+    if (introStart !== 0) {
+        chaptersTrack.addCue(new VTTCue(0, introStart, '{% if user.preferences.title_language == "english" and anime_data.title.english %}{{ anime_data.title.english }}{% elif user.preferences.title_language == "native" and anime_data.title.native %}{{ anime_data.title.native }}{% else %}{{ anime_data.title.romaji }}{% endif %} — Episode {{ current_episode }} — {{current_episode_name}}) ({% if request.GET.mode == "dub" %}Dub{% else %}Sub{% endif %})'));
+    }
+
+    if (introStart === 0 && introStart != introEnd && introEnd != outroStart) {
+        chaptersTrack.addCue(new VTTCue(introEnd, outroStart, '{% if user.preferences.title_language == "english" and anime_data.title.english %}{{ anime_data.title.english }}{% elif user.preferences.title_language == "native" and anime_data.title.native %}{{ anime_data.title.native }}{% else %}{{ anime_data.title.romaji }}{% endif %} — Episode {{ current_episode }} — {{current_episode_name}} ({% if request.GET.mode == "dub" %}Dub{% else %}Sub{% endif %})'));
     }
 
     player.textTracks.add(chaptersTrack);
