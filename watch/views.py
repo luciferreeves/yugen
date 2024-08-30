@@ -13,44 +13,28 @@ def watch(request, anime_id, episode=None):
 
     mode = request.GET.get("mode", request.user.preferences.default_language)
 
-    # data from cache:
-    data_from_cache = get_from_redis_cache(anime_id)
+    base_url = f"{os.getenv("CONSUMET_URL")}/meta/anilist/data/{anime_id}?provider=zoro"
+    response = requests.get(base_url)
+    anime_data = response.json()
 
-    if not data_from_cache:
-        print("cache miss. fetching data from api")
-        base_url = f"{os.getenv("CONSUMET_URL")}/meta/anilist/data/{anime_id}?provider=zoro"
-        response = requests.get(base_url)
-        anime_data = response.json()
+    base_url = f"{os.getenv("ZORO_URL")}/anime/search?q={anime_data["title"]["english"]}&page=1"
+    response = requests.get(base_url)
+    anime_search_result = response.json()
+    anime_selected = [a for a in anime_search_result["animes"] if a["name"] == anime_data["title"]["english"]]
 
-        base_url = f"{os.getenv("ZORO_URL")}/anime/search?q={anime_data["title"]["english"]}&page=1"
-        response = requests.get(base_url)
-        anime_search_result = response.json()
-        anime_selected = [a for a in anime_search_result["animes"] if a["name"] == anime_data["title"]["english"]]
-
-        if not anime_selected:
-            anime_selected = anime_search_result["animes"][0]
-        else:
-            anime_selected = anime_selected[0]
-
-        base_url = f"{os.getenv("ZORO_URL")}/anime/episodes/{anime_selected["id"]}"
-        response = requests.get(base_url)
-        anime_episodes = response.json()
-
-        data_to_cache = {
-            "anime_data": anime_data,
-            "anime_selected": anime_selected,
-            "anime_episodes": anime_episodes,
-        }
-        data_to_cache = json.dumps(data_to_cache)
-
-        store_in_redis_cache(anime_id, data_to_cache)
+    if not anime_selected:
+        anime_selected = anime_search_result["animes"][0]
     else:
-        data_from_cache = json.loads(data_from_cache)
-        anime_data = data_from_cache["anime_data"]
-        anime_selected = data_from_cache["anime_selected"]
-        anime_episodes = data_from_cache["anime_episodes"]
+        anime_selected = anime_selected[0]
+
+    base_url = f"{os.getenv("ZORO_URL")}/anime/episodes/{anime_selected["id"]}"
+    response = requests.get(base_url)
+    anime_episodes = response.json()
 
     if mode == "dub" and not anime_selected["episodes"]["dub"]:
+        mode = "sub"
+
+    if not anime_selected["episodes"][mode] or anime_selected["episodes"][mode] < episode:
         mode = "sub"
 
     if episode > anime_episodes["totalEpisodes"]:
