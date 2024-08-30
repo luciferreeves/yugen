@@ -6,42 +6,54 @@
 {% endblock css %}
 {% block content %}
 <div class="flex flex-col lg:flex-row mt-4 gap-2">
-    <!-- Video Player Section (75%) -->
-    <div class="w-full lg:w-3/4">
-      <!-- Set a fixed height based on the 16:9 aspect ratio -->
-      <!-- This grey div is a placeholder for the video player -->
-      {% comment %} <div class="w-full h-0 lg:h-auto aspect-video bg-gray-500 flex items-center justify-center rounded"> {% endcomment %}
-      <div id="video-player" class="aspect-video">
-      </div>
+    <div class="w-full lg:w-3/4 relative">
+        <div id="video-player" class="aspect-video"></div>
+        <div id="skip-buttons" class="absolute bottom-24 right-4 flex flex-col space-y-2">
+            <div id="skipIntro" class="relative bg-white bg-opacity-20 text-white text-center py-2 px-4 rounded-lg cursor-pointer overflow-hidden hidden">
+                <span class="relative z-10">Skip Intro</span>
+                <div id="intro-overlay" class="absolute inset-0 bg-{{ user.preferences.accent_colour }}-600 transition-transform duration-[5000ms] ease-linear origin-left scale-x-0"></div>
+            </div>
+            <div id="skipOutro" class="relative bg-white bg-opacity-20 text-white text-center py-2 px-4 rounded-lg cursor-pointer overflow-hidden hidden">
+                <span class="relative z-10">Skip Outro</span>
+                <div id="outro-overlay" class="absolute inset-0 bg-{{ user.preferences.accent_colour }}-600 transition-transform duration-[5000ms] ease-linear origin-left scale-x-0"></div>
+            </div>
+        </div>
     </div>
-  
-    <!-- Episode List Section (25%) -->
+
     <div class="w-full lg:w-1/4 px-2 overflow-y-auto">
       <h2 class="text-white text-xl font-bold mb-4">Episodes</h2>
       <ul class="space-y-2">
-        <!-- Example Episode Items -->
         <li class="bg-gray-700 text-white p-2 rounded">Episode 1: The Beginning</li>
         <li class="bg-gray-700 text-white p-2 rounded">Episode 2: The Journey</li>
         <li class="bg-gray-700 text-white p-2 rounded">Episode 3: The Encounter</li>
-        <!-- Add more episodes here -->
       </ul>
     </div>
 </div>
-
+{% comment %} {{ anime_data.totalEpisodes > current_episode }} {% endcomment %}
+{{ anime_episodes.totalEpisodes }}
+{{ current_episode }}
 {% endblock content %}
 {% block scripts %}
 <script type="module">
-    import { VidstackPlayer, VidstackPlayerLayout } from 'https://cdn.vidstack.io/player';
+    const introStart = {{ episode_data.intro.start }};
+    const introEnd = {{ episode_data.intro.end }};
+    const outroStart = {{ episode_data.outro.start }};
+    const outroEnd = {{ episode_data.outro.end }};
+    const skipIntroButton = document.getElementById('skipIntro');
+    const skipOutroButton = document.getElementById('skipOutro');
+    const introOverlay = document.getElementById('intro-overlay');
+    const outroOverlay = document.getElementById('outro-overlay');
+
+    import { VidstackPlayer, VidstackPlayerLayout, TextTrack } from 'https://cdn.vidstack.io/player';
 
     const layout = new VidstackPlayerLayout({
-        {% for track in episode_data.subtitles %}
-        {% if track.kind == "thumbnails" %}
-        thumbnails: '{{ track.file }}',
-        {% endif %}
+        {% for track in episode_data.tracks %}
+            {% if track.kind == 'thumbnails' %}
+                thumbnails: "https://vtt.blasphemy8473.workers.dev/{{ track.file }}",
+            {% endif %}
         {% endfor %}
     });
     
-    // thumbnails: 'https://files.vidstack.io/sprite-fight/thumbnails.vtt',
     const player = await VidstackPlayer.create({
         target: '#video-player',
         autoStartLoad: true,
@@ -72,26 +84,89 @@
         ],
     });
 
-    player.addEventListener('auto-play', (event) => {
-        const requestEvent = event.request;
-    });
-    
-    // autoplay has failed.
-    player.addEventListener('auto-play-fail', (event) => {
-        const requestEvent = event.request;
-        console.log(event.detail.muted); // was media muted?
-        console.log(event.detail.error); // media error
+    const chapters = [
+        { startTime: introStart, endTime: introEnd, title: 'Intro' },
+        { startTime: outroStart, endTime: outroEnd, title: 'Outro' }
+    ];
+
+    const chaptersTrack = new TextTrack({
+        kind: "chapters",
+        default: true,
     });
 
-    /*const url = '{{ stream_url }}';
-  
-    const player = await VidstackPlayer.create({
-        target: '#video-player',
-        title: '{{ anime.title }}',
-        src: url,
-        layout: new VidstackPlayerLayout({
-            thumbnails: 'https://files.vidstack.io/sprite-fight/thumbnails.vtt',
-        }),
-    });*/
-  </script>
+    for (const chapter of chapters) {
+        if (chapter.startTime === chapter.endTime) {
+            continue;
+        }
+        chaptersTrack.addCue(new VTTCue(chapter.startTime, chapter.endTime, chapter.title));
+    }
+
+    player.textTracks.add(chaptersTrack);
+    const autoSkipIntro = {% if user.preferences.auto_skip_intro %}true{% else %}false{% endif %};
+
+    player.addEventListener('time-update', (event) => {
+        const currentTime = event.detail.currentTime;
+
+        if (currentTime >= introStart && currentTime <= introEnd && introStart !== introEnd) {
+            if (autoSkipIntro) {
+                player.currentTime = introEnd;
+            } else {
+                skipIntroButton.classList.remove('hidden');
+                skipOutroButton.classList.add('hidden');
+                setTimeout(() => introOverlay.classList.add('scale-x-100'), 100);
+            }
+        } else if (currentTime >= outroStart && currentTime <= outroEnd && outroStart !== outroEnd) {
+            if (autoSkipIntro) {
+                player.currentTime = outroEnd;
+            } else {
+                skipOutroButton.classList.remove('hidden');
+                skipIntroButton.classList.add('hidden');
+                setTimeout(() => outroOverlay.classList.add('scale-x-100'), 100);
+            }
+        } else {
+            skipIntroButton.classList.add('hidden');
+            skipOutroButton.classList.add('hidden');
+            introOverlay.classList.remove('scale-x-100');
+            outroOverlay.classList.remove('scale-x-100');
+        }
+
+        {% if user.preferences.auto_next_episode and anime_episodes.totalEpisodes > current_episode %}
+        if (currentTime >= player.duration && player.duration !== 0) {
+            const currentUrl = window.location.href;
+            const animeId = {{ anime_id }};
+            const currentEpisode = {{ current_episode }};
+            const nextEpisode = currentEpisode + 1;
+            const nextUrl = currentUrl.replace(`/watch/${animeId}/${currentEpisode}`, `/watch/${animeId}/${nextEpisode}`);
+            window.location.href = nextUrl;
+        }
+        {% endif %}
+    });
+
+    skipIntroButton.addEventListener('click', () => {
+        player.currentTime = introEnd;
+        introOverlay.classList.remove('scale-x-100');
+    });
+
+    skipOutroButton.addEventListener('click', () => {
+        player.currentTime = outroEnd;
+        outroOverlay.classList.remove('scale-x-100');
+    });
+
+    {% if user.preferences.auto_play_video %}
+    function attemptPlayback() {
+        player.play().catch((error) => {
+            console.error('Autoplay failed:', error);
+        });
+    }
+    function onUserInteraction() {
+        document.removeEventListener('pointerdown', onUserInteraction);
+        attemptPlayback();
+    }
+    document.addEventListener('pointerdown', onUserInteraction, { once: true });
+    player.addEventListener('can-play', () => {
+        attemptPlayback();
+    });
+    {% endif %}
+
+</script>
 {% endblock scripts %}

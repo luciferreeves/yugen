@@ -25,6 +25,9 @@ def watch(request, anime_id, episode=None):
     else:
         anime_selected = anime_selected[0]
 
+    if mode == "dub" and not anime_selected["episodes"]["dub"]:
+        mode = "sub"
+
     base_url = f"{os.getenv("ZORO_URL")}/anime/episodes/{anime_selected["id"]}"
     response = requests.get(base_url)
     anime_episodes = response.json()
@@ -38,6 +41,11 @@ def watch(request, anime_id, episode=None):
     response = requests.get(base_url)
     episode_data = response.json()
 
+    if "message" in episode_data and episode_data["message"] == "Couldn't find server. Try another server":
+        base_url = f"{os.getenv("ZORO_URL")}/anime/episode-srcs?id={episode_d["episodeId"]}?server=hd-2&category={mode}"
+        response = requests.get(base_url)
+        episode_data = response.json()
+
     return render(request, "watch/watch.html", {
         "anime_data": anime_data,
         "anime_selected": anime_selected,
@@ -45,5 +53,6 @@ def watch(request, anime_id, episode=None):
         "episode_data": episode_data,
         "current_episode": episode,
         "stream_url": episode_data["sources"][0]["url"],
+        "anime_id": anime_id,
         "mode": mode,
     })
