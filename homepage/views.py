@@ -1,4 +1,7 @@
+import os
+from django.http import JsonResponse
 from django.shortcuts import render
+import requests
 from homepage.utils import (
     get_trending_anime,
     get_popular_anime,
@@ -27,3 +30,12 @@ def index(request):
     }
 
     return render(request, "home/index.html", context)
+
+def search_json(request):
+    query = request.GET.get("q")
+
+    base_url = f"{os.getenv("CONSUMET_URL")}/meta/anilist/advanced-search?query={query}&page=1&perPage=5&type=ANIME"
+    response = requests.get(base_url)
+    search_results = response.json()
+
+    return JsonResponse(search_results)

@@ -1,9 +1,8 @@
 import os
+from django.http import JsonResponse
 import dotenv
 from django.shortcuts import render, redirect
 import requests
-import json
-from watch.utils import get_from_redis_cache, store_in_redis_cache
 
 dotenv.load_dotenv()
 

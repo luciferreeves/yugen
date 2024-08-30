@@ -183,8 +183,9 @@
         id="mobile-search"
         placeholder="Search Anime"
         class="bg-neutral-900 text-white text-sm w-full outline-none focus:outline-none border border-neutral-800 rounded-lg pl-4 py-3 pr-12"
-        onfocus="toggleDropdown(true, 'mobile')"
-        onblur="toggleDropdown(false, 'mobile')"
+        onkeyup="handleSearchInput('mobile')"
+        onfocus="handleInputFocus('mobile')"
+        onblur="handleBlur('mobile')"
       />
     </div>
     <!-- Mobile Full-Width Dropdown -->
@@ -215,8 +216,9 @@
             type="text"
             placeholder="Search Anime"
             class="bg-neutral-900 text-white text-sm lg:w-60 xl:w-96 outline-none focus:outline-none border border-neutral-800 rounded-lg pl-4 py-3 pr-12"
-            onfocus="toggleDropdown(true, 'desktop')"
-            onblur="toggleDropdown(false, 'desktop')"
+            onkeyup="handleSearchInput('desktop')"
+            onfocus="handleInputFocus('desktop')"
+            onblur="handleBlur('desktop')"
           />
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -428,55 +430,97 @@
     </div>
   </div>
 </nav>
+{% block scripts %}
 <script>
-  // Example function to populate the dropdown with API data
-  function populateDropdown(items, platform) {
-    const dropdown = document.getElementById(platform);
-    dropdown.innerHTML = ''; // Clear existing items
+  let debounceTimeout;
 
-    items.forEach((item, index) => {
-      const link = document.createElement('a');
-      link.href = '#';
-      link.className = 'block px-4 py-2 text-white hover:bg-neutral-700';
-      link.textContent = item.name; // Assuming 'name' is the property you want to display
+  function debounce(callback, delay) {
+    return function (...args) {
+      clearTimeout(debounceTimeout);
+      debounceTimeout = setTimeout(() => {
+        callback.apply(this, args);
+      }, delay);
+    };
+  }
+
+  function handleBlur(platform) {
+    // Delay hiding to allow interaction with dropdown
+    setTimeout(() => {
+      const searchInput = document.getElementById(platform + "-search");
+      const dropdown = document.getElementById(platform + "-dropdown");
+      if (!searchInput.contains(document.activeElement) &&
+          !dropdown.contains(document.activeElement)) {
+        toggleDropdown(false, platform);
+      }
+    }, 200); // Adjust the delay as needed
+  }
+
+  function handleSearchInput(platform) {
+    const searchInput = document.getElementById(platform + "-search");
+    const query = searchInput.value;
+    if (query) {
+      debounce(async () => {
+        const results = await getAnimeSearchResult(query);
+        if (results.length) {
+          toggleDropdown(true, platform);
+          populateDropdown(results, platform);
+        } else {
+          toggleDropdown(false, platform);
+        }
+      }, 200)();
+    } else {
+      toggleDropdown(false, platform);
+    }
+  }
+
+  function handleInputFocus(platform) {
+    const searchInput = document.getElementById(platform + "-search");
+    const dropdown = document.getElementById(platform + "-dropdown");
+    if (searchInput.value) {
+      toggleDropdown(true, platform);
+    }
+  }
+
+  function populateDropdown(results, platform) {
+    const dropdownId =
+      platform === "mobile" ? "mobile-dropdown" : "desktop-dropdown";
+    const dropdown = document.getElementById(dropdownId);
+    dropdown.innerHTML = ""; // Clear existing items
+
+    results.forEach((result, index) => {
+      const link = document.createElement("a");
+      link.href = '/watch/' + result.id;
+      link.className = "block px-4 py-2 text-white hover:bg-neutral-700";
+      link.textContent = result.title.english || result.title.romaji;
 
       // Add specific rounding based on the item's position
       if (index === 0) {
-        link.classList.add('hover:rounded-t-lg');
-      } else if (index === items.length - 1) {
-        link.classList.add('hover:rounded-b-lg');
+        link.classList.add("hover:rounded-t-lg");
+      } else if (index === results.length - 1) {
+        link.classList.add("hover:rounded-b-lg");
       }
 
       dropdown.appendChild(link);
     });
   }
 
-  // Example usage
-  const sampleItems = [
-    { name: 'Anime 1' },
-    { name: 'Anime 2' },
-    { name: 'Anime 3' },
-    // Add more items here...
-  ];
-
-  function toggleDropdown(show, platform) {
-    switch (platform) {
-      case 'mobile':
-        // Populate the dropdown with sample items
-        if (show) {
-          populateDropdown(sampleItems, 'mobile-dropdown');
-        }
-        document.getElementById('mobile-dropdown').classList.toggle('hidden', !show);
-        break;
-      case 'desktop':
-        // Populate the dropdown with sample items
-        if (show) {
-          populateDropdown(sampleItems, 'desktop-dropdown');
-        }
-        document.getElementById('desktop-dropdown').classList.toggle('hidden', !show);
-        break;
-      default:
-        break;
+  async function getAnimeSearchResult(query) {
+    const url = "{% url 'home:q_search' %}?q=" + query;
+    try {
+      const response = await fetch(url);
+      const data = await response.json();
+      return data.results;
+    } catch (error) {
+      console.error("Error fetching search results:", error);
+      return [];
     }
   }
+
+  function toggleDropdown(show, platform) {
+    console.log("Toggling dropdown:", show, platform);
+    const dropdownId =
+      platform === "mobile" ? "mobile-dropdown" : "desktop-dropdown";
+    document.getElementById(dropdownId).classList.toggle("hidden", !show);
+  }
 </script>
+{% endblock scripts %}
