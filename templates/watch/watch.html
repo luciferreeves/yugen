@@ -49,6 +49,7 @@
     const skipOutroButton = document.getElementById('skipOutro');
     const introOverlay = document.getElementById('intro-overlay');
     const outroOverlay = document.getElementById('outro-overlay');
+    const autoSkipIntro = {% if user.preferences.auto_skip_intro %}true{% else %}false{% endif %};
 
     import { VidstackPlayer, VidstackPlayerLayout, TextTrack } from 'https://cdn.vidstack.io/player';
 
@@ -69,7 +70,7 @@
         logLevel: 'warn',
         crossOrigin: true,
         playsInline: true,
-        title: '{% if user.preferences.title_language == "english" and anime_data.title.english %}{{ anime_data.title.english }}{% elif user.preferences.title_language == "native" and anime_data.title.native %}{{ anime_data.title.native }}{% else %}{{ anime_data.title.romaji }}{% endif %} — Episode {{ current_episode }} ({% if request.GET.mode == "dub" %}Dub{% else %}Sub{% endif %})',
+        title: '{% if user.preferences.title_language == "english" and anime_data.title.english %}{{ anime_data.title.english }}{% elif user.preferences.title_language == "native" and anime_data.title.native %}{{ anime_data.title.native }}{% else %}{{ anime_data.title.romaji }}{% endif %} — Episode {{ current_episode }} — {{current_episode_name}}',
         subtitlePreference: {
             lang: 'English',
         },
@@ -90,34 +91,40 @@
         ],
     });
 
-    const chapters = [
-        { startTime: introStart, endTime: introEnd, title: 'Intro' },
-        { startTime: outroStart, endTime: outroEnd, title: 'Outro' }
-    ];
-
-    const chaptersTrack = new TextTrack({
-        kind: "chapters",
-        default: true,
-    });
-
-    for (const chapter of chapters) {
-        if (chapter.startTime === chapter.endTime) {
-            continue;
+    
+    player.addEventListener('duration-change', (event) => {
+        const chapters = [
+            { startTime: introStart, endTime: introEnd, title: 'Intro' },
+            { startTime: outroStart, endTime: outroEnd, title: 'Outro' }
+        ];
+    
+        const chaptersTrack = new TextTrack({
+            kind: "chapters",
+            default: true,
+        });
+    
+        for (const chapter of chapters) {
+            if (chapter.startTime === chapter.endTime) {
+                continue;
+            }
+            chaptersTrack.addCue(new VTTCue(chapter.startTime, chapter.endTime, chapter.title));
         }
-        chaptersTrack.addCue(new VTTCue(chapter.startTime, chapter.endTime, chapter.title));
-    }
-
-    if (introStart !== 0) {
-        chaptersTrack.addCue(new VTTCue(0, introStart, '{% if user.preferences.title_language == "english" and anime_data.title.english %}{{ anime_data.title.english }}{% elif user.preferences.title_language == "native" and anime_data.title.native %}{{ anime_data.title.native }}{% else %}{{ anime_data.title.romaji }}{% endif %} — Episode {{ current_episode }} — {{current_episode_name}}) ({% if request.GET.mode == "dub" %}Dub{% else %}Sub{% endif %})'));
-    }
-
-    if (introStart === 0 && introStart != introEnd && introEnd != outroStart) {
-        chaptersTrack.addCue(new VTTCue(introEnd, outroStart, '{% if user.preferences.title_language == "english" and anime_data.title.english %}{{ anime_data.title.english }}{% elif user.preferences.title_language == "native" and anime_data.title.native %}{{ anime_data.title.native }}{% else %}{{ anime_data.title.romaji }}{% endif %} — Episode {{ current_episode }} — {{current_episode_name}} ({% if request.GET.mode == "dub" %}Dub{% else %}Sub{% endif %})'));
-    }
-
-    player.textTracks.add(chaptersTrack);
-    const autoSkipIntro = {% if user.preferences.auto_skip_intro %}true{% else %}false{% endif %};
-
+    
+        if (introStart !== 0) {
+            chaptersTrack.addCue(new VTTCue(0, introStart, '{% if user.preferences.title_language == "english" and anime_data.title.english %}{{ anime_data.title.english }}{% elif user.preferences.title_language == "native" and anime_data.title.native %}{{ anime_data.title.native }}{% else %}{{ anime_data.title.romaji }}{% endif %} — Episode {{ current_episode }} — {{current_episode_name}}'));
+        }
+    
+        if (introStart === 0 && introStart != introEnd && introEnd != outroStart) {
+            chaptersTrack.addCue(new VTTCue(introEnd, outroStart, '{% if user.preferences.title_language == "english" and anime_data.title.english %}{{ anime_data.title.english }}{% elif user.preferences.title_language == "native" and anime_data.title.native %}{{ anime_data.title.native }}{% else %}{{ anime_data.title.romaji }}{% endif %} — Episode {{ current_episode }} — {{current_episode_name}}'));
+        }
+        const duration = event.detail;
+        if (duration > 0 && outroEnd < duration && outroEnd !== 0) {
+            console.log(outroEnd, duration)
+            chaptersTrack.addCue(new VTTCue(outroEnd, duration, '{% if user.preferences.title_language == "english" and anime_data.title.english %}{{ anime_data.title.english }}{% elif user.preferences.title_language == "native" and anime_data.title.native %}{{ anime_data.title.native }}{% else %}{{ anime_data.title.romaji }}{% endif %} — Episode {{ current_episode }} — {{current_episode_name}}'));
+        }
+        player.textTracks.add(chaptersTrack);
+    });
+    
     player.addEventListener('time-update', (event) => {
         const currentTime = event.detail.currentTime;
 
