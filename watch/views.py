@@ -2,35 +2,72 @@ import os
 from django.http import JsonResponse
 import dotenv
 from django.shortcuts import render, redirect
-from watch.utils import update_anime_user_history, get_anime_user_history
+from watch.utils import update_anime_user_history, get_anime_user_history, get_from_redis_cache, store_in_redis_cache
 import requests
 import json
 
 dotenv.load_dotenv()
 
 def watch(request, anime_id, episode=None):
+    # store anime history
+    if request.user.is_authenticated:
+        anime_history = get_anime_user_history(request.user, anime_id)
+
+        watched_episodes = [h.episode for h in anime_history]
+        current_watched_time = [h.time_watched for h in anime_history if h.episode == episode]
+        current_watched_time = current_watched_time[0] if current_watched_time else 0
+    else:
+        anime_history = None
+        watched_episodes = []
+        current_watched_time = 0
+
     if not episode or episode < 1:
-        return redirect("watch:watch_episode", anime_id=anime_id, episode=1)
+        # episode where last watched is true
+        episode = [h.episode for h in anime_history if h.last_watched]
+        episode = episode[0] if episode else 1
+        return redirect("watch:watch_episode", anime_id=anime_id, episode=episode)
+    
+    # if current episode is not in history, add it
+    if not any(h.episode == episode for h in anime_history):
+        update_anime_user_history(request.user, anime_id, episode, 0)
 
     mode = request.GET.get("mode", request.user.preferences.default_language)
 
-    base_url = f"{os.getenv("CONSUMET_URL")}/meta/anilist/data/{anime_id}?provider=zoro"
-    response = requests.get(base_url)
-    anime_data = response.json()
+    anime_data_cached = get_from_redis_cache(anime_id)
 
-    base_url = f"{os.getenv("ZORO_URL")}/anime/search?q={anime_data["title"]["english"]}&page=1"
-    response = requests.get(base_url)
-    anime_search_result = response.json()
-    anime_selected = [a for a in anime_search_result["animes"] if a["name"].lower() == anime_data["title"]["english"].lower()]
+    if not anime_data_cached:
+        print("fetching data from api")
+        base_url = f"{os.getenv("CONSUMET_URL")}/meta/anilist/data/{anime_id}?provider=zoro"
+        response = requests.get(base_url)
+        anime_data = response.json()
 
-    if not anime_selected:
-        anime_selected = anime_search_result["animes"][0]
+        base_url = f"{os.getenv("ZORO_URL")}/anime/search?q={anime_data["title"]["english"]}&page=1"
+        response = requests.get(base_url)
+        anime_search_result = response.json()
+        anime_selected = [a for a in anime_search_result["animes"] if a["name"].lower() == anime_data["title"]["english"].lower()]
+
+        if not anime_selected:
+            anime_selected = anime_search_result["animes"][0]
+        else:
+            anime_selected = anime_selected[0]
+
+        base_url = f"{os.getenv("ZORO_URL")}/anime/episodes/{anime_selected["id"]}"
+        response = requests.get(base_url)
+        anime_episodes = response.json()
+
+        anime_data_to_cache = {
+            "anime_data": anime_data,
+            "anime_selected": anime_selected,
+            "anime_episodes": anime_episodes,
+        }
+
+        store_in_redis_cache(anime_id, json.dumps(anime_data_to_cache))
     else:
-        anime_selected = anime_selected[0]
-
-    base_url = f"{os.getenv("ZORO_URL")}/anime/episodes/{anime_selected["id"]}"
-    response = requests.get(base_url)
-    anime_episodes = response.json()
+        print("fetching data from cache")
+        anime_data_cached = json.loads(anime_data_cached)
+        anime_data = anime_data_cached["anime_data"]
+        anime_selected = anime_data_cached["anime_selected"]
+        anime_episodes = anime_data_cached["anime_episodes"]
 
     if mode == "dub" and not anime_selected["episodes"]["dub"]:
         mode = "sub"
@@ -54,22 +91,6 @@ def watch(request, anime_id, episode=None):
 
     current_episode_name = [e["title"] for e in anime_episodes["episodes"] if e["number"] == episode][0]
 
-    # store anime history
-    if request.user.is_authenticated:
-        anime_history = get_anime_user_history(request.user, anime_id)
-
-        # if current episode is not in history, add it
-        if not any(h.episode == episode for h in anime_history):
-            update_anime_user_history(request.user, anime_id, episode, 0)
-
-        watched_episodes = [h.episode for h in anime_history]
-        current_watched_time = [h.time_watched for h in anime_history if h.episode == episode]
-        current_watched_time = current_watched_time[0] if current_watched_time else 0
-    else:
-        anime_history = None
-        watched_episodes = []
-        current_watched_time = 0
-
     context = {
         "anime_data": anime_data,
         "anime_selected": anime_selected,
@@ -84,8 +105,6 @@ def watch(request, anime_id, episode=None):
         "current_watched_time": current_watched_time,
         "mode": mode,
     }
-
-    print(context)
 
     return render(request, "watch/watch.html", context)
 

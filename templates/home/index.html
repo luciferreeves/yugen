@@ -127,15 +127,15 @@
       </button>      
     </section>
     <!-- Data Cards: Trending Anime -->
-    <section id="trending" class="flex flex-wrap justify-center mt-4 animate__animated animate__slideInUp">
+    <section id="trending" class="flex flex-wrap justify-center mt-4 animate__animated animate__slideInUp max-w-full">
       {% include "partials/datacard_render.html" with data=trending_anime %}
     </section>
     <!-- Data Cards: Popular Anime -->
-    <section id="popular" class="flex-wrap justify-center mt-4 hidden animate__animated animate__slideInUp">
+    <section id="popular" class="flex-wrap justify-center mt-4 hidden animate__animated animate__slideInUp max-w-full">
       {% include "partials/datacard_render.html" with data=popular_anime %}
     </section>
     <!-- Data Cards: Top Rated Anime -->
-    <section id="top_rated" class="flex-wrap justify-center mt-4 hidden animate__animated animate__slideInUp">
+    <section id="top_rated" class="flex-wrap justify-center mt-4 hidden animate__animated animate__slideInUp max-w-full">
       {% include "partials/datacard_render.html" with data=top_anime %}
     </section>
   </section>
