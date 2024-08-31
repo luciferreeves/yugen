@@ -152,7 +152,7 @@ def get_discord_user(access_token, token_type):
 
                 if preferred_guild == guild["id"]:
                     print("Preferred Guild Found. Updating User Nickname to", member["nick"])
-                    user["global_name"] = member["nick"] if member["nick"] is not None else user["username"]
+                    user["guild_name"] = member["nick"] if member["nick"] is not None else user["username"]
                     break
                 
     else:
