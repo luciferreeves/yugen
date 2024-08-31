@@ -63,7 +63,8 @@ def watch(request, anime_id, episode=None):
             update_anime_user_history(request.user, anime_id, episode, 0)
 
         watched_episodes = [h.episode for h in anime_history]
-        current_watched_time = [h.time_watched for h in anime_history if h.episode == episode][0]
+        current_watched_time = [h.time_watched for h in anime_history if h.episode == episode]
+        current_watched_time = current_watched_time[0] if current_watched_time else 0
     else:
         anime_history = None
         watched_episodes = []
