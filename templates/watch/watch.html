@@ -8,13 +8,13 @@
 <div class="flex flex-col lg:flex-row mt-4 gap-2">
     <div class="w-full lg:w-3/4 relative">
         <div id="video-player" class="aspect-video"></div>
-        <div id="skip-buttons" class="absolute bottom-24 right-4 flex flex-col space-y-2">
-            <div id="skipIntro" class="relative bg-white bg-opacity-20 text-white text-center py-2 px-4 rounded-lg cursor-pointer overflow-hidden hidden">
-                <span class="relative z-10">Skip Intro</span>
+        <div id="skip-buttons" class="absolute bottom-24 right-4 flex flex-col space-y-2 z-20">
+            <div id="skipIntro" class="relative z-10 bg-white bg-opacity-20 text-white text-center py-2 px-4 rounded-lg cursor-pointer overflow-hidden hidden">
+                <span class="relative" style="z-index: inherit;">Skip Intro</span>
                 <div id="intro-overlay" class="absolute inset-0 bg-{{ user.preferences.accent_colour }}-600 transition-transform duration-[5000ms] ease-linear origin-left scale-x-0"></div>
             </div>
-            <div id="skipOutro" class="relative bg-white bg-opacity-20 text-white text-center py-2 px-4 rounded-lg cursor-pointer overflow-hidden hidden">
-                <span class="relative z-10">Skip Outro</span>
+            <div id="skipOutro" class="relative z-10 bg-white bg-opacity-20 text-white text-center py-2 px-4 rounded-lg cursor-pointer overflow-hidden hidden">
+                <span class="relative" style="z-index: inherit;">Skip Outro</span>
                 <div id="outro-overlay" class="absolute inset-0 bg-{{ user.preferences.accent_colour }}-600 transition-transform duration-[5000ms] ease-linear origin-left scale-x-0"></div>
             </div>
         </div>
@@ -170,6 +170,11 @@
         if (currentWatchTime > 0) {
             player.currentTime = currentWatchTime;
         }
+        
+        const mediaProviderElememt = document.querySelector('media-player');
+        const skipButtons = document.getElementById('skip-buttons');
+        document.getElementById('skip-buttons').remove();
+        mediaProviderElememt.appendChild(skipButtons);
     });
     
     player.addEventListener('time-update', (event) => {
