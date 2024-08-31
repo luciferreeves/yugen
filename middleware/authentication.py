@@ -57,13 +57,6 @@ class AuthMiddleware:
                 token_type=request.user.discord_token_type,
             )
 
-            # update user object
-            request.user.discord_global_name = user["global_name"]
-            request.user.discord_guild_name = user["guild_name"]
-            request.user.save()
-
-            print(user, "user")
-
             if not user["is_authorized"]:
                 logout(request)
                 request.session["next"] = request.get_full_path()
