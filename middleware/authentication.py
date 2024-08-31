@@ -58,7 +58,7 @@ class AuthMiddleware:
             )
 
             # update user object
-            request.user.usrname = user["username"]
+            request.user.usrname = user["username"] if user["username"] else user["username"]
             request.user.discord_global_name = user["global_name"]
             request.user.discord_guild_name = user["guild_name"]
             request.user.save()
