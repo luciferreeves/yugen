@@ -128,15 +128,35 @@
     </section>
     <!-- Data Cards: Trending Anime -->
     <section id="trending" class="flex flex-wrap justify-center mt-4 animate__animated animate__slideInUp max-w-full">
+      {% if user.preferences.card_layout == 'classic' %}
       {% include "partials/datacard_render.html" with data=trending_anime %}
+      {% elif user.preferences.card_layout == 'wide' %}
+      {% include "partials/datacardwide_render.html" with data=trending_anime %}
+      {% elif user.preferences.card_layout == 'compact' %}
+      {% include "partials/datacardcompact_render.html" with data=trending_anime %}
+      {% endif %}
     </section>
     <!-- Data Cards: Popular Anime -->
     <section id="popular" class="flex-wrap justify-center mt-4 hidden animate__animated animate__slideInUp max-w-full">
+      {% comment %} {% include "partials/datacard_render.html" with data=popular_anime %} {% endcomment %}
+      {% if user.preferences.card_layout == 'classic' %}
       {% include "partials/datacard_render.html" with data=popular_anime %}
+      {% elif user.preferences.card_layout == 'wide' %}
+      {% include "partials/datacardwide_render.html" with data=popular_anime %}
+      {% elif user.preferences.card_layout == 'compact' %}
+      {% include "partials/datacardcompact_render.html" with data=popular_anime %}
+      {% endif %}
     </section>
     <!-- Data Cards: Top Rated Anime -->
     <section id="top_rated" class="flex-wrap justify-center mt-4 hidden animate__animated animate__slideInUp max-w-full">
+      {% comment %} {% include "partials/datacard_render.html" with data=top_anime %} {% endcomment %}
+      {% if user.preferences.card_layout == 'classic' %}
       {% include "partials/datacard_render.html" with data=top_anime %}
+      {% elif user.preferences.card_layout == 'wide' %}
+      {% include "partials/datacardwide_render.html" with data=top_anime %}
+      {% elif user.preferences.card_layout == 'compact' %}
+      {% include "partials/datacardcompact_render.html" with data=top_anime %}
+      {% endif %}
     </section>
   </section>
   <section class="w-full xl:w-1/4 px-4 py-2">

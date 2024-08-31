@@ -54,6 +54,8 @@ def index(request):
         "next_season": next_season
     }
 
+    print(trending_anime)
+
     return render(request, "home/index.html", context)
 
 def search_json(request):

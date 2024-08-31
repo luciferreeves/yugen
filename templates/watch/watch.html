@@ -20,9 +20,9 @@
         </div>
     </div>
 
-    <div class="w-full lg:w-1/4 flex flex-col overflow-y-auto px-2 lg:px-0 h-full max-h-screen lg:h-[42vw] lg:max-h-[806px]">
+    <div class="w-full lg:w-1/4 flex flex-col px-2 lg:px-0">
         <h2 class="text-white text-xl font-bold mb-4">Episodes</h2>
-        <div class="flex flex-col gap-2">
+        <div class="flex flex-col gap-2 h-full max-h-96 lg:h-[39vw] lg:max-h-[761px] overflow-y-auto">
             {% for episode in anime_episodes.episodes %}
             {% if episode.number == current_episode %}
             <a id="selected-episode" href="{% url "watch:watch_episode" anime_id episode.number %}" class="flex flex-row justify-between items-center w-full gap-4 bg-{{ user.preferences.accent_colour }}-600 p-2 rounded hover:bg-{{ user.preferences.accent_colour }}-600 hover:bg-opacity-30">
