@@ -45,7 +45,7 @@
                 
             </a>
             {% else %}
-            <a href="{% url "watch:watch_episode" anime_id episode.number %}" class="flex flex-row justify-between w-full gap-4 bg-white bg-opacity-10 p-2 rounded hover:bg-{{ user.preferences.accent_colour }}-600 hover:bg-opacity-30">
+            <a href="{% url "watch:watch_episode" anime_id episode.number %}" class="flex flex-row justify-between w-full gap-4 {% if episode.number in watched_episodes %}bg-{{ user.preferences.accent_colour }}-600 bg-opacity-20{% else %}bg-white bg-opacity-10{% endif %} p-2 rounded hover:bg-{{ user.preferences.accent_colour }}-600 hover:bg-opacity-30">
                 <span class="truncate max-w-full overflow-hidden text-ellipsis whitespace-nowrap">{{ episode.number }}. {{ episode.title }}</span>
                 <span class="flex flex-row item-center gap-2">
                 {% if anime_selected.episodes.sub >= episode.number %}                  
@@ -88,10 +88,10 @@
     const introOverlay = document.getElementById('intro-overlay');
     const outroOverlay = document.getElementById('outro-overlay');
     const autoSkipIntro = {% if user.preferences.auto_skip_intro %}true{% else %}false{% endif %};
-    console.log(introStart, introEnd, outroStart, outroEnd);
-
+    const currentWatchTime = {{ current_watched_time }};
+    
     import { VidstackPlayer, VidstackPlayerLayout, TextTrack } from 'https://cdn.vidstack.io/player';
-
+    
     const layout = new VidstackPlayerLayout({
         {% for track in episode_data.tracks %}
             {% if track.kind == 'thumbnails' %}
@@ -161,12 +161,15 @@
             if (chapter.startTime === chapter.endTime || chapter.endTime === 0) {
                 continue;
             }
-            console.log(`Adding chapter at ${chapter.startTime} for ${chapter.title}`);
             chaptersTrack.addCue(new VTTCue(chapter.startTime, chapter.endTime, chapter.title));
         }
         
         player.textTracks.add(chaptersTrack);
         chaptersLoaded = true;
+
+        if (currentWatchTime > 0) {
+            player.currentTime = currentWatchTime;
+        }
     });
     
     player.addEventListener('time-update', (event) => {
@@ -232,6 +235,34 @@
         attemptPlayback();
     });
     {% endif %}
+
+    let lastTime = 0;
+    setInterval(() => {
+        const {
+            paused,
+            playing,
+            waiting,
+            currentTime,
+        } = player.state;
+        if (paused || waiting) {
+            lastTime = currentTime;
+        }
+        if (paused || waiting || currentTime === lastTime) {
+            return;
+        }
+        fetch('{% url "watch:update_watch_history" %}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: JSON.stringify({
+                'anime_id': {{ anime_id }},
+                'episode': {{ current_episode }},
+                'time_watched': parseInt(player.currentTime)
+            })
+        });
+    }, 30000);
 
 </script>
 {% endblock scripts %}

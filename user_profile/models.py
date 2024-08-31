@@ -28,7 +28,7 @@ class UserHistory(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     anime_id = models.IntegerField()
     episode = models.IntegerField()
-    timestamp = models.DateTimeField(auto_now=True)
+    time_watched = models.IntegerField(default=0)
 
     def __str__(self):
         return f"{self.user.username} watched episode {self.episode} of anime {self.anime_id}"

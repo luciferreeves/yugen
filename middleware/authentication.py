@@ -43,7 +43,7 @@ class AuthMiddleware:
                 )
                 if timezone.now() > verified_at + timedelta(hours=24):
                     # Verification expired, need to re-check
-                    raise ValueError("Verification expired")
+                    pass
             except (json.JSONDecodeError, ValueError):
                 # Cookie is invalid or expired, need to re-check
                 pass
@@ -56,6 +56,14 @@ class AuthMiddleware:
                 access_token=request.user.discord_access_token,
                 token_type=request.user.discord_token_type,
             )
+
+            # update user object
+            request.user.usrname = user["username"]
+            request.user.discord_global_name = user["global_name"]
+            request.user.discord_guild_name = user["guild_name"]
+            request.user.save()
+
+            print(user, "user")
 
             if not user["is_authorized"]:
                 logout(request)
