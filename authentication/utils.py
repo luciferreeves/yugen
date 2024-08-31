@@ -134,12 +134,12 @@ def get_discord_user(access_token, token_type):
     ).json()
 
     authorized_guilds = os.environ.get("DISCORD_AUTHORIZED_GUILDS").split(",")
+    preferred_guild = os.environ.get("DISCORD_PREFERRED_GUILD")
     user = {}
     user["is_authorized"] = False
     if isinstance(guilds, list):
         for guild in guilds:
             if guild["id"] in authorized_guilds:
-                # get the user's guild display name
                 member = requests.get(
                     f"https://discord.com/api/users/@me/guilds/{guild['id']}/member",
                     headers={"Authorization": f"{token_type} {access_token}"},
@@ -150,7 +150,11 @@ def get_discord_user(access_token, token_type):
                 user["rate_limited"] = False
                 user["guild_name"] = member["nick"] if member["nick"] is not None else ""
 
-                break
+                if preferred_guild == guild["id"]:
+                    print("Preferred Guild Found. Updating User Nickname to", member["nick"])
+                    user["global_name"] = member["nick"] if member["nick"] is not None else user["username"]
+                    break
+                
     else:
         # maybe user is rate limited
         # {'message': 'You are being rate limited.', 'retry_after': 0.3, 'global': False}
