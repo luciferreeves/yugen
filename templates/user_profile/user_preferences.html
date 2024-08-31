@@ -235,6 +235,21 @@
         </label>
     </div>
 </div>
+<div class="w-full py-4 flex flex-row justify-between items-center border-b border-white border-opacity-10">
+    <div>
+        <h3 class="text-xl">Ingrain Sub Subtitle in Dub</h3>
+        <small class="text-gray-400 text-sm">Experimental: Display the sub subtitles in the dub media if dub subtitles are not available.</small>
+    </div>
+    <div class="relative">
+        <label class="flex items-center cursor-pointer">
+            <input type="checkbox" class="hidden peer" id="ingrain_sub_subtitles_in_dub_checkbox" {% if user.preferences.ingrain_sub_subtitles_in_dub %}checked{% endif %}>
+            <div class="w-10 h-6 bg-neutral-700 rounded-full p-1 flex items-center peer-checked:bg-{{ user.preferences.accent_colour }}-600 transition-colors duration-100">
+                <div class="toggle-dot w-4 h-4 bg-white rounded-full shadow-md transform duration-100 ease-in-out"></div>
+            </div>
+        </label>
+    </div>
+</div>
+
 <h2 class="text-2xl font-bold text-center mt-8 flex gap-2 items-center">
     <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 24 24" class="text-orange-500" height="1.4rem" width="1.4rem" xmlns="http://www.w3.org/2000/svg"><path d="M5.32943 3.27152C6.56252 2.83314 7.9923 3.10743 8.97927 4.0944C9.96652 5.08165 10.2407 6.51196 9.80178 7.74529L20.6465 18.5901L18.5252 20.7114L7.67936 9.86703C6.44627 10.3054 5.01649 10.0311 4.02952 9.04415C3.04227 8.0569 2.7681 6.62659 3.20701 5.39326L5.44373 7.62994C6.02952 8.21572 6.97927 8.21572 7.56505 7.62994C8.15084 7.04415 8.15084 6.0944 7.56505 5.50862L5.32943 3.27152ZM15.6968 5.15506L18.8788 3.38729L20.293 4.80151L18.5252 7.98349L16.7574 8.33704L14.6361 10.4584L13.2219 9.04415L15.3432 6.92283L15.6968 5.15506ZM8.62572 12.9332L10.747 15.0546L5.79729 20.0043C5.2115 20.5901 4.26175 20.5901 3.67597 20.0043C3.12464 19.453 3.09221 18.5792 3.57867 17.99L3.67597 17.883L8.62572 12.9332Z"></path></svg>
     <span>Site Settings</span>
@@ -314,6 +329,7 @@
         const autoSkipIntro = document.getElementById('auto_skip_intro_checkbox').checked;
         const autoPlayVideo = document.getElementById('auto_play_video_checkbox').checked;
         const autoNextEpisode = document.getElementById('auto_next_episode_checkbox').checked;
+        const ingrainSubSubtitlesInDub = document.getElementById('ingrain_sub_subtitles_in_dub_checkbox').checked;
         const displayGuildNameInsteadOfUsername = document.getElementById('display_guild_name_instead_of_username_checkbox').checked;
         const smartMALSync = document.getElementById('smart_mal_sync_checkbox').checked;
 
@@ -329,6 +345,7 @@
             autoSkipIntro,
             autoPlayVideo,
             autoNextEpisode,
+            ingrainSubSubtitlesInDub,
             displayGuildNameInsteadOfUsername,
             smartMALSync
         };

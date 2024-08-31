@@ -18,11 +18,13 @@ print("cache flushed")
 
 def update_anime_user_history(user, anime_id, episode, time_watched):
     # per episode history
+    print("updating history")
     history, created = UserHistory.objects.get_or_create(user=user, anime_id=anime_id, episode=episode)
     history.time_watched = time_watched
 
     # last watched
     last_watched = UserHistory.objects.filter(user=user, anime_id=anime_id, last_watched=True)
+    print(last_watched)
     if last_watched:
         last_watched = last_watched[0]
         last_watched.last_watched = False

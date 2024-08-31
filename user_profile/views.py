@@ -100,6 +100,7 @@ def save_user_preferences(request):
     auto_skip_intro = data.get("autoSkipIntro")
     auto_play_video = data.get("autoPlayVideo")
     auto_next_episode = data.get("autoNextEpisode")
+    ingrain_sub_subtitles_in_dub = data.get("ingrainSubSubtitlesInDub")
     display_guild_name_instead_of_username = data.get("displayGuildNameInsteadOfUsername")
     smart_mal_sync = data.get("smartMALSync")
 
@@ -115,6 +116,7 @@ def save_user_preferences(request):
     user_preferences.auto_skip_intro = auto_skip_intro
     user_preferences.auto_play_video = auto_play_video
     user_preferences.auto_next_episode = auto_next_episode
+    user_preferences.ingrain_sub_subtitles_in_dub = ingrain_sub_subtitles_in_dub
     user_preferences.display_guild_name_instead_of_username = display_guild_name_instead_of_username
     user_preferences.smart_mal_sync = smart_mal_sync
 

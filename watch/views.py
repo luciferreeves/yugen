@@ -10,26 +10,16 @@ dotenv.load_dotenv()
 
 def watch(request, anime_id, episode=None):
     # store anime history
-    if request.user.is_authenticated:
-        anime_history = get_anime_user_history(request.user, anime_id)
+    anime_history = get_anime_user_history(request.user, anime_id)
 
-        watched_episodes = [h.episode for h in anime_history]
-        current_watched_time = [h.time_watched for h in anime_history if h.episode == episode]
-        current_watched_time = current_watched_time[0] if current_watched_time else 0
-    else:
-        anime_history = None
-        watched_episodes = []
-        current_watched_time = 0
+    watched_episodes = [h.episode for h in anime_history]
+    current_watched_time = [h.time_watched for h in anime_history if h.episode == episode]
+    current_watched_time = current_watched_time[0] if current_watched_time else 0
 
     if not episode or episode < 1:
-        # episode where last watched is true
         episode = [h.episode for h in anime_history if h.last_watched]
         episode = episode[0] if episode else 1
         return redirect("watch:watch_episode", anime_id=anime_id, episode=episode)
-    
-    # if current episode is not in history, add it
-    if not any(h.episode == episode for h in anime_history):
-        update_anime_user_history(request.user, anime_id, episode, 0)
 
     mode = request.GET.get("mode", request.user.preferences.default_language)
 
@@ -89,7 +79,18 @@ def watch(request, anime_id, episode=None):
         response = requests.get(base_url)
         episode_data = response.json()
 
+    # if no captions are present and the mode is dub, and ingrain_sub_subtitles_in_dub is true, then fetch the sub track
+    if not any(t["kind"] == "captions" for t in episode_data["tracks"]) and mode == "dub" and request.user.preferences.ingrain_sub_subtitles_in_dub:
+        base_url = f"{os.getenv("ZORO_URL")}/anime/episode-srcs?id={episode_d["episodeId"]}?server&category=sub"
+        response = requests.get(base_url).json()
+        # attach the sub captions to the dub episode data, append - do not replace
+        captions = [t for t in response["tracks"] if t["kind"] == "captions"]
+        if captions:
+            episode_data["tracks"].extend(captions)
+
     current_episode_name = [e["title"] for e in anime_episodes["episodes"] if e["number"] == episode][0]
+   
+    update_anime_user_history(request.user, anime_id, episode, current_watched_time)
 
     context = {
         "anime_data": anime_data,
