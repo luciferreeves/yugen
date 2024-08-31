@@ -12,19 +12,13 @@ r = redis.Redis(
     ssl=True,
 )
 
-# delete everything from redis cache
-r.flushall()
-print("cache flushed")
-
 def update_anime_user_history(user, anime_id, episode, time_watched):
     # per episode history
-    print("updating history")
     history, created = UserHistory.objects.get_or_create(user=user, anime_id=anime_id, episode=episode)
     history.time_watched = time_watched
 
     # last watched
     last_watched = UserHistory.objects.filter(user=user, anime_id=anime_id, last_watched=True)
-    print(last_watched)
     if last_watched:
         last_watched = last_watched[0]
         last_watched.last_watched = False
@@ -40,9 +34,7 @@ def get_anime_user_history(user, anime_id):
 
 def store_in_redis_cache(anime_id, data):
     r.set(anime_id, data, ex=60*60) # 1 hour
-    print("data cached", anime_id)
 
 def get_from_redis_cache(anime_id):
     data = r.get(anime_id)
-    print("data fetched from cache", anime_id)
     return data

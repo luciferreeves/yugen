@@ -18,7 +18,6 @@ def index(request):
     homepage_data_cached = get_from_redis_cache("homepage_data")
 
     if not homepage_data_cached:
-        print("fetching homepage data from api")
         trending_anime = get_trending_anime()
         popular_anime = get_popular_anime()
         top_anime = get_top_anime()
@@ -53,8 +52,6 @@ def index(request):
         "upcoming_anime": upcoming_anime["results"],
         "next_season": next_season
     }
-
-    print(trending_anime)
 
     return render(request, "home/index.html", context)
 

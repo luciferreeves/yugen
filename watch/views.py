@@ -26,7 +26,6 @@ def watch(request, anime_id, episode=None):
     anime_data_cached = get_from_redis_cache(anime_id)
 
     if not anime_data_cached:
-        print("fetching data from api")
         base_url = f"{os.getenv("CONSUMET_URL")}/meta/anilist/data/{anime_id}?provider=zoro"
         response = requests.get(base_url)
         anime_data = response.json()
@@ -53,7 +52,6 @@ def watch(request, anime_id, episode=None):
 
         store_in_redis_cache(anime_id, json.dumps(anime_data_to_cache))
     else:
-        print("fetching data from cache")
         anime_data_cached = json.loads(anime_data_cached)
         anime_data = anime_data_cached["anime_data"]
         anime_selected = anime_data_cached["anime_selected"]
