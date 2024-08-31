@@ -14,7 +14,7 @@
             </div>
         </div>
         <a href="{% url 'watch:watch' anime.id %}" class="flex flex-col gap-2 w-full justify-around max-w-[calc(100%-10rem)]">
-            <h2 class="text-xl font-bold text-transparent bg-clip-text block w-full" style="background: linear-gradient(-45deg, {% if anime.color %}{{ anime.color }}{% else %}white{% endif %}, white); -webkit-background-clip: text; background-clip: text;">
+            <h2 class="text-xl font-bold text-transparent bg-clip-text block w-full truncate overflow-hidden text-ellipsis whitespace-nowrap" style="background: linear-gradient(-45deg, {% if anime.color %}{{ anime.color }}{% else %}white{% endif %}, white); -webkit-background-clip: text; background-clip: text;">
                 {% if user.preferences.title_language == "english" and anime.title.english %}
                 {{ anime.title.english }}
                 {% elif user.preferences.title_language == "native" and anime.title.native %}
