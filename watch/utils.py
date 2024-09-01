@@ -33,7 +33,11 @@ def get_anime_user_history(user, anime_id):
 
 
 def store_in_redis_cache(anime_id, data):
-    r.set(anime_id, data, ex=60*60) # 1 hour
+    try:
+        r.set(anime_id, data, ex=60*60) # 1 hour
+    except Exception as e:
+        print(e)
+        pass
 
 def get_from_redis_cache(anime_id):
     data = r.get(anime_id)

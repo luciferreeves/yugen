@@ -9,7 +9,6 @@ import json
 dotenv.load_dotenv()
 
 def watch(request, anime_id, episode=None):
-    # store anime history
     anime_history = get_anime_user_history(request.user, anime_id)
 
     watched_episodes = [h.episode for h in anime_history]
@@ -23,44 +22,34 @@ def watch(request, anime_id, episode=None):
 
     mode = request.GET.get("mode", request.user.preferences.default_language)
 
-    anime_data_cached = get_from_redis_cache(anime_id)
+    anime_data_cached = get_from_redis_cache(f"anime_{anime_id}_anime_data")
+    anime_selected_cached = get_from_redis_cache(f"anime_{anime_id}_anime_selected")
+    anime_episodes_cached = get_from_redis_cache(f"anime_{anime_id}_anime_episodes")
 
     if not anime_data_cached:
-        base_url = f"{os.getenv("CONSUMET_URL")}/meta/anilist/data/{anime_id}?provider=zoro"
+        base_url = f"{os.getenv("CONSUMET_URL")}/meta/anilist/info/{anime_id}?provider=zoro"
         response = requests.get(base_url)
         anime_data = response.json()
+        store_in_redis_cache(f"anime_{anime_id}_anime_data", json.dumps(anime_data))
+    else:
+        anime_data = json.loads(anime_data_cached)
 
-        base_url = f"{os.getenv("ZORO_URL")}/anime/search?q={anime_data["title"]["english"]}&page=1"
+    if not anime_selected_cached:
+        z_anime_id = anime_data["episodes"][0]["id"].split("$")[0]
+        base_url = f"{os.getenv("ZORO_URL")}/anime/info?id={z_anime_id}"
         response = requests.get(base_url)
-        anime_search_result = response.json()
-        anime_selected = [a for a in anime_search_result["animes"] if a["name"].lower() == anime_data["title"]["english"].lower()]
+        anime_selected = response.json()
+        store_in_redis_cache(f"anime_{anime_id}_anime_selected", json.dumps(anime_selected))
+    else:
+        anime_selected = json.loads(anime_selected_cached)
 
-        if not anime_selected:
-            anime_selected = anime_search_result["animes"][0]
-        else:
-            anime_selected = anime_selected[0]
-
-        base_url = f"{os.getenv("ZORO_URL")}/anime/episodes/{anime_selected["id"]}"
+    if not anime_episodes_cached:
+        base_url = f"{os.getenv("ZORO_URL")}/anime/episodes/{anime_selected["anime"]["info"]["id"]}"
         response = requests.get(base_url)
         anime_episodes = response.json()
+        store_in_redis_cache(f"anime_{anime_id}_anime_episodes", json.dumps(anime_episodes))
 
-        anime_data_to_cache = {
-            "anime_data": anime_data,
-            "anime_selected": anime_selected,
-            "anime_episodes": anime_episodes,
-        }
-
-        store_in_redis_cache(anime_id, json.dumps(anime_data_to_cache))
-    else:
-        anime_data_cached = json.loads(anime_data_cached)
-        anime_data = anime_data_cached["anime_data"]
-        anime_selected = anime_data_cached["anime_selected"]
-        anime_episodes = anime_data_cached["anime_episodes"]
-
-    if mode == "dub" and not anime_selected["episodes"]["dub"]:
-        mode = "sub"
-
-    if not anime_selected["episodes"][mode] or anime_selected["episodes"][mode] < episode:
+    if not anime_selected["anime"]["info"]["stats"]["episodes"][mode] or anime_selected["anime"]["info"]["stats"]["episodes"][mode] < episode:
         mode = "sub"
 
     if episode > anime_episodes["totalEpisodes"]:
@@ -81,7 +70,6 @@ def watch(request, anime_id, episode=None):
     if not any(t["kind"] == "captions" for t in episode_data["tracks"]) and mode == "dub" and request.user.preferences.ingrain_sub_subtitles_in_dub:
         base_url = f"{os.getenv("ZORO_URL")}/anime/episode-srcs?id={episode_d["episodeId"]}?server&category=sub"
         response = requests.get(base_url).json()
-        # attach the sub captions to the dub episode data, append - do not replace
         captions = [t for t in response["tracks"] if t["kind"] == "captions"]
         if captions:
             episode_data["tracks"].extend(captions)
@@ -90,12 +78,15 @@ def watch(request, anime_id, episode=None):
    
     update_anime_user_history(request.user, anime_id, episode, current_watched_time)
 
+    current_episode_data = [e for e in anime_episodes["episodes"] if e["number"] == episode][0]
+
     context = {
         "anime_data": anime_data,
         "anime_selected": anime_selected,
         "anime_episodes": anime_episodes,
         "episode_data": episode_data,
         "current_episode": episode,
+        "current_episode_data": current_episode_data,
         "stream_url": episode_data["sources"][0]["url"],
         "anime_id": anime_id,
         "current_episode_name": current_episode_name,

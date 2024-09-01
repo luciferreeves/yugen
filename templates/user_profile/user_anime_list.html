@@ -140,20 +140,20 @@
 </section>
 <section class="flex flex-row justify-between my-4">
     {% if prev_offset %}
-        <a href="{% url 'user_profile:user_profile' %}?category=anime_list&offset={{ prev_offset }}{% if filter %}&filter={{ filter }}{% endif %}" class="bg-purple-600 text-sm font-bold py-3 px-6 rounded-full flex items-center gap-2">
+        <a href="{% url 'user_profile:user_profile' %}?category=anime_list&offset={{ prev_offset }}{% if filter %}&filter={{ filter }}{% endif %}" class="bg-{{ user.preferences.accent_colour }}-600 text-sm font-bold py-3 px-6 rounded-full flex items-center gap-2">
             <span>Load Previous</span>
         </a>
     {% else %}
-        <a class="bg-purple-600 bg-opacity-20 text-sm font-bold py-3 px-6 rounded-full flex items-center gap-2 cursor-not-allowed">
+        <a class="bg-{{ user.preferences.accent_colour }}-600 bg-opacity-20 text-sm font-bold py-3 px-6 rounded-full flex items-center gap-2 cursor-not-allowed">
             <span>Load Previous</span>
         </a>
     {% endif %}
     {% if next_offset %}
-        <a href="{% url 'user_profile:user_profile' %}?category=anime_list&offset={{ next_offset }}{% if filter %}&filter={{ filter }}{% endif %}" class="bg-purple-600 text-sm font-bold py-3 px-6 rounded-full flex items-center gap-2">
+        <a href="{% url 'user_profile:user_profile' %}?category=anime_list&offset={{ next_offset }}{% if filter %}&filter={{ filter }}{% endif %}" class="bg-{{ user.preferences.accent_colour }}-600 text-sm font-bold py-3 px-6 rounded-full flex items-center gap-2">
             <span>Load Next</span>
         </a>
     {% else %}
-        <a class="bg-purple-600 bg-opacity-20 text-sm font-bold py-3 px-6 rounded-full flex items-center gap-2 cursor-not-allowed">
+        <a class="bg-{{ user.preferences.accent_colour }}-600 bg-opacity-20 text-sm font-bold py-3 px-6 rounded-full flex items-center gap-2 cursor-not-allowed">
             <span>Load Next</span>
         </a>
     {% endif %}
