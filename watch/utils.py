@@ -12,6 +12,9 @@ r = redis.Redis(
     ssl=True,
 )
 
+r.flushall()
+print("Redis cache flushed")
+
 def update_anime_user_history(user, anime_id, episode, time_watched):
     # per episode history
     history, created = UserHistory.objects.get_or_create(user=user, anime_id=anime_id, episode=episode)

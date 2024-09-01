@@ -2,6 +2,7 @@ import os
 from django.http import JsonResponse
 import dotenv
 from django.shortcuts import render, redirect
+from authentication.utils import get_single_anime_mal
 from watch.utils import update_anime_user_history, get_anime_user_history, get_from_redis_cache, store_in_redis_cache
 import requests
 import json
@@ -48,6 +49,8 @@ def watch(request, anime_id, episode=None):
         response = requests.get(base_url)
         anime_episodes = response.json()
         store_in_redis_cache(f"anime_{anime_id}_anime_episodes", json.dumps(anime_episodes))
+    else:
+        anime_episodes = json.loads(anime_episodes_cached)
 
     if not anime_selected["anime"]["info"]["stats"]["episodes"][mode] or anime_selected["anime"]["info"]["stats"]["episodes"][mode] < episode:
         mode = "sub"
@@ -95,6 +98,13 @@ def watch(request, anime_id, episode=None):
         "current_watched_time": current_watched_time,
         "mode": mode,
     }
+
+    if request.user.mal_access_token:
+        mal_data = get_single_anime_mal(request.user.mal_access_token, anime_data["malId"])
+        if mal_data:
+            mal_data["average_episode_duration"] = mal_data["average_episode_duration"] // 60 + 1
+            context["mal_data"] = mal_data
+            context["mal_episode_range"] = range(1, mal_data["num_episodes"] + 1)
 
     return render(request, "watch/watch.html", context)
 
