@@ -102,8 +102,8 @@
         <div class="flex flex-row gap-2 items-center justify-between">
             <h2 class="text-xl font-bold truncate max-w-full overflow-hidden text-ellipsis whitespace-nowrap">Episode {{ current_episode_data.number }} — {{ current_episode_data.title }}</h2>
             <div class="flex flex-row gap-1 items-center">
-                <a href="{% url "watch:watch_episode" anime_id current_episode_data.number %}?mode=sub" class="{% if mode == "sub" %}bg-{{ user.preferences.accent_colour }}-600{% else %}bg-white bg-opacity-10{% endif %} text-white text-sm font-bold px-4 py-2 rounded">Sub</a>
-                <a href="{% url "watch:watch_episode" anime_id current_episode_data.number %}?mode=dub" class="{% if mode == "dub" %}bg-{{ user.preferences.accent_colour }}-600{% else %}bg-white bg-opacity-10{% endif %} text-white text-sm font-bold px-4 py-2 rounded">Dub</a>
+                <a href="{% if current_episode_data.number %}{% url "watch:watch_episode" anime_id current_episode_data.number %}?mode=sub{% endif %}" class="{% if mode == "sub" %}bg-{{ user.preferences.accent_colour }}-600{% else %}bg-white bg-opacity-10{% endif %} text-white text-sm font-bold px-4 py-2 rounded">Sub</a>
+                <a href="{% if current_episode_data.number %}{% url "watch:watch_episode" anime_id current_episode_data.number %}?mode=dub{% endif %}" class="{% if mode == "dub" %}bg-{{ user.preferences.accent_colour }}-600{% else %}bg-white bg-opacity-10{% endif %} text-white text-sm font-bold px-4 py-2 rounded">Dub</a>
             </div>
         </div>
         <p class="my-4">

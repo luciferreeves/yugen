@@ -3,10 +3,10 @@ from django.http import JsonResponse
 import dotenv
 from django.shortcuts import render, redirect
 from authentication.utils import get_single_anime_mal
-from watch.utils import update_anime_user_history, get_anime_user_history, get_from_redis_cache, store_in_redis_cache
+from watch.utils import get_episode_metadata, update_anime_user_history, get_anime_user_history, get_from_redis_cache, store_in_redis_cache
 import requests
 import json
-from watch.tmdbmapper import get_anime_episodes
+
 
 dotenv.load_dotenv()
 
@@ -27,6 +27,14 @@ def watch(request, anime_id, episode=None):
     anime_data_cached = get_from_redis_cache(f"anime_{anime_id}_anime_data")
     anime_selected_cached = get_from_redis_cache(f"anime_{anime_id}_anime_selected")
     anime_episodes_cached = get_from_redis_cache(f"anime_{anime_id}_anime_episodes")
+
+    anime_data = None
+    anime_selected = None
+    anime_episodes = None
+    episode_data = None
+    current_episode_data = None
+    current_episode_name = None
+    current_episode_metadata = None
 
     if anime_data_cached:
         try:
@@ -53,60 +61,54 @@ def watch(request, anime_id, episode=None):
         store_in_redis_cache(f"anime_{anime_id}_anime_data", json.dumps(anime_data))
 
     if not anime_selected_cached:
-        z_anime_id = anime_data["episodes"][0]["id"].split("$")[0]
-        base_url = f"{os.getenv("ZORO_URL")}/anime/info?id={z_anime_id}"
-        response = requests.get(base_url)
-        anime_selected = response.json()
-        store_in_redis_cache(f"anime_{anime_id}_anime_selected", json.dumps(anime_selected))
+        z_anime_id = anime_data["episodes"][0]["id"].split("$")[0] if len(anime_data["episodes"]) > 0 else None
+        if z_anime_id is not None:
+            base_url = f"{os.getenv("ZORO_URL")}/anime/info?id={z_anime_id}"
+            response = requests.get(base_url)
+            anime_selected = response.json()
+            store_in_redis_cache(f"anime_{anime_id}_anime_selected", json.dumps(anime_selected))
 
-    if not anime_episodes_cached:
+    if not anime_episodes_cached and anime_selected is not None:
         base_url = f"{os.getenv("ZORO_URL")}/anime/episodes/{anime_selected["anime"]["info"]["id"]}"
         response = requests.get(base_url)
         anime_episodes = response.json()
         store_in_redis_cache(f"anime_{anime_id}_anime_episodes", json.dumps(anime_episodes))
 
-    if not anime_selected["anime"]["info"]["stats"]["episodes"][mode] or anime_selected["anime"]["info"]["stats"]["episodes"][mode] < episode:
-        mode = "sub"
+    if anime_selected is not None:
+        if not anime_selected["anime"]["info"]["stats"]["episodes"][mode] or anime_selected["anime"]["info"]["stats"]["episodes"][mode] < episode:
+            mode = "sub"
 
-    if episode > anime_episodes["totalEpisodes"]:
+    if anime_episodes is not None:
+        print(anime_episodes)
+        if episode > anime_episodes["totalEpisodes"]:
             return redirect("watch:watch_episode", anime_id=anime_id, episode=anime_episodes["totalEpisodes"])
         
-    episode_d = [e for e in anime_episodes["episodes"] if e["number"] == episode][0]
+        episode_d = [e for e in anime_episodes["episodes"] if e["number"] == episode][0]
 
-    base_url = f"{os.getenv("ZORO_URL")}/anime/episode-srcs?id={episode_d["episodeId"]}?server&category={mode}"
-    response = requests.get(base_url)
-    episode_data = response.json()
-
-    if "message" in episode_data and episode_data["message"] == "Couldn't find server. Try another server":
-        base_url = f"{os.getenv("ZORO_URL")}/anime/episode-srcs?id={episode_d["episodeId"]}?server=hd-2&category={mode}"
+        base_url = f"{os.getenv("ZORO_URL")}/anime/episode-srcs?id={episode_d["episodeId"]}?server&category={mode}"
         response = requests.get(base_url)
         episode_data = response.json()
 
-    # if no captions are present and the mode is dub, and ingrain_sub_subtitles_in_dub is true, then fetch the sub track
-    if not any(t["kind"] == "captions" for t in episode_data["tracks"]) and mode == "dub" and request.user.preferences.ingrain_sub_subtitles_in_dub:
-        base_url = f"{os.getenv("ZORO_URL")}/anime/episode-srcs?id={episode_d["episodeId"]}?server&category=sub"
-        response = requests.get(base_url).json()
-        captions = [t for t in response["tracks"] if t["kind"] == "captions"]
-        if captions:
-            episode_data["tracks"].extend(captions)
+        if "message" in episode_data and episode_data["message"] == "Couldn't find server. Try another server":
+            base_url = f"{os.getenv("ZORO_URL")}/anime/episode-srcs?id={episode_d["episodeId"]}?server=hd-2&category={mode}"
+            response = requests.get(base_url)
+            episode_data = response.json()
 
-    current_episode_name = [e["title"] for e in anime_episodes["episodes"] if e["number"] == episode][0]
-   
-    update_anime_user_history(request.user, anime_id, episode, current_watched_time)
+        # if no captions are present and the mode is dub, and ingrain_sub_subtitles_in_dub is true, then fetch the sub track
+        if not any(t["kind"] == "captions" for t in episode_data["tracks"]) and mode == "dub" and request.user.preferences.ingrain_sub_subtitles_in_dub:
+            base_url = f"{os.getenv("ZORO_URL")}/anime/episode-srcs?id={episode_d["episodeId"]}?server&category=sub"
+            response = requests.get(base_url).json()
+            captions = [t for t in response["tracks"] if t["kind"] == "captions"]
+            if captions:
+                episode_data["tracks"].extend(captions)
 
-    current_episode_data = [e for e in anime_episodes["episodes"] if e["number"] == episode][0]
+        current_episode_name = [e["title"] for e in anime_episodes["episodes"] if e["number"] == episode][0]
+    
+        update_anime_user_history(request.user, anime_id, episode, current_watched_time)
 
-    episode_metadata = get_from_redis_cache(f"anime_{anime_id}_episode_metadata")
-    try:
-        episode_metadata = json.loads(episode_metadata)
-    except:
-        episode_metadata = None
+        current_episode_data = [e for e in anime_episodes["episodes"] if e["number"] == episode][0]
 
-    if not episode_metadata:
-        episode_metadata = get_anime_episodes(anime_data)
-        store_in_redis_cache(f"anime_{anime_id}_episode_metadata", json.dumps(episode_metadata))
-
-    current_episode_metadata = episode_metadata[episode - 1] if episode_metadata else None
+        current_episode_metadata = get_episode_metadata(anime_data, episode)
 
     context = {
         "anime_data": anime_data,
@@ -115,7 +117,7 @@ def watch(request, anime_id, episode=None):
         "episode_data": episode_data,
         "current_episode": episode,
         "current_episode_data": current_episode_data,
-        "stream_url": episode_data["sources"][0]["url"],
+        "stream_url": episode_data["sources"][0]["url"] if episode_data else None,
         "anime_id": anime_id,
         "current_episode_name": current_episode_name,
         "anime_history": anime_history,
@@ -125,7 +127,7 @@ def watch(request, anime_id, episode=None):
         "mode": mode,
     }
 
-    if request.user.mal_access_token:
+    if request.user.mal_access_token and anime_data and "malId" in anime_data:
         mal_data = get_single_anime_mal(request.user.mal_access_token, anime_data["malId"])
         if mal_data:
             mal_data["average_episode_duration"] = mal_data["average_episode_duration"] // 60 + 1

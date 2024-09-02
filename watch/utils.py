@@ -1,7 +1,9 @@
+import json
 import redis
 import os
 import dotenv
 from user_profile.models import UserHistory
+from watch.tmdbmapper import get_anime_episodes
 
 dotenv.load_dotenv()
 
@@ -14,6 +16,23 @@ r = redis.Redis(
 
 # r.flushall()
 # print("Redis cache flushed")
+
+def get_episode_metadata(anime_data, episode):
+    # Special Cases:
+    special_case = False
+    if anime_data["title"]["english"] == "Attack on Titan Final Season THE FINAL CHAPTERS Special 1" and episode == 2:
+        episode = 1
+
+    episode_metadata = get_from_redis_cache(f"anime_{anime_data['id']}_episode_metadata")
+    if episode_metadata:
+        episode_metadata = json.loads(episode_metadata)
+    else:
+        episode_metadata = get_anime_episodes(anime_data)
+        if not special_case:
+            store_in_redis_cache(f"anime_{anime_data['id']}_episode_metadata", json.dumps(episode_metadata))
+    current_episode_metadata = episode_metadata[episode - 1] if len(episode_metadata) >= episode else None
+    return current_episode_metadata
+
 
 def update_anime_user_history(user, anime_id, episode, time_watched):
     # per episode history
