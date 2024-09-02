@@ -6,6 +6,7 @@ from authentication.utils import get_single_anime_mal
 from watch.utils import update_anime_user_history, get_anime_user_history, get_from_redis_cache, store_in_redis_cache
 import requests
 import json
+from watch.tmdbmapper import get_anime_episodes
 
 dotenv.load_dotenv()
 
@@ -27,13 +28,29 @@ def watch(request, anime_id, episode=None):
     anime_selected_cached = get_from_redis_cache(f"anime_{anime_id}_anime_selected")
     anime_episodes_cached = get_from_redis_cache(f"anime_{anime_id}_anime_episodes")
 
+    if anime_data_cached:
+        try:
+            anime_data = json.loads(anime_data_cached)
+        except:
+            anime_data = None
+
+    if anime_selected_cached:
+        try:
+            anime_selected = json.loads(anime_selected_cached)
+        except:
+            anime_selected = None
+
+    if anime_episodes_cached:
+        try:
+            anime_episodes = json.loads(anime_episodes_cached)
+        except:
+            anime_episodes = None
+
     if not anime_data_cached:
         base_url = f"{os.getenv("CONSUMET_URL")}/meta/anilist/info/{anime_id}?provider=zoro"
         response = requests.get(base_url)
         anime_data = response.json()
         store_in_redis_cache(f"anime_{anime_id}_anime_data", json.dumps(anime_data))
-    else:
-        anime_data = json.loads(anime_data_cached)
 
     if not anime_selected_cached:
         z_anime_id = anime_data["episodes"][0]["id"].split("$")[0]
@@ -41,16 +58,12 @@ def watch(request, anime_id, episode=None):
         response = requests.get(base_url)
         anime_selected = response.json()
         store_in_redis_cache(f"anime_{anime_id}_anime_selected", json.dumps(anime_selected))
-    else:
-        anime_selected = json.loads(anime_selected_cached)
 
     if not anime_episodes_cached:
         base_url = f"{os.getenv("ZORO_URL")}/anime/episodes/{anime_selected["anime"]["info"]["id"]}"
         response = requests.get(base_url)
         anime_episodes = response.json()
         store_in_redis_cache(f"anime_{anime_id}_anime_episodes", json.dumps(anime_episodes))
-    else:
-        anime_episodes = json.loads(anime_episodes_cached)
 
     if not anime_selected["anime"]["info"]["stats"]["episodes"][mode] or anime_selected["anime"]["info"]["stats"]["episodes"][mode] < episode:
         mode = "sub"
@@ -83,6 +96,18 @@ def watch(request, anime_id, episode=None):
 
     current_episode_data = [e for e in anime_episodes["episodes"] if e["number"] == episode][0]
 
+    episode_metadata = get_from_redis_cache(f"anime_{anime_id}_episode_metadata")
+    try:
+        episode_metadata = json.loads(episode_metadata)
+    except:
+        episode_metadata = None
+
+    if not episode_metadata:
+        episode_metadata = get_anime_episodes(anime_data)
+        store_in_redis_cache(f"anime_{anime_id}_episode_metadata", json.dumps(episode_metadata))
+
+    current_episode_metadata = episode_metadata[episode - 1] if episode_metadata else None
+
     context = {
         "anime_data": anime_data,
         "anime_selected": anime_selected,
@@ -96,6 +121,7 @@ def watch(request, anime_id, episode=None):
         "anime_history": anime_history,
         "watched_episodes": watched_episodes,
         "current_watched_time": current_watched_time,
+        "current_episode_metadata": current_episode_metadata,
         "mode": mode,
     }
 

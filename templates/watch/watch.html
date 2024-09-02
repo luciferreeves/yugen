@@ -106,6 +106,9 @@
                 <a href="{% url "watch:watch_episode" anime_id current_episode_data.number %}?mode=dub" class="{% if mode == "dub" %}bg-{{ user.preferences.accent_colour }}-600{% else %}bg-white bg-opacity-10{% endif %} text-white text-sm font-bold px-4 py-2 rounded">Dub</a>
             </div>
         </div>
+        <p class="my-4">
+            {{ current_episode_metadata.description }}
+        </p>
         <div class="flex flex-col lg:flex-row w-full my-4 bg-neutral-950 rounded p-2 gap-4">
             <div class="flex flex-col items-center lg:items-start gap-2 min-w-32">
                 <img src="{{ anime_data.image }}" alt="{{ anime_data.title.english }}" class="rounded-lg w-48 h-72 object-cover"/>
@@ -569,7 +572,8 @@
             <span>Recommendations</span>
         </div>
         <div class="flex flex-col gap-2">
-            {% for recommendation in anime_data.recommendations %}
+            {% for recommendation in anime_data.recommendations|slice:":10" %}
+            {% if recommendation.id %}
             <a href="{% url 'watch:watch' recommendation.id %}" class="flex flex-row w-full gap-4 bg-white bg-opacity-10 p-2 rounded hover:bg-{{ user.preferences.accent_colour }}-600 hover:bg-opacity-30">
                 <img src="{{ recommendation.image }}" alt="{{ recommendation.title.english }}" class="rounded-lg w-12 h-16 object-cover"/>
                 <div class="flex flex-col gap-2 max-w-[calc(100%-4rem)]">
@@ -632,6 +636,7 @@
                     {% endif %}
                 </div>
             </a>
+            {% endif %}
             {% endfor %}
         </div>
         {% endif %}
