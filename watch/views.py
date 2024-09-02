@@ -94,7 +94,7 @@ def watch(request, anime_id, episode=None):
             episode_data = response.json()
 
         # if no captions are present and the mode is dub, and ingrain_sub_subtitles_in_dub is true, then fetch the sub track
-        if not any(t["kind"] == "captions" for t in episode_data["tracks"]) and mode == "dub" and request.user.preferences.ingrain_sub_subtitles_in_dub:
+        if "tracks" in episode_data and not any(t["kind"] == "captions" for t in episode_data["tracks"]) and mode == "dub" and request.user.preferences.ingrain_sub_subtitles_in_dub:
             base_url = f"{os.getenv("ZORO_URL")}/anime/episode-srcs?id={episode_d["episodeId"]}?server&category=sub"
             response = requests.get(base_url).json()
             captions = [t for t in response["tracks"] if t["kind"] == "captions"]
@@ -116,7 +116,7 @@ def watch(request, anime_id, episode=None):
         "episode_data": episode_data,
         "current_episode": episode,
         "current_episode_data": current_episode_data,
-        "stream_url": episode_data["sources"][0]["url"] if episode_data else None,
+        "stream_url": episode_data["sources"][0]["url"] if episode_data and "sources" in episode_data else None,
         "anime_id": anime_id,
         "current_episode_name": current_episode_name,
         "anime_history": anime_history,

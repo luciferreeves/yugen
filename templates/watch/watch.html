@@ -857,6 +857,25 @@
         document.getElementById('skip-buttons').remove();
         mediaProviderElememt.appendChild(skipButtons);
     });
+
+    const storedQuality = JSON.parse(window.localStorage.getItem('quality'));
+    const storedAutoQuality = window.localStorage.getItem('autoQuality') === 'true';
+    player.qualities.addEventListener('add', (event) => {
+        const quality = event.detail;
+        if (storedQuality && quality.height === storedQuality.height && !storedAutoQuality) {
+            quality.selected = true;
+        }
+    });
+
+    player.qualities.addEventListener('change', (event) => {
+        const quality = event.detail;
+        window.localStorage.setItem('quality', JSON.stringify(quality.current));
+    });
+
+    const { autoQuality } = player.state;
+    player.subscribe(({ autoQuality }) => {
+        window.localStorage.setItem('autoQuality', autoQuality);
+    });
     
     player.addEventListener('time-update', (event) => {
         const currentTime = event.detail.currentTime;
