@@ -79,7 +79,6 @@ def watch(request, anime_id, episode=None):
             mode = "sub"
 
     if anime_episodes is not None:
-        print(anime_episodes)
         if episode > anime_episodes["totalEpisodes"]:
             return redirect("watch:watch_episode", anime_id=anime_id, episode=anime_episodes["totalEpisodes"])
         
