@@ -1,6 +1,16 @@
 {% extends "partials/base.html" %}
 {% load custom_filters %}
-
+{% block css %}
+<style>
+    @media (max-width: 640px) {
+        .detail-section {
+          top: 8rem;
+          left: -8.5rem;
+          width: 100vw;
+        }
+      }
+</style>
+{% endblock css %}
 {% block content %}
 <div style="background-image: url('{{ anime.cover }}')" class="relative bg-center bg-cover h-32 lg:h-96 my-4 rounded-lg" >
     <div class="absolute inset-0" style="background: linear-gradient(45deg, rgb(8, 8, 8) 15%, transparent 60%), linear-gradient(0deg, rgb(8, 8, 8) 0%, transparent 60%);"></div>
@@ -20,35 +30,35 @@
                 <svg stroke="currentColor" fill="currentColor" stroke-width="0" role="img" viewBox="0 0 24 24" height="1.5rem" width="1.5rem" xmlns="http://www.w3.org/2000/svg"><path d="M8.273 7.247v8.423l-2.103-.003v-5.216l-2.03 2.404-1.989-2.458-.02 5.285H.001L0 7.247h2.203l1.865 2.545 2.015-2.546 2.19.001zm8.628 2.069l.025 6.335h-2.365l-.008-2.871h-2.8c.07.499.21 1.266.417 1.779.155.381.298.751.583 1.128l-1.705 1.125c-.349-.636-.622-1.337-.878-2.082a9.296 9.296 0 0 1-.507-2.179c-.085-.75-.097-1.471.107-2.212a3.908 3.908 0 0 1 1.161-1.866c.313-.293.749-.5 1.1-.687.351-.187.743-.264 1.107-.359a7.405 7.405 0 0 1 1.191-.183c.398-.034 1.107-.066 2.39-.028l.545 1.749H14.51c-.593.008-.878.001-1.341.209a2.236 2.236 0 0 0-1.278 1.92l2.663.033.038-1.81h2.309zm3.992-2.099v6.627l3.107.032-.43 1.775h-4.807V7.187l2.13.03z"></path></svg>
             </a>
         </div>
-        <div class="flex flex-row overflow-x-auto lg:flex-col gap-4 my-4 pb-2 lg:pb-0">
-            <div class="whitespace-nowrap">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 my-4 max-w-4xl mx-auto">
+            <div>
                 <span class="font-bold">Format: </span>{{ anime.type }}
             </div>
-            <div class="whitespace-nowrap">
+            <div>
                 <span class="font-bold">Episodes: </span>{{ anime.totalEpisodes }}
             </div>
-            <div class="whitespace-nowrap">
+            <div>
                 <span class="font-bold">Year: </span>{{ anime.releaseDate }}
             </div>
-            <div class="whitespace-nowrap">
+            <div>
                 <span class="font-bold">Duration: </span>{{ anime.duration }} mins
             </div>
-            <div class="whitespace-nowrap">
+            <div>
                 <span class="font-bold">Status: </span>{{ anime.status }}
             </div>
-            <div class="whitespace-nowrap capitalize">
+            <div class="capitalize">
                 <span class="font-bold">Season: </span>{{ anime.season }}
             </div>
-            <div class="whitespace-nowrap">
+            <div>
                 <span class="font-bold">Rating: </span>{{ anime.rating }} / 100
             </div>
-            <div class="whitespace-nowrap">
+            <div>
                 <span class="font-bold">Popularity: </span>{{ anime.popularity }}
             </div>
-            <div class="whitespace-nowrap">
+            <div>
                 <span class="font-bold">Country: </span>{{ anime.countryOfOrigin }}
             </div>
-            <div class="whitespace-nowrap">
+            <div class="sm:col-span-2 lg:col-span-3">
                 <span class="font-bold">Studios: </span>
                 {% for studio in anime.studios %}
                     <span>{{ studio }}</span>{% if not forloop.last %}, {% endif %}
@@ -155,100 +165,101 @@
             {{ anime.title.romaji }}
             {% endif %}
         </h2>
-        <p class="max-h-24 overflow-auto text-sm text-white mb-4 no-scrollbar">
+        <p class="h-96 lg:max-h-24 overflow-auto text-sm text-white mb-4 no-scrollbar">
             {{ anime.description|strip_html }}
         </p>
-    </div>
-</div>
-<section class="w-full lg:w-10/12 flex flex-col items-center justify-center p-2 relative top-64 lg:top-0 lg:left-[18rem]">
-    <section class="inline-flex w-max flex-row gap-4 rounded-full mb-8 bg-white bg-opacity-10 mx-auto">
-      <button class="flex flex-row items-center focus:outline-none gap-2 text-sm font-bold py-2 px-4 rounded-full category-switch" data-target="characters">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-4">
-            <path fill-rule="evenodd" d="M18.685 19.097A9.723 9.723 0 0 0 21.75 12c0-5.385-4.365-9.75-9.75-9.75S2.25 6.615 2.25 12a9.723 9.723 0 0 0 3.065 7.097A9.716 9.716 0 0 0 12 21.75a9.716 9.716 0 0 0 6.685-2.653Zm-12.54-1.285A7.486 7.486 0 0 1 12 15a7.486 7.486 0 0 1 5.855 2.812A8.224 8.224 0 0 1 12 20.25a8.224 8.224 0 0 1-5.855-2.438ZM15.75 9a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0Z" clip-rule="evenodd" />
-        </svg>          
-        <span>Characters</span>
-      </button>
-      <button class="flex flex-row items-center focus:outline-none gap-2 text-sm font-bold py-2 px-4 rounded-full category-switch bg-{{ user.preferences.accent_colour }}-600" data-target="episodes">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-4">
-            <path fill-rule="evenodd" d="M1.5 5.625c0-1.036.84-1.875 1.875-1.875h17.25c1.035 0 1.875.84 1.875 1.875v12.75c0 1.035-.84 1.875-1.875 1.875H3.375A1.875 1.875 0 0 1 1.5 18.375V5.625Zm1.5 0v1.5c0 .207.168.375.375.375h1.5a.375.375 0 0 0 .375-.375v-1.5a.375.375 0 0 0-.375-.375h-1.5A.375.375 0 0 0 3 5.625Zm16.125-.375a.375.375 0 0 0-.375.375v1.5c0 .207.168.375.375.375h1.5A.375.375 0 0 0 21 7.125v-1.5a.375.375 0 0 0-.375-.375h-1.5ZM21 9.375A.375.375 0 0 0 20.625 9h-1.5a.375.375 0 0 0-.375.375v1.5c0 .207.168.375.375.375h1.5a.375.375 0 0 0 .375-.375v-1.5Zm0 3.75a.375.375 0 0 0-.375-.375h-1.5a.375.375 0 0 0-.375.375v1.5c0 .207.168.375.375.375h1.5a.375.375 0 0 0 .375-.375v-1.5Zm0 3.75a.375.375 0 0 0-.375-.375h-1.5a.375.375 0 0 0-.375.375v1.5c0 .207.168.375.375.375h1.5a.375.375 0 0 0 .375-.375v-1.5ZM4.875 18.75a.375.375 0 0 0 .375-.375v-1.5a.375.375 0 0 0-.375-.375h-1.5a.375.375 0 0 0-.375.375v1.5c0 .207.168.375.375.375h1.5ZM3.375 15h1.5a.375.375 0 0 0 .375-.375v-1.5a.375.375 0 0 0-.375-.375h-1.5a.375.375 0 0 0-.375.375v1.5c0 .207.168.375.375.375Zm0-3.75h1.5a.375.375 0 0 0 .375-.375v-1.5A.375.375 0 0 0 4.875 9h-1.5A.375.375 0 0 0 3 9.375v1.5c0 .207.168.375.375.375Zm4.125 0a.75.75 0 0 0 0 1.5h9a.75.75 0 0 0 0-1.5h-9Z" clip-rule="evenodd" />
-        </svg>
-        <span>Episodes</span>
-      </button>      
-      <button class="flex flex-row items-center focus:outline-none gap-2 text-sm font-bold py-2 px-4 rounded-full category-switch" data-target="trailer">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-4">
-            <path d="M4.5 4.5a3 3 0 0 0-3 3v9a3 3 0 0 0 3 3h8.25a3 3 0 0 0 3-3v-9a3 3 0 0 0-3-3H4.5ZM19.94 18.75l-2.69-2.69V7.94l2.69-2.69c.944-.945 2.56-.276 2.56 1.06v11.38c0 1.336-1.616 2.005-2.56 1.06Z" />
-        </svg>
-        <span>Trailer</span>
-      </button>      
-    </section>
-    <section id="characters" class="w-full hidden">
-        <div class="flex flex-wrap">
-            {% for character in anime.characters %}
-            <div class="w-full lg:w-1/2 px-4 py-2 flex justify-between">
-                <div class="flex flex-row gap-2 items-center">
-                    <img src="{{ character.image }}" alt="{{ character.name }}" class="rounded-full w-16 h-16 object-cover"/>
-                    <div class="flex flex-col gap-2">
-                        <span class="font-bold">
-                            {% if user.preferences.character_name_language == "romaji" %}
-                            {{ character.name.full }}
-                            {% else %}
-                            {{ character.name.native }}
-                            {% endif %}
-                        </span>
-                        <span class="capitalize">{{ character.role }}</span>
-                    </div>
-                </div>
-                <div class="flex flex-col items-end">
-                    {% for voice_actor in character.voiceActors|slice:":1" %}
-                    <div class="flex flex-row gap-2 items-center mb-2">
-                        <div class="flex flex-col gap-2 text-right">
-                            <span class="font-bold">
-                                {% if user.preferences.character_name_language == "romaji" %}
-                                {{ voice_actor.name.full }}
-                                {% else %}
-                                {{ voice_actor.name.native }}
-                                {% endif %}
-                            </span>
-                            <span class="capitalize">{{ voice_actor.language }}</span>
+        <section class="w-full flex flex-col items-center justify-center p-2 relative detail-section">
+            <section class="inline-flex w-max flex-row gap-4 rounded-full mb-8 bg-white bg-opacity-10 mx-auto">
+              <button class="flex flex-row items-center focus:outline-none gap-2 text-sm font-bold py-2 px-4 rounded-full category-switch" data-target="characters">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-4">
+                    <path fill-rule="evenodd" d="M18.685 19.097A9.723 9.723 0 0 0 21.75 12c0-5.385-4.365-9.75-9.75-9.75S2.25 6.615 2.25 12a9.723 9.723 0 0 0 3.065 7.097A9.716 9.716 0 0 0 12 21.75a9.716 9.716 0 0 0 6.685-2.653Zm-12.54-1.285A7.486 7.486 0 0 1 12 15a7.486 7.486 0 0 1 5.855 2.812A8.224 8.224 0 0 1 12 20.25a8.224 8.224 0 0 1-5.855-2.438ZM15.75 9a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0Z" clip-rule="evenodd" />
+                </svg>          
+                <span>Characters</span>
+              </button>
+              <button class="flex flex-row items-center focus:outline-none gap-2 text-sm font-bold py-2 px-4 rounded-full category-switch bg-{{ user.preferences.accent_colour }}-600" data-target="episodes">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-4">
+                    <path fill-rule="evenodd" d="M1.5 5.625c0-1.036.84-1.875 1.875-1.875h17.25c1.035 0 1.875.84 1.875 1.875v12.75c0 1.035-.84 1.875-1.875 1.875H3.375A1.875 1.875 0 0 1 1.5 18.375V5.625Zm1.5 0v1.5c0 .207.168.375.375.375h1.5a.375.375 0 0 0 .375-.375v-1.5a.375.375 0 0 0-.375-.375h-1.5A.375.375 0 0 0 3 5.625Zm16.125-.375a.375.375 0 0 0-.375.375v1.5c0 .207.168.375.375.375h1.5A.375.375 0 0 0 21 7.125v-1.5a.375.375 0 0 0-.375-.375h-1.5ZM21 9.375A.375.375 0 0 0 20.625 9h-1.5a.375.375 0 0 0-.375.375v1.5c0 .207.168.375.375.375h1.5a.375.375 0 0 0 .375-.375v-1.5Zm0 3.75a.375.375 0 0 0-.375-.375h-1.5a.375.375 0 0 0-.375.375v1.5c0 .207.168.375.375.375h1.5a.375.375 0 0 0 .375-.375v-1.5Zm0 3.75a.375.375 0 0 0-.375-.375h-1.5a.375.375 0 0 0-.375.375v1.5c0 .207.168.375.375.375h1.5a.375.375 0 0 0 .375-.375v-1.5ZM4.875 18.75a.375.375 0 0 0 .375-.375v-1.5a.375.375 0 0 0-.375-.375h-1.5a.375.375 0 0 0-.375.375v1.5c0 .207.168.375.375.375h1.5ZM3.375 15h1.5a.375.375 0 0 0 .375-.375v-1.5a.375.375 0 0 0-.375-.375h-1.5a.375.375 0 0 0-.375.375v1.5c0 .207.168.375.375.375Zm0-3.75h1.5a.375.375 0 0 0 .375-.375v-1.5A.375.375 0 0 0 4.875 9h-1.5A.375.375 0 0 0 3 9.375v1.5c0 .207.168.375.375.375Zm4.125 0a.75.75 0 0 0 0 1.5h9a.75.75 0 0 0 0-1.5h-9Z" clip-rule="evenodd" />
+                </svg>
+                <span>Episodes</span>
+              </button>      
+              <button class="flex flex-row items-center focus:outline-none gap-2 text-sm font-bold py-2 px-4 rounded-full category-switch" data-target="trailer">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-4">
+                    <path d="M4.5 4.5a3 3 0 0 0-3 3v9a3 3 0 0 0 3 3h8.25a3 3 0 0 0 3-3v-9a3 3 0 0 0-3-3H4.5ZM19.94 18.75l-2.69-2.69V7.94l2.69-2.69c.944-.945 2.56-.276 2.56 1.06v11.38c0 1.336-1.616 2.005-2.56 1.06Z" />
+                </svg>
+                <span>Trailer</span>
+              </button>      
+            </section>
+            <section id="characters" class="w-full hidden">
+                <div class="flex flex-wrap">
+                    {% for character in anime.characters %}
+                    <div class="w-full lg:w-1/2 px-4 py-2 flex justify-between">
+                        <div class="flex flex-row gap-2 items-center">
+                            <img src="{{ character.image }}" alt="{{ character.name }}" class="rounded-full w-16 h-16 object-cover"/>
+                            <div class="flex flex-col gap-2">
+                                <span class="font-bold">
+                                    {% if user.preferences.character_name_language == "romaji" %}
+                                    {{ character.name.full }}
+                                    {% else %}
+                                    {{ character.name.native }}
+                                    {% endif %}
+                                </span>
+                                <span class="capitalize">{{ character.role }}</span>
+                            </div>
                         </div>
-                        <img src="{{ voice_actor.image }}" alt="{{ voice_actor.name }}" class="rounded-full w-16 h-16 object-cover"/>
+                        <div class="flex flex-col items-end">
+                            {% for voice_actor in character.voiceActors|slice:":1" %}
+                            <div class="flex flex-row gap-2 items-center mb-2">
+                                <div class="flex flex-col gap-2 text-right">
+                                    <span class="font-bold">
+                                        {% if user.preferences.character_name_language == "romaji" %}
+                                        {{ voice_actor.name.full }}
+                                        {% else %}
+                                        {{ voice_actor.name.native }}
+                                        {% endif %}
+                                    </span>
+                                    <span class="capitalize">{{ voice_actor.language }}</span>
+                                </div>
+                                <img src="{{ voice_actor.image }}" alt="{{ voice_actor.name }}" class="rounded-full w-16 h-16 object-cover"/>
+                            </div>
+                            {% endfor %}
+                        </div>
                     </div>
                     {% endfor %}
                 </div>
-            </div>
-            {% endfor %}
-        </div>
-    </section>
-    <section id="episodes" class="w-full flex-wrap flex justify-start">
-        {% for episode in episodes.episodes %}
-        <a href="{% url "watch:watch_episode" anime.id episode.number %}" class="w-full lg:w-1/2 px-2 mb-2">
-            <div class="flex flex-row w-full bg-neutral-950 rounded hover:bg-{{ user.preferences.accent_colour }}-600 hover:bg-opacity-30 p-2 gap-4">
-                <div class="flex-shrink-0">
-                    <img src="{% if episode.metadata.image %}{{ episode.metadata.image }}{% else %}{{ anime.cover}}{% endif %}" alt="{{ episode.title }}" class="w-48 h-28 object-cover rounded-lg"/>
+            </section>
+            <section id="episodes" class="w-full flex-wrap flex justify-start">
+                {% for episode in episodes.episodes %}
+                <a href="{% url "watch:watch_episode" anime.id episode.number %}" class="w-full lg:w-1/2 px-2 mb-2">
+                    <div class="flex flex-col lg:flex-row w-full bg-neutral-950 rounded hover:bg-{{ user.preferences.accent_colour }}-600 hover:bg-opacity-30 p-2 gap-4">
+                        <div class="flex-shrink-0">
+                            <img src="{% if episode.metadata.image %}{{ episode.metadata.image }}{% else %}{{ anime.cover}}{% endif %}" alt="{{ episode.title }}" class="w-48 h-28 object-cover rounded-lg"/>
+                        </div>
+                        <div class="flex flex-col gap-2">
+                            <h2 class="font-bold">{% if episode.metadata.title %}{{ episode.metadata.title }}{% else %}{{ episode.title }}{% endif %}</h2>
+                            <p class="text-sm">{{ episode.metadata.description|truncatewords:50 }}</p>
+                        </div>
+                    </div>
+                </a>
+                {% endfor %}
+                {% if not episodes %}
+                <div class="w-full h-96 flex items-center justify-center">
+                    <span>No Episodes Available</span>
                 </div>
-                <div class="flex flex-col gap-2">
-                    <h2 class="font-bold">{% if episode.metadata.title %}{{ episode.metadata.title }}{% else %}{{ episode.title }}{% endif %}</h2>
-                    <p class="text-sm">{{ episode.metadata.description|truncatewords:50 }}</p>
+                {% endif %}
+            </section>
+            <section id="trailer" class="w-full hidden">
+                {% if anime.trailer and anime.trailer.site == "youtube" %}
+                <iframe src="https://www.youtube.com/embed/{{ anime.trailer.id }}" title="{{ anime.title.english }} Trailer" class="w-full aspect-video" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" credentialless allowfullscreen></iframe>
+                {% else %}
+                <div class="w-full h-96 flex items-center justify-center">
+                    <span>No Trailer Available</span>
                 </div>
-            </div>
-        </a>
-        {% endfor %}
-        {% if not episodes %}
-        <div class="w-full h-96 flex items-center justify-center">
-            <span>No Episodes Available</span>
-        </div>
-        {% endif %}
-    </section>
-    <section id="trailer" class="w-full hidden">
-        {% if anime.trailer and anime.trailer.site == "youtube" %}
-        <iframe src="https://www.youtube.com/embed/{{ anime.trailer.id }}" title="{{ anime.title.english }} Trailer" class="w-full aspect-video" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" credentialless allowfullscreen></iframe>
-        {% else %}
-        <div class="w-full h-96 flex items-center justify-center">
-            <span>No Trailer Available</span>
-        </div>
-        {% endif %}
-    </section>
-</section>
+                {% endif %}
+            </section>
+        </section>
+    </div>
+</div>
+
 {% endblock content %}
 {% block scripts %}
 <script>

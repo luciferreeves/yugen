@@ -41,6 +41,7 @@ main {
 .peer:checked + div .toggle-dot {
   transform: translateX(100%);
 }
+
 .toggle-dot {
   transition: transform 0.1s ease-in-out;
 }
