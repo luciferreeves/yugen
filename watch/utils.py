@@ -1,3 +1,4 @@
+import datetime
 import json
 import redis
 import os
@@ -9,9 +10,8 @@ dotenv.load_dotenv()
 
 r = redis.Redis(
     host=os.getenv("REDIS_HOST"),
-    port=6379,
+    port=os.getenv("REDIS_PORT"),
     password=os.getenv("REDIS_PASSWORD"),
-    ssl=True,
 )
 
 # r.flushall()
@@ -61,6 +61,7 @@ def update_anime_user_history(user, anime_id, episode, time_watched):
         last_watched.save()
 
     history.last_watched = True
+    history.last_updated = datetime.datetime.now()
     history.save()
 
 def get_anime_user_history(user, anime_id):
@@ -70,7 +71,8 @@ def get_anime_user_history(user, anime_id):
 
 def store_in_redis_cache(anime_id, data):
     try:
-        r.set(anime_id, data, ex=60*60) # 1 hour
+        print("Storing in cache=>", anime_id)
+        r.set(anime_id, data, ex=60*60*12) # 1 hour
     except Exception as e:
         print(e)
         pass

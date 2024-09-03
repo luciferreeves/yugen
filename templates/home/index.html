@@ -4,7 +4,7 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
 {% endblock css %} {% block content %}
 <!-- Swiper: Trending Anime -->
-<section class="swiper rounded mt-2">
+<section class="swiper bigSwiper rounded mt-2">
   <div class="swiper-wrapper">
     {% for anime in trending_anime %} 
     {% if anime.duration %}
@@ -102,6 +102,35 @@
   <a href="#" class="bg-orange-100 bg-opacity-10 text-orange-300 text-sm font-bold py-2 px-4 rounded-full">Thriller</a>
 </section>
 
+{% if request.user.preferences.show_history_on_home %}
+<h1 class="text-2xl font-bold text-white mt-4">Continue Watching</h1>
+<div class="flex flex-row gap-2 mt-4 overflow-x-auto no-scrollbar swiper historySwiper">
+  <div class="swiper-wrapper">
+    {% for history in user_history_data %}
+    <a href="{% url "watch:watch_episode" history.anime_id history.episode %}" class="group rounded-lg aspect-video h-48 relative flex-shrink-0 overflow-hidden swiper-slide">
+      <div class="absolute inset-0 bg-center bg-cover transition-transform group-hover:scale-110" style="background-image: url('{{ history.metadata.image }}')"></div>
+      <div class="absolute inset-0 bg-{{ user.preferences.accent_colour }}-600 opacity-0 group-hover:opacity-30 transition-opacity"></div>
+      <div class="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-70"></div>
+      <div class="flex flex-col justify-end h-full p-2 relative z-10">
+        <h1 class="text-xl font-bold truncate max-w-full overflow-hidden text-ellipsis whitespace-nowrap">
+          {% if user.preferences.title_language == "english" and history.title.english %}
+          {{ history.title.english }}
+          {% elif user.preferences.title_language == "native" and history.title.native %}
+          {{ history.title.native }}
+          {% else %}
+          {{ history.title.romaji }}
+          {% endif %}
+        </h1>
+        <h2 class="font-bold truncate max-w-full overflow-hidden text-ellipsis whitespace-nowrap">{{ history.metadata.title }}</h2>
+        <p>Episode {{ history.episode }}</p>
+      </div>
+    </a>
+    {% endfor %}
+  </div>
+</div>
+{% endif %}
+
+
 <!-- Split: Anime List: Sidebar -->
 <section class="flex flex-col xl:flex-row mt-4 gap-4">
   <section class="w-full xl:w-3/4 flex flex-col items-center p-2">
@@ -179,7 +208,7 @@
 {% endblock content %} {% block scripts %}
 <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
 <script>
-  const swiper = new Swiper(".swiper", {
+  const swiper = new Swiper(".bigSwiper", {
     // Optional parameters
     direction: "horizontal",
     loop: true,
@@ -197,6 +226,12 @@
       el: ".swiper-pagination",
       dynamicBullets: true,
     },
+  });
+
+  const historySwiper = new Swiper(".historySwiper", {
+    slidesPerView: 'auto',
+    spaceBetween: 8,
+    freeMode: true,
   });
 </script>
 <script>

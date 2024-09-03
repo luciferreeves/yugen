@@ -31,6 +31,7 @@ class UserHistory(models.Model):
     episode = models.IntegerField()
     time_watched = models.IntegerField(default=0)
     last_watched = models.BooleanField(default=False)
+    last_updated = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return f"{self.user.username} watched episode {self.episode} of anime {self.anime_id}"
