@@ -32,7 +32,11 @@ DEBUG = True if os.environ.get("DEBUG") == "True" else False
 ALLOWED_HOSTS = ["127.0.0.1", "localhost", ".vercel.app", ".rize.moe"]
 
 AUTH_USER_MODEL = "authentication.User"
+X_FRAME_OPTIONS = "SAMEORIGIN"
 
+CORS_ALLOWED_ORIGINS = [
+       "https://www.youtube.com",
+]
 # Application definition
 
 INSTALLED_APPS = [

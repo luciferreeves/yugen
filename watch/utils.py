@@ -18,7 +18,6 @@ r = redis.Redis(
 # print("Redis cache flushed")
 
 def get_episode_metadata(anime_data, episode):
-    # Special Cases:
     special_case = False
     if anime_data["title"]["english"] == "Attack on Titan Final Season THE FINAL CHAPTERS Special 1" and episode == 2:
         episode = 1
@@ -32,6 +31,21 @@ def get_episode_metadata(anime_data, episode):
             store_in_redis_cache(f"anime_{anime_data['id']}_episode_metadata", json.dumps(episode_metadata))
     current_episode_metadata = episode_metadata[episode - 1] if len(episode_metadata) >= episode else None
     return current_episode_metadata
+
+
+def get_all_episode_metadata(anime_data):
+    episode_metadata = get_from_redis_cache(f"anime_{anime_data['id']}_episode_metadata")
+    if episode_metadata:
+        episode_metadata = json.loads(episode_metadata)
+    else:
+        episode_metadata = get_anime_episodes(anime_data)
+        store_in_redis_cache(f"anime_{anime_data['id']}_episode_metadata", json.dumps(episode_metadata))
+
+    # Special cases
+    if anime_data["title"]["english"] == "Attack on Titan Final Season THE FINAL CHAPTERS Special 1":
+        episode_metadata.insert(0, episode_metadata[0])
+
+    return episode_metadata
 
 
 def update_anime_user_history(user, anime_id, episode, time_watched):

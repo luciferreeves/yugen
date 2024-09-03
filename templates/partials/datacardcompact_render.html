@@ -1,4 +1,5 @@
 {% for anime in data %}
+{% if not anime.status == "Not yet aired"%}
 <div class="w-full max-w-full px-2 mb-2">
     <a href="{% url 'watch:watch' anime.id %}">
     <div class="flex flex-row bg-neutral-950 rounded hover:bg-{{ user.preferences.accent_colour }}-600 hover:bg-opacity-30 p-2 gap-4 items-center">
@@ -122,4 +123,5 @@
     </div>
 </a>
 </div>
+{% endif %}
 {% endfor %}

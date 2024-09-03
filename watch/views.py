@@ -11,6 +11,10 @@ import json
 dotenv.load_dotenv()
 
 def watch(request, anime_id, episode=None):
+    forward_detail = request.GET.get("forward") == "detail"
+    if not episode and request.user.preferences.default_watch_page == "detail" and not forward_detail:
+        return redirect("detail:detail", anime_id=anime_id)
+
     anime_history = get_anime_user_history(request.user, anime_id)
 
     watched_episodes = [h.episode for h in anime_history]
@@ -59,6 +63,9 @@ def watch(request, anime_id, episode=None):
         response = requests.get(base_url)
         anime_data = response.json()
         store_in_redis_cache(f"anime_{anime_id}_anime_data", json.dumps(anime_data))
+
+    if anime_data["status"] == "Not yet aired":
+        return redirect("detail:detail", anime_id=anime_id)
 
     if not anime_selected_cached:
         z_anime_id = anime_data["episodes"][0]["id"].split("$")[0] if len(anime_data["episodes"]) > 0 else None
