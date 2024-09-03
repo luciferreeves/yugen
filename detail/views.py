@@ -30,8 +30,9 @@ def detail(request, anime_id):
     if anime_episodes is not None:
         anime_episodes_metadata = get_all_episode_metadata(anime_data)
         # attach metadata to episodes
-        for i, episode in enumerate(anime_episodes["episodes"]):
-            episode["metadata"] = anime_episodes_metadata[i]
+        if anime_episodes_metadata:
+            for i, episode in enumerate(anime_episodes["episodes"]):
+                episode["metadata"] = anime_episodes_metadata[i]
 
     context = {
         "anime": anime_data,

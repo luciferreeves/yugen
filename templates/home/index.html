@@ -108,9 +108,9 @@
   <div class="swiper-wrapper">
     {% for history in user_history_data %}
     <a href="{% url "watch:watch_episode" history.anime_id history.episode %}" class="group rounded-lg aspect-video h-48 relative flex-shrink-0 overflow-hidden swiper-slide">
-      <div class="absolute inset-0 bg-center bg-cover transition-transform group-hover:scale-110" style="background-image: url('{{ history.metadata.image }}')"></div>
+      <div class="absolute inset-0 bg-center bg-cover transition-transform group-hover:scale-110" style="background-image: url('{% if history.metadata.image %}{{ history.metadata.image }}'){% else %}{{ history.cover }}{% endif %}"></div>
       <div class="absolute inset-0 bg-{{ user.preferences.accent_colour }}-600 opacity-0 group-hover:opacity-30 transition-opacity"></div>
-      <div class="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-70"></div>
+      <div class="absolute inset-0" style="background: linear-gradient(45deg, rgb(8, 8, 8) 15%, transparent 60%), linear-gradient(0deg, rgb(8, 8, 8) 0%, transparent 60%);"></div>
       <div class="flex flex-col justify-end h-full p-2 relative z-10">
         <h1 class="text-xl font-bold truncate max-w-full overflow-hidden text-ellipsis whitespace-nowrap">
           {% if user.preferences.title_language == "english" and history.title.english %}

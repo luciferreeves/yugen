@@ -110,6 +110,7 @@ def gather_watch_history(request, limit=None):
         user_history_data.append({
             "anime_id": anime_id,
             "title": anime_data["title"],
+            "cover": anime_data["cover"],
             "episode": last_watched,
             "metadata": episode_metadata
         })

@@ -4,7 +4,7 @@ import redis
 import os
 import dotenv
 from user_profile.models import UserHistory
-from watch.tmdbmapper import get_anime_episodes
+from watch.tmdbmapper import get_anime_episodes, get_tv_episode_group_details
 
 dotenv.load_dotenv()
 
@@ -18,27 +18,32 @@ r = redis.Redis(
 # print("Redis cache flushed")
 
 def get_episode_metadata(anime_data, episode):
-    special_case = False
-    if anime_data["title"]["english"] == "Attack on Titan Final Season THE FINAL CHAPTERS Special 1" and episode == 2:
-        episode = 1
-
-    episode_metadata = get_from_redis_cache(f"anime_{anime_data['id']}_episode_metadata")
-    if episode_metadata:
-        episode_metadata = json.loads(episode_metadata)
-    else:
-        episode_metadata = get_anime_episodes(anime_data)
-        if not special_case:
-            store_in_redis_cache(f"anime_{anime_data['id']}_episode_metadata", json.dumps(episode_metadata))
+    episode_metadata = get_all_episode_metadata(anime_data)
     current_episode_metadata = episode_metadata[episode - 1] if len(episode_metadata) >= episode else None
     return current_episode_metadata
 
 
 def get_all_episode_metadata(anime_data):
+    special_case = False
+
+    special_cases = {
+        "Clannad": "5de8c6127646fd00139b883d",
+        "Clannad: After Story": "5de8c6bda313b80012935f55"
+    }
+
+    if anime_data["title"]["english"] in special_cases:
+        special_case = True
+
     episode_metadata = get_from_redis_cache(f"anime_{anime_data['id']}_episode_metadata")
     if episode_metadata:
         episode_metadata = json.loads(episode_metadata)
     else:
-        episode_metadata = get_anime_episodes(anime_data)
+        if not special_case:
+            episode_metadata = get_anime_episodes(anime_data)
+        else:
+            group_id = special_cases[anime_data["title"]["english"]]
+            episode_metadata = get_tv_episode_group_details(group_id)
+
         store_in_redis_cache(f"anime_{anime_data['id']}_episode_metadata", json.dumps(episode_metadata))
 
     # Special cases
