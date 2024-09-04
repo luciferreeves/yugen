@@ -337,10 +337,12 @@ def watch(request, anime_id, episode=None):
         "mode": mode,
         "watched_episodes": [h.episode.number for h in history],
         "current_watched_time": current_watched_time,
-        "mal_data": mal_data,
         "mal_episode_range": range(1, mal_data["num_episodes"] + 1) if mal_data else None,
         "seasons": seasons,
     }
+
+    if mal_data:
+        context["mal_data"] = mal_data
 
     if "nextAiringEpisode" in anime_fetched:
         context["nextAiringEpisode"] = anime_fetched["nextAiringEpisode"]
