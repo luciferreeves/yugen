@@ -340,7 +340,7 @@ def watch(request, anime_id, episode=None):
         "seasons": seasons,
     }
 
-    if mal_data and request.user.mal_access_token:
+    if request.user.mal_access_token:
         context["mal_data"] = mal_data
         context["mal_episode_range"] = range(1, mal_data["num_episodes"] + 1)
 
