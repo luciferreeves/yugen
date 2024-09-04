@@ -133,6 +133,8 @@ def update_anime(anime_id, anime_fetched):
                 'status': anime_fetched.get('status'),
                 'start_date': start_date,
                 'end_date': end_date,
+                'dub': 0,  # Set a default value
+                'sub': 0,  # Set a default value
             }
         )
         
@@ -161,11 +163,13 @@ def update_anime(anime_id, anime_fetched):
         # Update sub and dub count
         z_anime_info = get_info_by_zid(anime.z_anime_id)
         try:
-            anime.sub = z_anime_info["anime"]["info"]["stats"]["episodes"]["sub"]
-            anime.dub = z_anime_info["anime"]["info"]["stats"]["episodes"]["dub"]
+            anime.sub = z_anime_info["anime"]["info"]["stats"]["episodes"].get("sub", 0)
+            anime.dub = z_anime_info["anime"]["info"]["stats"]["episodes"].get("dub", 0)
         except:
             print("Error fetching sub and dub count:", z_anime_info)
-            pass
+            # Set default values if fetching fails
+            anime.sub = anime.sub or 0  # Keep existing value or set to 0
+            anime.dub = anime.dub or 0  # Keep existing value or set to 0
         
         # Update genres
         anime.genres.set([AnimeGenre.objects.get_or_create(name=genre)[0] for genre in anime_fetched['genres']])
@@ -185,6 +189,8 @@ def update_anime_episodes(anime):
     with transaction.atomic():
         # Update anime's total episodes
         anime.currentEpisode = fetched_episodes["totalEpisodes"]
+        anime.dub = anime.dub if anime.dub is not None else 0
+        anime.sub = anime.sub if anime.sub is not None else 0
         anime.save()
 
         # Get existing episodes for this anime
@@ -203,7 +209,7 @@ def update_anime_episodes(anime):
                 'description': metadata.get('description', ''),
                 'air_date': dt.strptime(metadata.get('airDate', '1970-01-01'), '%Y-%m-%d').date(),
                 'image': metadata.get('image', ''),
-                'filler': metadata.get('isFiller', False)
+                'filler': episode.get('isFiller', False)
             }
 
             if int(episode['number']) in existing_episodes:

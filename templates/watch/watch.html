@@ -31,7 +31,7 @@
                 <span class="truncate max-w-full overflow-hidden text-ellipsis whitespace-nowrap">{{ episode.number }}. {{ episode.title }}</span>
                 
                 <span class="flex flex-row item-center gap-2">
-                {% if episode.isFiller %}
+                {% if episode.filler %}
                 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" fill="#fff" class="size-3" style="margin-top:0.35rem;" version="1.1" id="Capa_1" viewBox="0 0 23.758 23.758" xml:space="preserve">
                     <g>
                         <g>
@@ -64,7 +64,7 @@
             <a href="{% url "watch:watch_episode" anime.id episode.number %}{% if request.GET.mode %}?mode={{ request.GET.mode }}{% endif %}" class="flex flex-row justify-between w-full gap-4 {% if episode.number in watched_episodes %}bg-{{ user.preferences.accent_colour }}-600 bg-opacity-20{% else %}bg-white bg-opacity-10{% endif %} p-2 rounded hover:bg-{{ user.preferences.accent_colour }}-600 hover:bg-opacity-30">
                 <span class="truncate max-w-full overflow-hidden text-ellipsis whitespace-nowrap">{{ episode.number }}. {{ episode.title }}</span>
                 <span class="flex flex-row item-center gap-2">
-                {% if episode.isFiller %}
+                {% if episode.filler %}
                 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" fill="#fff" class="size-3" style="margin-top:0.35rem;" version="1.1" id="Capa_1" viewBox="0 0 23.758 23.758" xml:space="preserve">
                     <g>
                         <g>
