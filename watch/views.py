@@ -253,6 +253,9 @@ def watch(request, anime_id, episode=None):
         return redirect("detail:detail", anime_id=anime_id)
     
     anime_fetched = get_anime_by_id(anime_id)
+    if anime_fetched["status"] == "Not yet aired":
+        return redirect("detail:detail", anime_id=anime_id)
+
     try:
         anime = Anime.objects.get(id=anime_id)
         if anime.needs_update():
@@ -312,6 +315,9 @@ def watch(request, anime_id, episode=None):
         "mal_data": mal_data,
         "mal_episode_range": range(1, mal_data["num_episodes"] + 1) if mal_data else None,
     }
+
+    if "nextAiringEpisode" in anime_fetched:
+        context["nextAiringEpisode"] = anime_fetched["nextAiringEpisode"]
 
     return render(request, "watch/watch.html", context)
 

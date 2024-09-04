@@ -33,7 +33,10 @@ def get_anime_data(anime_id):
             response = requests.get(base_url, timeout=10)
             response.raise_for_status()
             anime_data = response.json()
-            store_in_redis_cache(cache_key, json.dumps(anime_data), 86400)  # Cache for 24 hours
+            if anime_data["status"] == "Completed":
+                store_in_redis_cache(cache_key, json.dumps(anime_data), 3600 * 24 * 30)  # Cache for 30 days
+            else:
+                store_in_redis_cache(cache_key, json.dumps(anime_data), 3600 * 12) # Cache for 12 hours
         except requests.RequestException as e:
             print(f"Error fetching anime data for ID {anime_id}: {e}")
             return None

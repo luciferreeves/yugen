@@ -169,7 +169,7 @@
                             <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/>
                         </svg>
                     </div>
-                    <div class="absolute z-10 w-full mt-1 bg-neutral-900 rounded shadow-lg hidden" id="status_options">
+                    <div class="absolute z-10 w-full mt-1 bg-neutral-900 rounded shadow-lg hidden max-h-96 overflow-y-scroll no-scrollbar" id="status_options">
                         <div class="py-1">
                             <div class="cursor-pointer px-4 py-2 text-white hover:bg-{{ user.preferences.accent_colour }}-600 capitalize" data-value="watching">watching</div>
                             <div class="cursor-pointer px-4 py-2 text-white hover:bg-{{ user.preferences.accent_colour }}-600 capitalize" data-value="completed">completed</div>
@@ -195,7 +195,7 @@
                             <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/>
                         </svg>
                     </div>
-                    <div class="absolute z-10 w-full mt-1 bg-neutral-900 rounded shadow-lg hidden" id="score_options">
+                    <div class="absolute z-10 w-full mt-1 bg-neutral-900 rounded shadow-lg hidden max-h-96 overflow-y-scroll no-scrollbar" id="score_options">
                         <div class="py-1">
                             <div class="cursor-pointer px-4 py-2 text-white hover:bg-{{ user.preferences.accent_colour }}-600" data-value="10">10</div>
                             <div class="cursor-pointer px-4 py-2 text-white hover:bg-{{ user.preferences.accent_colour }}-600" data-value="9">9</div>
@@ -227,7 +227,7 @@
                             <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/>
                         </svg>
                     </div>
-                    <div class="absolute z-10 w-full mt-1 bg-neutral-900 rounded shadow-lg hidden" id="episodes_options">
+                    <div class="absolute z-10 w-full mt-1 bg-neutral-900 rounded shadow-lg hidden max-h-96 overflow-y-scroll no-scrollbar" id="episodes_options">
                         <div class="py-1">
                             <div class="cursor-pointer px-4 py-2 text-white hover:bg-{{ user.preferences.accent_colour }}-600" data-value="Episodes">0</div>
                             {% for i in mal_episode_range %}

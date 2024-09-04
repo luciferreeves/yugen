@@ -109,14 +109,73 @@
         <p class="my-4">
             {{ current_episode.description }}
         </p>
+        {% if nextAiringEpisode %}
+        <p id="nextAiringEpisodeMessage"></p>
+        <script>
+            const nextAiringEpisode = {
+                airingTime: {{ nextAiringEpisode.airingTime }},
+                timeUntilAiring: {{ nextAiringEpisode.timeUntilAiring }},
+                episode: {{ nextAiringEpisode.episode }}
+            };
+        
+            function formatNextEpisode(nextAiringEpisode) {
+                const airingTime = nextAiringEpisode.airingTime * 1000; // Convert to milliseconds
+                const episodeNumber = nextAiringEpisode.episode;
+        
+                function updateCountdown() {
+                    const now = new Date().getTime();
+                    const timeUntilAiring = airingTime - now;
+                
+                    if (timeUntilAiring <= 0) {
+                        return `Episode ${episodeNumber} has aired.`;
+                    }
+                
+                    const days = Math.floor(timeUntilAiring / (1000 * 60 * 60 * 24));
+                    const hours = Math.floor((timeUntilAiring % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                    const minutes = Math.floor((timeUntilAiring % (1000 * 60 * 60)) / (1000 * 60));
+                    const seconds = Math.floor((timeUntilAiring % (1000 * 60)) / 1000);
+                
+                    const airingDate = new Date(airingTime);
+                    const formattedDate = airingDate.toLocaleDateString('en-US', {
+                        weekday: 'short',
+                        year: 'numeric',
+                        month: 'short',
+                        day: 'numeric',
+                    });
+                    const formattedTime = airingDate.toLocaleTimeString('en-US', {
+                        hour: 'numeric',
+                        minute: '2-digit',
+                        second: '2-digit',
+                        hour12: true
+                    });
+                
+                    return `Episode <strong>${episodeNumber}</strong> will air on ${formattedDate} at ${formattedTime} ` +
+                           `<strong class="text-{{ user.preferences.accent_colour }}-600">(${days} days, ${hours} hours, ${minutes} minutes, ${seconds} seconds)</strong>`;
+                }
+        
+                const countdownElement = document.getElementById('nextAiringEpisodeMessage');
+                countdownElement.innerHTML = updateCountdown();
+        
+                // Update countdown every second
+                setInterval(() => {
+                    countdownElement.innerHTML = updateCountdown();
+                }, 1000);
+            }
+        
+            // Call the function when the page loads
+            document.addEventListener('DOMContentLoaded', function() {
+                formatNextEpisode(nextAiringEpisode);
+            });
+        </script>
+        {% endif %}
         <div class="flex flex-col lg:flex-row w-full my-4 bg-neutral-950 rounded p-2 gap-4">
             <div class="flex flex-col items-center lg:items-start gap-2 min-w-32">
-                <img src="{{ anime.image }}" alt="{{ anime.title.english }}" class="rounded-lg w-48 h-72 object-cover"/>
-                <div class="flex flex-row gap-2">
-                    <a href="https://anilist.co/anime/{{ anime.id }}" target="_blank" class="text-xs font-bold bg-white bg-opacity-10 rounded px-2 py-1">
+                <img src="{{ anime.image }}" alt="{{ anime.title.english }}" class="rounded-lg w-56 h-72 object-cover"/>
+                <div class="flex flex-row gap-2 w-full">
+                    <a href="https://anilist.co/anime/{{ anime.id }}" target="_blank" class="text-xs font-bold bg-{{ user.preferences.accent_colour }}-400 bg-opacity-30 flex-1 justify-center flex hover:bg-opacity-50 rounded px-2 py-1">
                         <svg stroke="currentColor" fill="currentColor" stroke-width="0" role="img" viewBox="0 0 24 24" height="1.5rem" width="1.5rem" xmlns="http://www.w3.org/2000/svg"><path d="M24 17.53v2.421c0 .71-.391 1.101-1.1 1.101h-5l-.057-.165L11.84 3.736c.106-.502.46-.788 1.053-.788h2.422c.71 0 1.1.391 1.1 1.1v12.38H22.9c.71 0 1.1.392 1.1 1.101zM11.034 2.947l6.337 18.104h-4.918l-1.052-3.131H6.019l-1.077 3.131H0L6.361 2.948h4.673zm-.66 10.96-1.69-5.014-1.541 5.015h3.23z"></path></svg>
                     </a>
-                    <a href="https://myanimelist.net/anime/{{ anime.malId }}" target="_blank" class="ext-xs font-bold bg-white bg-opacity-10 rounded px-2 py-1">
+                    <a href="https://myanimelist.net/anime/{{ anime.malId }}" target="_blank" class="ext-xs font-bold bg-{{ user.preferences.accent_colour }}-400 bg-opacity-30 flex-1 justify-center flex hover:bg-opacity-50 rounded px-2 py-1">
                         <svg stroke="currentColor" fill="currentColor" stroke-width="0" role="img" viewBox="0 0 24 24" height="1.5rem" width="1.5rem" xmlns="http://www.w3.org/2000/svg"><path d="M8.273 7.247v8.423l-2.103-.003v-5.216l-2.03 2.404-1.989-2.458-.02 5.285H.001L0 7.247h2.203l1.865 2.545 2.015-2.546 2.19.001zm8.628 2.069l.025 6.335h-2.365l-.008-2.871h-2.8c.07.499.21 1.266.417 1.779.155.381.298.751.583 1.128l-1.705 1.125c-.349-.636-.622-1.337-.878-2.082a9.296 9.296 0 0 1-.507-2.179c-.085-.75-.097-1.471.107-2.212a3.908 3.908 0 0 1 1.161-1.866c.313-.293.749-.5 1.1-.687.351-.187.743-.264 1.107-.359a7.405 7.405 0 0 1 1.191-.183c.398-.034 1.107-.066 2.39-.028l.545 1.749H14.51c-.593.008-.878.001-1.341.209a2.236 2.236 0 0 0-1.278 1.92l2.663.033.038-1.81h2.309zm3.992-2.099v6.627l3.107.032-.43 1.775h-4.807V7.187l2.13.03z"></path></svg>
                     </a>
                 </div>
@@ -309,7 +368,7 @@
                                     <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/>
                                 </svg>
                             </div>
-                            <div class="absolute z-10 w-full mt-1 bg-neutral-900 rounded shadow-lg hidden" id="status_options">
+                            <div class="absolute z-10 w-full mt-1 bg-neutral-900 rounded shadow-lg hidden max-h-96 overflow-y-scroll no-scrollbar" id="status_options">
                                 <div class="py-1">
                                     <div class="cursor-pointer px-4 py-2 text-white hover:bg-{{ user.preferences.accent_colour }}-600 capitalize" data-value="watching">watching</div>
                                     <div class="cursor-pointer px-4 py-2 text-white hover:bg-{{ user.preferences.accent_colour }}-600 capitalize" data-value="completed">completed</div>
@@ -335,7 +394,7 @@
                                     <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/>
                                 </svg>
                             </div>
-                            <div class="absolute z-10 w-full mt-1 bg-neutral-900 rounded shadow-lg hidden" id="score_options">
+                            <div class="absolute z-10 w-full mt-1 bg-neutral-900 rounded shadow-lg hidden max-h-96 overflow-y-scroll no-scrollbar" id="score_options">
                                 <div class="py-1">
                                     <div class="cursor-pointer px-4 py-2 text-white hover:bg-{{ user.preferences.accent_colour }}-600" data-value="10">10</div>
                                     <div class="cursor-pointer px-4 py-2 text-white hover:bg-{{ user.preferences.accent_colour }}-600" data-value="9">9</div>
@@ -367,7 +426,7 @@
                                     <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/>
                                 </svg>
                             </div>
-                            <div class="absolute z-10 w-full mt-1 bg-neutral-900 rounded shadow-lg hidden" id="episodes_options">
+                            <div class="absolute z-10 w-full mt-1 bg-neutral-900 rounded shadow-lg hidden max-h-96 overflow-y-scroll no-scrollbar" id="episodes_options">
                                 <div class="py-1">
                                     <div class="cursor-pointer px-4 py-2 text-white hover:bg-{{ user.preferences.accent_colour }}-600" data-value="Episodes">0</div>
                                     {% for i in mal_episode_range %}
