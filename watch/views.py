@@ -77,14 +77,20 @@ def get_episodes_by_zid(anime):
     return fetched_episodes
 
 def get_episode_streaming_data(episode_id, category):
-    base_url = f"{os.getenv('ZORO_URL')}/anime/episode-srcs?id={episode_id}?server&category={category}"
-    response = requests.get(base_url)
-    episode_data = response.json()
-
-    if "message" in episode_data and episode_data["message"] == "Couldn't find server. Try another server":
-        base_url = f"{os.getenv('ZORO_URL')}/anime/episode-srcs?id={episode_id}?server=hd-2&category={category}"
+    cache_key = f"episode_{episode_id}_streaming_data_{category}"
+    try:
+        episode_data = get_from_redis_cache(cache_key)
+        episode_data = json.loads(episode_data)
+    except:
+        base_url = f"{os.getenv('ZORO_URL')}/anime/episode-srcs?id={episode_id}?server&category={category}"
         response = requests.get(base_url)
         episode_data = response.json()
+
+        if "message" in episode_data and episode_data["message"] == "Couldn't find server. Try another server":
+            base_url = f"{os.getenv('ZORO_URL')}/anime/episode-srcs?id={episode_id}?server=hd-2&category={category}"
+            response = requests.get(base_url)
+            episode_data = response.json()
+        store_in_redis_cache(cache_key, json.dumps(episode_data), 3600 * 24 * 7)
 
     return episode_data
 
