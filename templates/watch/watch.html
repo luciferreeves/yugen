@@ -5,6 +5,7 @@
 <link rel="stylesheet" href="https://cdn.vidstack.io/player/audio.css" />
 <link rel="stylesheet" href="https://cdn.vidstack.io/player/video.css" />
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css"/>
 {% endblock css %}
 {% block content %}
 <div class="flex flex-col lg:flex-row mt-4 gap-2">
@@ -26,8 +27,8 @@
         <h2 class="text-white text-xl font-bold mb-4">Episodes</h2>
         <div class="flex flex-col gap-2 h-full max-h-96 lg:h-[39vw] lg:max-h-[761px] overflow-y-auto">
             {% for episode in all_episodes %}
-            {% if episode.number == current_episode_number %}
-            <a id="selected-episode" href="{% url "watch:watch_episode" anime.id episode.number %}{% if request.GET.mode %}?mode={{ request.GET.mode }}{% endif %}" class="flex flex-row gap-4 justify-between items-center w-full bg-{{ user.preferences.accent_colour }}-600 p-2 rounded hover:bg-{{ user.preferences.accent_colour }}-600 hover:bg-opacity-30">
+            {% if not viaMal and episode.number == current_episode_number or viaMal and episode.episode.number == current_episode_number %}
+            <a id="selected-episode" href="{% if not viaMal %}{% url "watch:watch_episode" anime.id episode.number %}{% if request.GET.mode %}?mode={{ request.GET.mode }}{% endif %}{% else %}{% url "watch:watch_via_zid_mal_id" anime.id anime.z_anime_id %}?ep={{ episode.episode.identifier }}{% if request.GET.mode %}&mode={{ request.GET.mode }}{% endif %}{% endif %}" class="flex flex-row gap-4 justify-between items-center w-full bg-{{ user.preferences.accent_colour }}-600 p-2 rounded hover:bg-{{ user.preferences.accent_colour }}-600 hover:bg-opacity-30">
                 <span class="truncate max-w-full overflow-hidden text-ellipsis whitespace-nowrap">{{ episode.number }}. {{ episode.title }}</span>
                 
                 <span class="flex flex-row item-center gap-2">
@@ -61,7 +62,7 @@
                 
             </a>
             {% else %}
-            <a href="{% url "watch:watch_episode" anime.id episode.number %}{% if request.GET.mode %}?mode={{ request.GET.mode }}{% endif %}" class="flex flex-row justify-between w-full gap-4 {% if episode.number in watched_episodes %}bg-{{ user.preferences.accent_colour }}-600 bg-opacity-20{% else %}bg-white bg-opacity-10{% endif %} p-2 rounded hover:bg-{{ user.preferences.accent_colour }}-600 hover:bg-opacity-30">
+            <a href="{% if not viaMal %}{% url "watch:watch_episode" anime.id episode.number %}{% if request.GET.mode %}?mode={{ request.GET.mode }}{% endif %}{% else %}{% url "watch:watch_via_zid_mal_id" anime.id anime.z_anime_id %}?ep={{ episode.episode.identifier }}{% if request.GET.mode %}&mode={{ request.GET.mode }}{% endif %}{% endif %}" class="flex flex-row justify-between w-full gap-4 {% if episode.number in watched_episodes %}bg-{{ user.preferences.accent_colour }}-600 bg-opacity-20{% else %}bg-white bg-opacity-10{% endif %} p-2 rounded hover:bg-{{ user.preferences.accent_colour }}-600 hover:bg-opacity-30">
                 <span class="truncate max-w-full overflow-hidden text-ellipsis whitespace-nowrap">{{ episode.number }}. {{ episode.title }}</span>
                 <span class="flex flex-row item-center gap-2">
                 {% if episode.filler %}
@@ -102,8 +103,8 @@
         <div class="flex flex-row gap-2 items-center justify-between">
             <h2 class="text-xl font-bold truncate max-w-full overflow-hidden text-ellipsis whitespace-nowrap">Episode {{ current_episode.number }} — {{ current_episode.title }}</h2>
             <div class="flex flex-row gap-1 items-center">
-                <a href="{% if current_episode.number %}{% url "watch:watch_episode" anime.id current_episode.number %}?mode=sub{% endif %}" class="{% if mode == "sub" %}bg-{{ user.preferences.accent_colour }}-600{% else %}bg-white bg-opacity-10{% endif %} text-white text-sm font-bold px-4 py-2 rounded">Sub</a>
-                <a href="{% if current_episode.number %}{% url "watch:watch_episode" anime.id current_episode.number %}?mode=dub{% endif %}" class="{% if mode == "dub" %}bg-{{ user.preferences.accent_colour }}-600{% else %}bg-white bg-opacity-10{% endif %} text-white text-sm font-bold px-4 py-2 rounded">Dub</a>
+                <a href="{% if not viaMal %}{% url "watch:watch_episode" anime.id current_episode.number %}?mode=sub{% else %}{% url "watch:watch_via_zid_mal_id" anime.id anime.z_anime_id %}?ep={{ current_episode.episode.identifier }}&mode=sub{% endif %}" class="{% if mode == "sub" %}bg-{{ user.preferences.accent_colour }}-600{% else %}bg-white bg-opacity-10{% endif %} text-white text-sm font-bold px-4 py-2 rounded">Sub</a>
+                <a href="{% if not viaMal %}{% url "watch:watch_episode" anime.id current_episode.number %}?mode=dub{% else %}{% url "watch:watch_via_zid_mal_id" anime.id anime.z_anime_id %}?ep={{ current_episode.episode.identifier }}&mode=dub{% endif %}" class="{% if mode == "dub" %}bg-{{ user.preferences.accent_colour }}-600{% else %}bg-white bg-opacity-10{% endif %} text-white text-sm font-bold px-4 py-2 rounded">Dub</a>
             </div>
         </div>
         <p class="my-4">
@@ -440,8 +441,34 @@
                 {% endif %}                
             </div>
         </div>
+        {% if seasons %}
+        <div class="my-8">
+            <h2 class="text-xl font-bold text-white uppercase flex flex-row items-center gap-1 mb-4">
+                Seasons
+            </h2>
+            <div class="flex flex-row gap-2 mt-4 overflow-x-auto no-scrollbar  swiper seasonSwiper">
+                <div class="swiper-wrapper">
+                    {% for season in seasons %}
+                    <a href="{% url "watch:watch_via_zid" season.id %}" class="group rounded-lg aspect-video h-48 relative flex-shrink-0 overflow-hidden swiper-slide
+                                    {% if season.isCurrent %}border-4 border-{{ user.preferences.accent_colour }}-600{% endif %}">
+                        <div class="absolute inset-0 bg-center bg-cover transition-transform group-hover:scale-110" style="background-image: url('{{ season.poster }}')"></div>
+                        <div class="absolute inset-0 bg-{{ user.preferences.accent_colour }}-600 opacity-0 group-hover:opacity-30 transition-opacity"></div>
+                        <div class="absolute inset-0" style="background: linear-gradient(45deg, rgb(8, 8, 8) 15%, transparent 60%), linear-gradient(0deg, rgb(8, 8, 8) 0%, transparent 60%);"></div>
+                        <div class="flex flex-col justify-end h-full p-2 relative z-10">
+                            <h1 class="text-xl font-bold truncate max-w-full overflow-hidden text-ellipsis whitespace-nowrap">
+                                {{ season.name }}
+                            </h1>
+                            <h2 class="font-bold truncate max-w-full overflow-hidden text-ellipsis whitespace-nowrap">{{ season.title }}</h2>
+                        </div>
+                    </a>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
         {% if characters %}
-        <div class="my-4">
+        <div class="my-8">
             <h2 class="text-xl font-bold text-white uppercase flex flex-row items-center gap-1 mb-4">
                 Characters &amp; Voice Actors
             </h2>
@@ -463,6 +490,7 @@
                     </div>
                     <div class="flex flex-col items-end">
                         {% for voice_actor in character.voiceActors|slice:":1" %}
+                        {% if voice_actor.image %}
                         <div class="flex flex-row gap-2 items-center mb-2">
                             <div class="flex flex-col gap-2 text-right">
                                 <span class="font-bold">
@@ -476,6 +504,7 @@
                             </div>
                             <img src="{{ voice_actor.image }}" alt="{{ voice_actor.name }}" class="rounded-full w-16 h-16 object-cover"/>
                         </div>
+                        {% endif %}
                         {% endfor %}
                     </div>
                 </div>
@@ -554,7 +583,7 @@
             </div>
             {% endif %}
             {% if related.type == "TV" or related.type == "MOVIE" or related.type == "OVA" or related.type == "ONA" or related.type == "SPECIAL" or related.type == "TV_SHORT" %}
-            <a href="{% url 'watch:watch' related.id %}" class="flex flex-row w-full gap-4 bg-white bg-opacity-10 p-2 rounded hover:bg-{{ user.preferences.accent_colour }}-600 hover:bg-opacity-30">
+            <a href="{% if not viaMal %}{% url 'watch:watch' related.id %}{% else %}{% url "watch:watch_via_zid" related.zid %}{% endif %}" class="flex flex-row w-full gap-4 bg-white bg-opacity-10 p-2 rounded hover:bg-{{ user.preferences.accent_colour }}-600 hover:bg-opacity-30">
                 <img src="{{ related.image }}" alt="{{ related.title.english }}" class="rounded-lg w-12 h-16 object-cover"/>
                 <div class="flex flex-col gap-2">
                     <span class="font-bold flex gap-2 flex-row items-center">
@@ -604,12 +633,14 @@
                             {{ related.rating }}
                             </span>
                         {% endif %}
+                        {% if related.relationType %}
                         <span class="text-xs font-bold bg-white bg-opacity-10 p-1 rounded flex items-center gap-1">
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-4">
                                 <path d="m11.645 20.91-.007-.003-.022-.012a15.247 15.247 0 0 1-.383-.218 25.18 25.18 0 0 1-4.244-3.17C4.688 15.36 2.25 12.174 2.25 8.25 2.25 5.322 4.714 3 7.688 3A5.5 5.5 0 0 1 12 5.052 5.5 5.5 0 0 1 16.313 3c2.973 0 5.437 2.322 5.437 5.25 0 3.925-2.438 7.111-4.739 9.256a25.175 25.175 0 0 1-4.244 3.17 15.247 15.247 0 0 1-.383.219l-.022.012-.007.004-.003.001a.752.752 0 0 1-.704 0l-.003-.001Z" />
                             </svg>          
                             {{ related.relationType }}
                         </span>
+                        {% endif %}
                         {% if related.episodes %}
                         <span class="text-xs font-bold bg-white bg-opacity-10 p-1 rounded flex items-center gap-1">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4">
@@ -632,8 +663,8 @@
         </div>
         <div class="flex flex-col gap-2">
             {% for recommendation in recommendations|slice:":10" %}
-            {% if recommendation.id %}
-            <a href="{% url 'watch:watch' recommendation.id %}" class="flex flex-row w-full gap-4 bg-white bg-opacity-10 p-2 rounded hover:bg-{{ user.preferences.accent_colour }}-600 hover:bg-opacity-30">
+            {% if recommendation.id or recommendation.zid %}
+            <a href="{% if not viaMal %}{% url 'watch:watch' recommendation.id %}{% else %}{% url "watch:watch_via_zid" recommendation.zid %}{% endif %}" class="flex flex-row w-full gap-4 bg-white bg-opacity-10 p-2 rounded hover:bg-{{ user.preferences.accent_colour }}-600 hover:bg-opacity-30">
                 <img src="{{ recommendation.image }}" alt="{{ recommendation.title.english }}" class="rounded-lg w-12 h-16 object-cover"/>
                 <div class="flex flex-col gap-2 max-w-[calc(100%-4rem)]">
                     <span class="font-bold flex gap-2 flex-row items-center">
@@ -817,7 +848,14 @@
     observer.observe(episodesSelect, {childList: true, characterData: true});
     {% endif %}
 </script>
-
+<script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+<script>
+    const seasonSwiper = new Swiper(".seasonSwiper", {
+      slidesPerView: 'auto',
+      spaceBetween: 8,
+      freeMode: true,
+    });
+  </script>
 <script type="module">
     const introStart = {{ streaming_data.intro.start }};
     const introEnd = {{ streaming_data.intro.end }};
@@ -1000,6 +1038,7 @@
     });
     {% endif %}
 
+    {% if not viaMal %}
     let lastTime = 0;
     setInterval(() => {
         const {
@@ -1029,6 +1068,6 @@
 
         lastTime = currentTime;
     }, 30000);
-
+    {% endif %}
 </script>
 {% endblock scripts %}

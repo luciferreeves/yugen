@@ -1,8 +1,10 @@
-{% extends "partials/base.html" %} {% block css %}
+{% extends "partials/base.html" %} 
 {% load custom_filters %}
+{% block css %}
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css"/>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
-{% endblock css %} {% block content %}
+{% endblock css %} 
+{% block content %}
 <!-- Swiper: Trending Anime -->
 <section class="swiper bigSwiper rounded mt-2">
   <div class="swiper-wrapper">
@@ -108,7 +110,7 @@
   <div class="swiper-wrapper">
     {% for history in user_history_data %}
     <a href="{% url "watch:watch_episode" history.anime.id history.episode.number %}" class="group rounded-lg aspect-video h-48 relative flex-shrink-0 overflow-hidden swiper-slide">
-      <div class="absolute inset-0 bg-center bg-cover transition-transform group-hover:scale-110" style="background-image: url('{% if history.episode.image %}{{ history.episode.image }}'){% else %}{{ history.anime.cover }}{% endif %}"></div>
+      <div class="absolute inset-0 bg-center bg-cover transition-transform group-hover:scale-110" style="background-image: url('{% if history.episode.image %}{{ history.episode.image }}{% else %}{{ history.anime.cover }}{% endif %}')"></div>
       <div class="absolute inset-0 bg-{{ user.preferences.accent_colour }}-600 opacity-0 group-hover:opacity-30 transition-opacity"></div>
       <div class="absolute inset-0" style="background: linear-gradient(45deg, rgb(8, 8, 8) 15%, transparent 60%), linear-gradient(0deg, rgb(8, 8, 8) 0%, transparent 60%);"></div>
       <div class="flex flex-col justify-end h-full p-2 relative z-10">

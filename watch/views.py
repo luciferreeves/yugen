@@ -2,15 +2,16 @@ import datetime
 from datetime import datetime as dt
 import os
 from django.http import Http404, JsonResponse
+from django.urls import reverse
 import dotenv
 from django.shortcuts import get_object_or_404, render, redirect
 import requests
 from authentication.utils import get_single_anime_mal
+from watch.tmdbmapper import parse_title_and_season
 from watch.utils import get_all_episode_metadata, get_from_redis_cache, store_in_redis_cache, update_anime_user_history, get_anime_user_history
 from watch.models import Anime, AnimeEpisode, AnimeTitle, AnimeTrailer, AnimeGenre, AnimeStudio
 from django.db import transaction
-from django.db.models import Q
-from collections import defaultdict
+from authentication.models import User
 import json
 
 dotenv.load_dotenv()
@@ -45,11 +46,33 @@ def get_info_by_zid(zid):
 
     return anime_selected
 
-def get_episodes_by_zid(anime):
-    base_url = f"{os.getenv('ZORO_URL')}/anime/episodes/{anime.z_anime_id}"
-    response = requests.get(base_url)
-    fetched_episodes = response.json()
+def get_seasons_by_zid(zid):
+    if not zid:
+        return []
 
+    fetched_info = get_info_by_zid(zid)
+    seasons = fetched_info["seasons"]
+
+    for season in seasons:
+        season["poster"] = season["poster"].replace("100x200/100", "400x800/100")
+
+    return seasons
+
+def get_episodes_by_zid(z_anime_id):
+    cache_key = f"anime_{z_anime_id}_episodes"
+    try:
+        fetched_episodes = get_from_redis_cache(cache_key)
+        fetched_episodes = json.loads(fetched_episodes)
+    except:
+        base_url = f"{os.getenv('ZORO_URL')}/anime/episodes/{z_anime_id}"
+        response = requests.get(base_url)
+        fetched_episodes = response.json()
+        store_in_redis_cache(cache_key, json.dumps(fetched_episodes), 3600 * 12)
+
+    return fetched_episodes
+
+def get_episodes_and_metadata(anime):
+    fetched_episodes = get_episodes_by_zid(anime.z_anime_id)
     anime_data = {
         "id": anime.id,
         "title": {
@@ -198,7 +221,7 @@ def update_anime_episodes(anime):
     if not anime.z_anime_id:
         return anime
 
-    fetched_episodes = get_episodes_by_zid(anime)
+    fetched_episodes = get_episodes_and_metadata(anime)
     
     with transaction.atomic():
         # Update anime's total episodes
@@ -299,6 +322,8 @@ def watch(request, anime_id, episode=None):
     if anime and episode_data:
         update_anime_user_history(request.user, anime, episode_data, current_watched_time)
 
+    seasons = get_seasons_by_zid(anime.z_anime_id)
+
     context = {
         "anime": anime,
         "current_episode_number": episode,
@@ -314,6 +339,7 @@ def watch(request, anime_id, episode=None):
         "current_watched_time": current_watched_time,
         "mal_data": mal_data,
         "mal_episode_range": range(1, mal_data["num_episodes"] + 1) if mal_data else None,
+        "seasons": seasons,
     }
 
     if "nextAiringEpisode" in anime_fetched:
@@ -337,3 +363,202 @@ def update_episode_watch_time(request):
         return JsonResponse({"status": "success"})
     else:
         return JsonResponse({"status": "error", "message": "User not authenticated"})
+
+def watch_via_zid(request, zid):
+    cache_key = f"anime_{zid}_anilist_lookup"
+    anilist_id = get_from_redis_cache(cache_key)
+
+    # See if anilist id is present in the info from zoro
+    if not anilist_id:
+        anime_selected = get_info_by_zid(zid)
+        anilist_id = anime_selected["anime"]["info"]["anilistId"]
+        # store_in_redis_cache(cache_key, anilist_id, 3600 * 24 * 30)
+
+    # If not see if we can find the anilist id from the mal id using anilist graphql
+    # this will almost always work and we wont need to search for the anime by name
+    if not anilist_id:
+        mal_id = anime_selected["anime"]["info"]["malId"]
+        print("Searching using graphql. Mal id:", mal_id)
+        anilist_graphql_url = "https://graphql.anilist.co"
+        query = """
+        query {{
+            Media(idMal: {mal_id}, type: ANIME) {{
+                id
+            }}
+        }}
+        """.format(mal_id=mal_id)
+
+        response = requests.post(anilist_graphql_url, json={"query": query})
+        response = response.json()
+
+        if not "errors" in response:
+            anilist_id = response["data"]["Media"]["id"]
+            # store_in_redis_cache(cache_key, anilist_id, 3600 * 24 * 30)
+
+    if not anilist_id:
+        anime_name = anime_selected['anime']['info']['name']
+        anime_name = parse_title_and_season(anime_name)["show_name"]
+        consumet_search_url = f"{os.getenv('CONSUMET_URL')}/meta/anilist/advanced-search?query={anime_name}&provider=zoro"
+        response = requests.get(consumet_search_url)
+        anime_search_results = response.json()
+
+        # compare where mal id is same and return the anilist id
+        for result in anime_search_results["results"]:
+            if result["malId"] == mal_id:
+                anilist_id = result["id"]
+                # store_in_redis_cache(cache_key, anilist_id, 3600 * 24 * 30)
+                break
+    
+    print(anilist_id)
+    if anilist_id:
+        return redirect("watch:watch", anime_id=anilist_id)
+    else:
+        return redirect("watch:watch_via_zid_mal_id", mal_id=mal_id, zid=zid)
+
+# same thing as watch, but with mal id and zid since anilist id is not available
+# context remains the same but data is not saved in database
+def watch_via_zid_mal_id(request, mal_id, zid):
+    anime_info = get_info_by_zid(zid)
+
+    mal_access_token = request.user.mal_access_token
+    if not mal_access_token:
+        u = User.objects.filter(mal_access_token__isnull=False).first()
+        mal_access_token = u.mal_access_token
+
+    anime_mal_info = get_single_anime_mal(mal_access_token, mal_id)
+    anime_episodes = get_episodes_by_zid(zid)
+    for index, episode in enumerate(anime_episodes["episodes"]):
+        episode_identifier = episode["episodeId"].split("?ep=")[1]
+        anime_episodes["episodes"][index]["episode"] = {
+            "identifier": episode_identifier,
+            "number": index + 1,
+        }
+        print(anime_episodes["episodes"][index]["episodeId"])
+
+    current_episode_number = 1
+    ep = request.GET.get("ep", None)
+
+    if ep:
+        current_episode_number = next((i + 1 for i, item in enumerate(anime_episodes["episodes"]) if item["episode"]["identifier"] == ep), 1)
+    else:
+        ep = anime_episodes["episodes"][0]["episode"]["identifier"]
+        return redirect(reverse("watch:watch_via_zid_mal_id", args=[mal_id, zid]) + f"?ep={ep}")
+
+    current_episode = anime_episodes["episodes"][int(current_episode_number) - 1]
+
+    mode = request.GET.get("mode", request.user.preferences.default_language)
+    if mode == "dub" and (not anime_info["anime"]["info"]["stats"]["episodes"]["dub"] or anime_info["anime"]["info"]["stats"]["episodes"]["dub"] < current_episode_number):
+        mode = "sub"
+
+    streaming_data = get_episode_streaming_data(current_episode["episodeId"], mode)
+
+    if streaming_data and "tracks" in streaming_data and not any(t["kind"] == "captions" for t in streaming_data["tracks"]) and mode == "dub" and request.user.preferences.ingrain_sub_subtitles_in_dub:
+        sub_streaming_data = get_episode_streaming_data(current_episode["episodeId"], "sub")
+        captions = [t for t in sub_streaming_data["tracks"] if t["kind"] == "captions"]
+        if captions:
+            streaming_data["tracks"].extend(captions)
+
+    anime = {
+        "id": mal_id,
+        "malId": mal_id,
+        "z_anime_id": zid,
+        "description": anime_info["anime"]["info"]["description"],
+        "image": anime_info["anime"]["info"]["poster"].replace("300x400/100", "600x800/100"),
+        "countryOfOrigin": "JP",
+        "titles": {
+            "english": anime_mal_info["alternative_titles"]["en"],
+            "romaji": anime_mal_info["title"],
+            "native": anime_mal_info["alternative_titles"]["ja"]
+        },
+        "type": anime_mal_info["media_type"].replace("_", " ").title(),
+        "popularity": anime_mal_info["popularity"],
+        "releaseDate": anime_mal_info["start_date"].split("-")[0],
+        "totalEpisodes": anime_mal_info["num_episodes"],
+        "currentEpisode": len(anime_episodes["episodes"]),
+        "rating": anime_mal_info["mean"],
+        "duration": anime_mal_info["average_episode_duration"] // 60 + 1,
+        "genres": {
+            "all": anime_mal_info["genres"]
+        },
+        "status": anime_mal_info["status"].replace("_", " ").title(),
+        "season": anime_mal_info["start_season"]["season"].title(),
+        "studios": {
+            "all": anime_mal_info["studios"]
+        },
+        "sub": anime_info["anime"]["info"]["stats"]["episodes"].get("sub", 0),
+        "dub": anime_info["anime"]["info"]["stats"]["episodes"].get("dub", 0),
+    }
+
+    related = []
+    for r in anime_info["relatedAnimes"]:
+        rd = {
+            "zid": r["id"],
+            "image": r["poster"].replace("300x400/100", "600x800/100"),
+            "title": {
+                "english": r["name"],
+                "romaji": r["jname"]
+            },
+            "episodes": r["episodes"]["sub"],
+            "type": r["type"],
+        }
+
+        related.append(rd)
+
+    recommended = []
+    for r in anime_info["recommendedAnimes"]:
+        rd = {
+            "zid": r["id"],
+            "image": r["poster"].replace("300x400/100", "600x800/100"),
+            "title": {
+                "english": r["name"],
+                "romaji": r["jname"]
+            },
+            "episodes": r["episodes"]["sub"],
+            "type": r["type"],
+        }
+
+    characters = []
+    for c in anime_info["anime"]["info"]["charactersVoiceActors"]:
+        cd = {
+            "name": {
+                "full": c["character"]["name"],
+                "natve": c["character"]["name"],
+            },
+            "image": c["character"]["poster"].replace("100x100/100", "200x200/100"),
+            "role": c["character"]["cast"],
+            "voiceActors": [
+               {
+                     "name": {
+                          "full": c["voiceActor"]["name"],
+                          "native": c["voiceActor"]["name"],
+                     },
+                     "image": c["voiceActor"]["poster"].replace("100x100/100", "200x200/100"),
+                     "language": "Japanese",
+               }
+            ],
+        }
+
+        characters.append(cd)
+
+    context = {
+        "anime": anime,
+        "current_episode_number": current_episode_number,
+        "current_episode": current_episode,
+        "all_episodes": anime_episodes["episodes"],
+        "streaming_data": streaming_data,
+        "stream_url": streaming_data["sources"][0]["url"] if streaming_data and "sources" in streaming_data else None,
+        "watched_episodes": [],
+        "current_watched_time": 0,
+        "mode": mode,
+        "seasons": get_seasons_by_zid(zid),
+        "viaMal": True,
+        "related": related,
+        "recommendations": recommended,
+        "characters": characters,
+    }
+
+    if request.user.mal_access_token:
+        context["mal_data"] = anime_mal_info
+        context["mal_episode_range"] = range(1, anime_mal_info["num_episodes"] + 1)
+
+    return render(request, "watch/watch.html", context)

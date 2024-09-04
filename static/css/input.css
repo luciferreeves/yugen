@@ -46,7 +46,7 @@ main {
   transition: transform 0.1s ease-in-out;
 }
 
-.historySwiper .swiper-slide {
+.historySwiper .swiper-slide, .seasonSwiper .swiper-slide {
   height: 12rem !important; /* equivalent to h-48 */
   width: auto !important;
   aspect-ratio: 16 / 9 !important;
