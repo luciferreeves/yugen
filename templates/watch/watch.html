@@ -25,9 +25,9 @@
     <div class="w-full lg:w-1/4 flex flex-col px-2 lg:px-0">
         <h2 class="text-white text-xl font-bold mb-4">Episodes</h2>
         <div class="flex flex-col gap-2 h-full max-h-96 lg:h-[39vw] lg:max-h-[761px] overflow-y-auto">
-            {% for episode in anime_episodes.episodes %}
-            {% if episode.number == current_episode %}
-            <a id="selected-episode" href="{% url "watch:watch_episode" anime_id episode.number %}{% if request.GET.mode %}?mode={{ request.GET.mode }}{% endif %}" class="flex flex-row gap-4 justify-between items-center w-full bg-{{ user.preferences.accent_colour }}-600 p-2 rounded hover:bg-{{ user.preferences.accent_colour }}-600 hover:bg-opacity-30">
+            {% for episode in all_episodes %}
+            {% if episode.number == current_episode_number %}
+            <a id="selected-episode" href="{% url "watch:watch_episode" anime.id episode.number %}{% if request.GET.mode %}?mode={{ request.GET.mode }}{% endif %}" class="flex flex-row gap-4 justify-between items-center w-full bg-{{ user.preferences.accent_colour }}-600 p-2 rounded hover:bg-{{ user.preferences.accent_colour }}-600 hover:bg-opacity-30">
                 <span class="truncate max-w-full overflow-hidden text-ellipsis whitespace-nowrap">{{ episode.number }}. {{ episode.title }}</span>
                 
                 <span class="flex flex-row item-center gap-2">
@@ -41,7 +41,7 @@
                 </svg>
                 {% endif %}
                 
-                {% if anime_selected.anime.info.stats.episodes.sub >= episode.number %}
+                {% if anime.sub >= episode.number %}
                 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" class="size-6" viewBox="0 0 24 24" version="1.1">
                     <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
                         <g fill="#fff" fill-rule="nonzero">
@@ -51,7 +51,7 @@
                 </svg>
                 {% endif %}
 
-                {% if anime_selected.anime.info.stats.episodes.dub >= episode.number %}
+                {% if anime.dub >= episode.number %}
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-4 mt-1" title="Available in Dub">
                     <path d="M8.25 4.5a3.75 3.75 0 1 1 7.5 0v8.25a3.75 3.75 0 1 1-7.5 0V4.5Z" />
                     <path d="M6 10.5a.75.75 0 0 1 .75.75v1.5a5.25 5.25 0 1 0 10.5 0v-1.5a.75.75 0 0 1 1.5 0v1.5a6.751 6.751 0 0 1-6 6.709v2.291h3a.75.75 0 0 1 0 1.5h-7.5a.75.75 0 0 1 0-1.5h3v-2.291a6.751 6.751 0 0 1-6-6.709v-1.5A.75.75 0 0 1 6 10.5Z" />
@@ -61,7 +61,7 @@
                 
             </a>
             {% else %}
-            <a href="{% url "watch:watch_episode" anime_id episode.number %}{% if request.GET.mode %}?mode={{ request.GET.mode }}{% endif %}" class="flex flex-row justify-between w-full gap-4 {% if episode.number in watched_episodes %}bg-{{ user.preferences.accent_colour }}-600 bg-opacity-20{% else %}bg-white bg-opacity-10{% endif %} p-2 rounded hover:bg-{{ user.preferences.accent_colour }}-600 hover:bg-opacity-30">
+            <a href="{% url "watch:watch_episode" anime.id episode.number %}{% if request.GET.mode %}?mode={{ request.GET.mode }}{% endif %}" class="flex flex-row justify-between w-full gap-4 {% if episode.number in watched_episodes %}bg-{{ user.preferences.accent_colour }}-600 bg-opacity-20{% else %}bg-white bg-opacity-10{% endif %} p-2 rounded hover:bg-{{ user.preferences.accent_colour }}-600 hover:bg-opacity-30">
                 <span class="truncate max-w-full overflow-hidden text-ellipsis whitespace-nowrap">{{ episode.number }}. {{ episode.title }}</span>
                 <span class="flex flex-row item-center gap-2">
                 {% if episode.isFiller %}
@@ -74,7 +74,7 @@
                 </svg>
                 {% endif %}
 
-                {% if anime_selected.anime.info.stats.episodes.sub >= episode.number %}                  
+                {% if anime.sub >= episode.number %}                  
                 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" class="size-6" viewBox="0 0 24 24" version="1.1">
                     <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
                         <g fill="#fff" fill-rule="nonzero">
@@ -84,7 +84,7 @@
                 </svg>
                 {% endif %}
 
-                {% if anime_selected.anime.info.stats.episodes.dub >= episode.number %}
+                {% if anime.dub >= episode.number %}
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-4 mt-1" title="Available in Dub">
                     <path d="M8.25 4.5a3.75 3.75 0 1 1 7.5 0v8.25a3.75 3.75 0 1 1-7.5 0V4.5Z" />
                     <path d="M6 10.5a.75.75 0 0 1 .75.75v1.5a5.25 5.25 0 1 0 10.5 0v-1.5a.75.75 0 0 1 1.5 0v1.5a6.751 6.751 0 0 1-6 6.709v2.291h3a.75.75 0 0 1 0 1.5h-7.5a.75.75 0 0 1 0-1.5h3v-2.291a6.751 6.751 0 0 1-6-6.709v-1.5A.75.75 0 0 1 6 10.5Z" />
@@ -100,87 +100,87 @@
 <div class="flex flex-col lg:flex-row my-4 gap-2">
     <div class="w-full lg:w-3/4">
         <div class="flex flex-row gap-2 items-center justify-between">
-            <h2 class="text-xl font-bold truncate max-w-full overflow-hidden text-ellipsis whitespace-nowrap">Episode {{ current_episode_data.number }} — {{ current_episode_data.title }}</h2>
+            <h2 class="text-xl font-bold truncate max-w-full overflow-hidden text-ellipsis whitespace-nowrap">Episode {{ current_episode.number }} — {{ current_episode.title }}</h2>
             <div class="flex flex-row gap-1 items-center">
-                <a href="{% if current_episode_data.number %}{% url "watch:watch_episode" anime_id current_episode_data.number %}?mode=sub{% endif %}" class="{% if mode == "sub" %}bg-{{ user.preferences.accent_colour }}-600{% else %}bg-white bg-opacity-10{% endif %} text-white text-sm font-bold px-4 py-2 rounded">Sub</a>
-                <a href="{% if current_episode_data.number %}{% url "watch:watch_episode" anime_id current_episode_data.number %}?mode=dub{% endif %}" class="{% if mode == "dub" %}bg-{{ user.preferences.accent_colour }}-600{% else %}bg-white bg-opacity-10{% endif %} text-white text-sm font-bold px-4 py-2 rounded">Dub</a>
+                <a href="{% if current_episode.number %}{% url "watch:watch_episode" anime.id current_episode.number %}?mode=sub{% endif %}" class="{% if mode == "sub" %}bg-{{ user.preferences.accent_colour }}-600{% else %}bg-white bg-opacity-10{% endif %} text-white text-sm font-bold px-4 py-2 rounded">Sub</a>
+                <a href="{% if current_episode.number %}{% url "watch:watch_episode" anime.id current_episode.number %}?mode=dub{% endif %}" class="{% if mode == "dub" %}bg-{{ user.preferences.accent_colour }}-600{% else %}bg-white bg-opacity-10{% endif %} text-white text-sm font-bold px-4 py-2 rounded">Dub</a>
             </div>
         </div>
         <p class="my-4">
-            {{ current_episode_metadata.description }}
+            {{ current_episode.description }}
         </p>
         <div class="flex flex-col lg:flex-row w-full my-4 bg-neutral-950 rounded p-2 gap-4">
             <div class="flex flex-col items-center lg:items-start gap-2 min-w-32">
-                <img src="{{ anime_data.image }}" alt="{{ anime_data.title.english }}" class="rounded-lg w-48 h-72 object-cover"/>
+                <img src="{{ anime.image }}" alt="{{ anime.title.english }}" class="rounded-lg w-48 h-72 object-cover"/>
                 <div class="flex flex-row gap-2">
-                    <a href="https://anilist.co/anime/{{ anime_data.id }}" target="_blank" class="text-xs font-bold bg-white bg-opacity-10 rounded px-2 py-1">
+                    <a href="https://anilist.co/anime/{{ anime.id }}" target="_blank" class="text-xs font-bold bg-white bg-opacity-10 rounded px-2 py-1">
                         <svg stroke="currentColor" fill="currentColor" stroke-width="0" role="img" viewBox="0 0 24 24" height="1.5rem" width="1.5rem" xmlns="http://www.w3.org/2000/svg"><path d="M24 17.53v2.421c0 .71-.391 1.101-1.1 1.101h-5l-.057-.165L11.84 3.736c.106-.502.46-.788 1.053-.788h2.422c.71 0 1.1.391 1.1 1.1v12.38H22.9c.71 0 1.1.392 1.1 1.101zM11.034 2.947l6.337 18.104h-4.918l-1.052-3.131H6.019l-1.077 3.131H0L6.361 2.948h4.673zm-.66 10.96-1.69-5.014-1.541 5.015h3.23z"></path></svg>
                     </a>
-                    <a href="https://myanimelist.net/anime/{{ anime_data.malId }}" target="_blank" class="ext-xs font-bold bg-white bg-opacity-10 rounded px-2 py-1">
+                    <a href="https://myanimelist.net/anime/{{ anime.malId }}" target="_blank" class="ext-xs font-bold bg-white bg-opacity-10 rounded px-2 py-1">
                         <svg stroke="currentColor" fill="currentColor" stroke-width="0" role="img" viewBox="0 0 24 24" height="1.5rem" width="1.5rem" xmlns="http://www.w3.org/2000/svg"><path d="M8.273 7.247v8.423l-2.103-.003v-5.216l-2.03 2.404-1.989-2.458-.02 5.285H.001L0 7.247h2.203l1.865 2.545 2.015-2.546 2.19.001zm8.628 2.069l.025 6.335h-2.365l-.008-2.871h-2.8c.07.499.21 1.266.417 1.779.155.381.298.751.583 1.128l-1.705 1.125c-.349-.636-.622-1.337-.878-2.082a9.296 9.296 0 0 1-.507-2.179c-.085-.75-.097-1.471.107-2.212a3.908 3.908 0 0 1 1.161-1.866c.313-.293.749-.5 1.1-.687.351-.187.743-.264 1.107-.359a7.405 7.405 0 0 1 1.191-.183c.398-.034 1.107-.066 2.39-.028l.545 1.749H14.51c-.593.008-.878.001-1.341.209a2.236 2.236 0 0 0-1.278 1.92l2.663.033.038-1.81h2.309zm3.992-2.099v6.627l3.107.032-.43 1.775h-4.807V7.187l2.13.03z"></path></svg>
                     </a>
                 </div>
             </div>
             <div class="flex flex-col gap-2 w-full">
-                <h2 class="text-2xl font-bold text-transparent bg-clip-text block w-full truncate overflow-hidden text-ellipsis whitespace-nowrap" style="background: linear-gradient(-45deg, {% if anime_data.color %}{{ anime_data.color }}{% else %}white{% endif %}, white); -webkit-background-clip: text; background-clip: text;">
-                    {% if user.preferences.title_language == "english" and anime_data.title.english %}
-                    {{ anime_data.title.english }}
-                    {% elif user.preferences.title_language == "native" and anime_data.title.native %}
-                    {{ anime_data.title.native }}
+                <h2 class="text-2xl font-bold text-transparent bg-clip-text block w-full truncate overflow-hidden text-ellipsis whitespace-nowrap" style="background: linear-gradient(-45deg, {% if anime.color %}{{ anime.color }}{% else %}white{% endif %}, white); -webkit-background-clip: text; background-clip: text;">
+                    {% if user.preferences.title_language == "english" and anime.title.english %}
+                    {{ anime.title.english }}
+                    {% elif user.preferences.title_language == "native" and anime.title.native %}
+                    {{ anime.title.native }}
                     {% else %}
-                    {{ anime_data.title.romaji }}
+                    {{ anime.title.romaji }}
                     {% endif %}
                 </h2>
                 <p class="max-h-24 overflow-auto text-sm text-white mb-4 no-scrollbar">
-                    {{ anime_data.description|strip_html }}
+                    {{ anime.description|strip_html }}
                 </p>
                 <div class="flex flex-col gap-2 mb-4">
                     <div class="flex flex-row gap-4">
                         <div class="flex-1">
-                            <span class="font-bold">Format: </span>{{ anime_data.type }}
+                            <span class="font-bold">Format: </span>{{ anime.type }}
                         </div>
                         <div class="flex-1">
-                            <span class="font-bold">Episodes: </span>{{ anime_data.totalEpisodes }}
-                        </div>
-                    </div>
-                    <div class="flex flex-row gap-4">
-                        <div class="flex-1">
-                            <span class="font-bold">Year: </span>{{ anime_data.releaseDate }}
-                        </div>
-                        <div class="flex-1">
-                            <span class="font-bold">Duration: </span>{{ anime_data.duration }} mins
+                            <span class="font-bold">Episodes: </span>{{ anime.totalEpisodes }}
                         </div>
                     </div>
                     <div class="flex flex-row gap-4">
                         <div class="flex-1">
-                            <span class="font-bold">Status: </span>{{ anime_data.status }}
+                            <span class="font-bold">Year: </span>{{ anime.releaseDate }}
+                        </div>
+                        <div class="flex-1">
+                            <span class="font-bold">Duration: </span>{{ anime.duration }} mins
+                        </div>
+                    </div>
+                    <div class="flex flex-row gap-4">
+                        <div class="flex-1">
+                            <span class="font-bold">Status: </span>{{ anime.status }}
                         </div>
                         <div class="flex-1 capitalize">
-                            <span class="font-bold">Season: </span>{{ anime_data.season }}
+                            <span class="font-bold">Season: </span>{{ anime.season }}
                         </div>
                     </div>
                     <div class="flex flex-row gap-4">
                         <div class="flex-1">
-                            <span class="font-bold">Rating: </span>{{ anime_data.rating }} / 100
+                            <span class="font-bold">Rating: </span>{{ anime.rating }} / 100
                         </div>
                         <div class="flex-1">
-                            <span class="font-bold">Popularity: </span>{{ anime_data.popularity }}
+                            <span class="font-bold">Popularity: </span>{{ anime.popularity }}
                         </div>
                     </div>
                     <div class="flex flex-row gap-4">
                         <div class="flex-1">
-                            <span class="font-bold">Country: </span>{{ anime_data.countryOfOrigin }}
+                            <span class="font-bold">Country: </span>{{ anime.countryOfOrigin }}
                         </div>
                         <div class="flex-1">
                             <span class="font-bold">Studios: </span>
-                            {% for studio in anime_data.studios %}
-                                <span>{{ studio }}</span>{% if not forloop.last %}, {% endif %}
+                            {% for studio in anime.studios.all %}
+                                <span>{{ studio.name }}</span>{% if not forloop.last %}, {% endif %}
                             {% endfor %}
                         </div>
                     </div>
                 </div>                
                 <span class="text-xs sm:text-sm font-bold flex gap-2 flex-row flex-wrap items-center">
-                    {% if anime_data.status == "Ongoing" %}
+                    {% if anime.status == "Ongoing" %}
                     <span class="text-xs font-bold bg-white bg-opacity-10 p-1 rounded flex items-center gap-1">
                         <span class="text-green-500 pt-1">
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-2 sm:size-3">
@@ -189,7 +189,7 @@
                         </span>
                         Ongoing
                     </span>
-                    {% elif anime_data.status == "Not yet aired" %}
+                    {% elif anime.status == "Not yet aired" %}
                     <span class="text-xs font-bold bg-white bg-opacity-10 p-1 rounded flex items-center gap-1">
                         <span class="text-yellow-500 pt-1">
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-2 sm:size-3">
@@ -214,73 +214,73 @@
                             <path d="M15 4h1a1 1 0 0 1 1 1v3.5"></path>
                             <path d="M20 6c.264 .112 .52 .217 .768 .315a1 1 0 0 1 .53 1.311l-2.298 5.374"></path>
                         </svg>
-                        {{ anime_data.type }}
+                        {{ anime.type }}
                     </span>
                     <span class="text-xs font-bold bg-white bg-opacity-10 p-1 rounded flex items-center gap-1">
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-4">
                             <path fill-rule="evenodd" d="M6.75 2.25A.75.75 0 0 1 7.5 3v1.5h9V3A.75.75 0 0 1 18 3v1.5h.75a3 3 0 0 1 3 3v11.25a3 3 0 0 1-3 3H5.25a3 3 0 0 1-3-3V7.5a3 3 0 0 1 3-3H6V3a.75.75 0 0 1 .75-.75Zm13.5 9a1.5 1.5 0 0 0-1.5-1.5H5.25a1.5 1.5 0 0 0-1.5 1.5v7.5a1.5 1.5 0 0 0 1.5 1.5h13.5a1.5 1.5 0 0 0 1.5-1.5v-7.5Z" clip-rule="evenodd" />
                         </svg>              
-                        {{ anime_data.releaseDate }}
+                        {{ anime.releaseDate }}
                     </span>
-                    {% if anime_data.rating %}
+                    {% if anime.rating %}
                     <span class="text-xs font-bold bg-white bg-opacity-10 p-1 rounded flex items-center gap-1">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M11.48 3.499a.562.562 0 0 1 1.04 0l2.125 5.111a.563.563 0 0 0 .475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 0 0-.182.557l1.285 5.385a.562.562 0 0 1-.84.61l-4.725-2.885a.562.562 0 0 0-.586 0L6.982 20.54a.562.562 0 0 1-.84-.61l1.285-5.386a.562.562 0 0 0-.182-.557l-4.204-3.602a.562.562 0 0 1 .321-.988l5.518-.442a.563.563 0 0 0 .475-.345L11.48 3.5Z"/>
                         </svg>
-                        {{ anime_data.rating }}
+                        {{ anime.rating }}
                         </span>
                     {% endif %}
-                    {% if anime_data.totalEpisodes %}
+                    {% if anime.totalEpisodes %}
                     <span class="text-xs font-bold bg-white bg-opacity-10 p-1 rounded flex items-center gap-1">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M5.25 8.25h15m-16.5 7.5h15m-1.8-13.5-3.9 19.5m-2.1-19.5-3.9 19.5"/>
                           </svg>
-                          {{ anime_data.totalEpisodes }}
+                          {{ anime.totalEpisodes }}
                     </span>
                     {% endif %}
                 </span>
                 <span class="text-xs sm:text-sm font-bold flex gap-2 flex-row flex-wrap items-center">
-                    {% for genre in anime_data.genres %}
-                    {% if genre == "Action" %}
+                    {% for genre in anime.genres.all %}
+                    {% if genre.name == "Action" %}
                     <span class="text-xs font-bold bg-green-100 bg-opacity-10 text-green-300 py-1 px-2 rounded-full">
-                    {% elif genre == "Adventure" %}
+                    {% elif genre.name == "Adventure" %}
                     <span class="text-xs font-bold bg-pink-100 bg-opacity-10 text-pink-300 py-1 px-2 rounded-full">
-                    {% elif genre == "Cars" %}
+                    {% elif genre.name == "Cars" %}
                     <span class="text-xs font-bold bg-orange-100 bg-opacity-10 text-orange-300 py-1 px-2 rounded-full">
-                    {% elif genre == "Comedy" %}
+                    {% elif genre.name == "Comedy" %}
                     <span class="text-xs font-bold bg-purple-100 bg-opacity-10 text-purple-300 py-1 px-2 rounded-full">
-                    {% elif genre == "Drama" %}
+                    {% elif genre.name == "Drama" %}
                     <span class="text-xs font-bold bg-blue-100 bg-opacity-10 text-blue-300 py-1 px-2 rounded-full">
-                    {% elif genre == "Fantasy" %}
+                    {% elif genre.name == "Fantasy" %}
                     <span class="text-xs font-bold bg-yellow-100 bg-opacity-10 text-yellow-300 py-1 px-2 rounded-full">
-                    {% elif genre == "Horror" %}
+                    {% elif genre.name == "Horror" %}
                     <span class="text-xs font-bold bg-red-100 bg-opacity-10 text-red-300 py-1 px-2 rounded-full">
-                    {% elif genre == "Mahou Shoujo" %}
+                    {% elif genre.name == "Mahou Shoujo" %}
                     <span class="text-xs font-bold bg-teal-100 bg-opacity-10 text-teal-300 py-1 px-2 rounded-full">
-                    {% elif genre == "Mecha" %}
+                    {% elif genre.name == "Mecha" %}
                     <span class="text-xs font-bold bg-indigo-100 bg-opacity-10 text-indigo-300 py-1 px-2 rounded-full">
-                    {% elif genre == "Music" %}
+                    {% elif genre.name == "Music" %}
                     <span class="text-xs font-bold bg-pink-100 bg-opacity-10 text-pink-300 py-1 px-2 rounded-full">
-                    {% elif genre == "Mystery" %}
+                    {% elif genre.name == "Mystery" %}
                     <span class="text-xs font-bold bg-purple-100 bg-opacity-10 text-purple-300 py-1 px-2 rounded-full">
-                    {% elif genre == "Psychological" %}
+                    {% elif genre.name == "Psychological" %}
                     <span class="text-xs font-bold bg-blue-100 bg-opacity-10 text-blue-300 py-1 px-2 rounded-full">
-                    {% elif genre == "Romance" %}
+                    {% elif genre.name == "Romance" %}
                     <span class="text-xs font-bold bg-yellow-100 bg-opacity-10 text-yellow-300 py-1 px-2 rounded-full">
-                    {% elif genre == "Sci-Fi" %}
+                    {% elif genre.name == "Sci-Fi" %}
                     <span class="text-xs font-bold bg-red-100 bg-opacity-10 text-red-300 py-1 px-2 rounded-full">
-                    {% elif genre == "Slice of Life" %}
+                    {% elif genre.name == "Slice of Life" %}
                     <span class="text-xs font-bold bg-teal-100 bg-opacity-10 text-teal-300 py-1 px-2 rounded-full">
-                    {% elif genre == "Sports" %}
+                    {% elif genre.name == "Sports" %}
                     <span class="text-xs font-bold bg-indigo-100 bg-opacity-10 text-indigo-300 py-1 px-2 rounded-full">
-                    {% elif genre == "Supernatural" %}
+                    {% elif genre.name == "Supernatural" %}
                     <span class="text-xs font-bold bg-green-100 bg-opacity-10 text-green-300 py-1 px-2 rounded-full">
-                    {% elif genre == "Thriller" %}
+                    {% elif genre.name == "Thriller" %}
                     <span class="text-xs font-bold bg-orange-100 bg-opacity-10 text-orange-300 py-1 px-2 rounded-full">
                     {% else %}
                     <span class="text-xs font-bold bg-white bg-opacity-10 text-white py-1 px-2 rounded-full">
                     {% endif %}
-                        {{ genre }}
+                        {{ genre.name }}
                     </span>
                     {% endfor %}
                 </span>
@@ -381,13 +381,13 @@
                 {% endif %}                
             </div>
         </div>
-        {% if anime_data.characters %}
+        {% if characters %}
         <div class="my-4">
             <h2 class="text-xl font-bold text-white uppercase flex flex-row items-center gap-1 mb-4">
                 Characters &amp; Voice Actors
             </h2>
             <div class="flex flex-wrap">
-                {% for character in anime_data.characters %}
+                {% for character in characters %}
                 <div class="w-full lg:w-1/2 p-2 flex justify-between">
                     <div class="flex flex-row gap-2 items-center">
                         <img src="{{ character.image }}" alt="{{ character.name }}" class="rounded-full w-16 h-16 object-cover"/>
@@ -426,13 +426,13 @@
         {% endif %}
     </div>
     <div class="w-full lg:w-1/4">
-        {% if anime_data.relations %}
+        {% if related %}
         <div class="text-xl font-bold text-white uppercase flex flex-row items-center gap-1 mb-4">
             <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 256 512" class="size-4" xmlns="http://www.w3.org/2000/svg"><path d="M224.3 273l-136 136c-9.4 9.4-24.6 9.4-33.9 0l-22.6-22.6c-9.4-9.4-9.4-24.6 0-33.9l96.4-96.4-96.4-96.4c-9.4-9.4-9.4-24.6 0-33.9L54.3 103c9.4-9.4 24.6-9.4 33.9 0l136 136c9.5 9.4 9.5 24.6.1 34z"></path></svg>
             <span>Related</span>
         </div>
         <div class="flex flex-col gap-2">
-            {% for related in anime_data.relations %}
+            {% for related in related|slice:":5" %}
             {% if related.type == "MANGA" or related.type == "NOVEL" %}
             <div onClick="showToast('{% if related.type == "MANGA" %}Manga{% else %}Novel{% endif %} reading is not supported yet!', false)" class="cursor-pointer flex flex-row w-full gap-4 bg-white bg-opacity-10 p-2 rounded hover:bg-{{ user.preferences.accent_colour }}-600 hover:bg-opacity-30">
                 <img src="{{ related.image }}" alt="{{ related.title.english }}" class="rounded-lg w-12 h-16 object-cover"/>
@@ -566,13 +566,13 @@
             {% endfor %}
         </div>
         {% endif %}
-        {% if anime_data.recommendations %}
+        {% if recommendations %}
         <div class="text-xl font-bold text-white uppercase flex flex-row items-center gap-1 my-4">
             <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 256 512" class="size-4" xmlns="http://www.w3.org/2000/svg"><path d="M224.3 273l-136 136c-9.4 9.4-24.6 9.4-33.9 0l-22.6-22.6c-9.4-9.4-9.4-24.6 0-33.9l96.4-96.4-96.4-96.4c-9.4-9.4-9.4-24.6 0-33.9L54.3 103c9.4-9.4 24.6-9.4 33.9 0l136 136c9.5 9.4 9.5 24.6.1 34z"></path></svg>
             <span>Recommendations</span>
         </div>
         <div class="flex flex-col gap-2">
-            {% for recommendation in anime_data.recommendations|slice:":10" %}
+            {% for recommendation in recommendations|slice:":10" %}
             {% if recommendation.id %}
             <a href="{% url 'watch:watch' recommendation.id %}" class="flex flex-row w-full gap-4 bg-white bg-opacity-10 p-2 rounded hover:bg-{{ user.preferences.accent_colour }}-600 hover:bg-opacity-30">
                 <img src="{{ recommendation.image }}" alt="{{ recommendation.title.english }}" class="rounded-lg w-12 h-16 object-cover"/>
@@ -760,10 +760,10 @@
 </script>
 
 <script type="module">
-    const introStart = {{ episode_data.intro.start }};
-    const introEnd = {{ episode_data.intro.end }};
-    const outroStart = {{ episode_data.outro.start }};
-    const outroEnd = {{ episode_data.outro.end }};
+    const introStart = {{ streaming_data.intro.start }};
+    const introEnd = {{ streaming_data.intro.end }};
+    const outroStart = {{ streaming_data.outro.start }};
+    const outroEnd = {{ streaming_data.outro.end }};
     const skipIntroButton = document.getElementById('skipIntro');
     const skipOutroButton = document.getElementById('skipOutro');
     const introOverlay = document.getElementById('intro-overlay');
@@ -774,7 +774,7 @@
     import { VidstackPlayer, VidstackPlayerLayout, TextTrack } from 'https://cdn.vidstack.io/player';
     
     const layout = new VidstackPlayerLayout({
-        {% for track in episode_data.tracks %}
+        {% for track in streaming_data.tracks %}
             {% if track.kind == 'thumbnails' %}
                 thumbnails: "https://vtt.blasphemy8473.workers.dev/{{ track.file }}",
             {% endif %}
@@ -790,13 +790,13 @@
         logLevel: 'warn',
         crossOrigin: true,
         playsInline: true,
-        title: '{% if user.preferences.title_language == "english" and anime_data.title.english %}{{ anime_data.title.english }}{% elif user.preferences.title_language == "native" and anime_data.title.native %}{{ anime_data.title.native }}{% else %}{{ anime_data.title.romaji }}{% endif %} — Episode {{ current_episode }} — {{current_episode_name}}',
+        title: '{% if user.preferences.title_language == "english" and anime.title.english %}{{ anime.title.english }}{% elif user.preferences.title_language == "native" and anime.title.native %}{{ anime.title.native }}{% else %}{{ anime.title.romaji }}{% endif %} — {{ current_episode.title }}',
         subtitlePreference: {
             lang: 'English',
         },
         layout,
         tracks: [
-            {% for track in episode_data.tracks %}
+            {% for track in streaming_data.tracks %}
             {% if track.kind == "captions" %}
             {
                 src: '{{ track.file }}',
@@ -821,16 +821,16 @@
 
         const chapters = [
             { startTime: introStart, endTime: introEnd, title: 'Intro' },
-            { startTime: introEnd, endTime: outroStart, title: '{% if user.preferences.title_language == "english" and anime_data.title.english %}{{ anime_data.title.english }}{% elif user.preferences.title_language == "native" and anime_data.title.native %}{{ anime_data.title.native }}{% else %}{{ anime_data.title.romaji }}{% endif %} — Episode {{ current_episode }} — {{current_episode_name}}' },
+            { startTime: introEnd, endTime: outroStart, title: '{% if user.preferences.title_language == "english" and anime.title.english %}{{ anime.title.english }}{% elif user.preferences.title_language == "native" and anime.title.native %}{{ anime.title.native }}{% else %}{{ anime.title.romaji }}{% endif %} — {{ current_episode.title }}' },
             { startTime: outroStart, endTime: outroEnd, title: 'Outro' }
         ];
     
         if (introStart > 0 && introStart < introEnd) {
-            chapters.unshift({ startTime: 0, endTime: introStart, title: '{% if user.preferences.title_language == "english" and anime_data.title.english %}{{ anime_data.title.english }}{% elif user.preferences.title_language == "native" and anime_data.title.native %}{{ anime_data.title.native }}{% else %}{{ anime_data.title.romaji }}{% endif %} — Episode {{ current_episode }} — {{current_episode_name}}' });
+            chapters.unshift({ startTime: 0, endTime: introStart, title: '{% if user.preferences.title_language == "english" and anime.title.english %}{{ anime.title.english }}{% elif user.preferences.title_language == "native" and anime.title.native %}{{ anime.title.native }}{% else %}{{ anime.title.romaji }}{% endif %} — {{ current_episode.title }}' });
         }
 
         if (outroEnd > 0 && outroStart < outroEnd && duration > outroEnd) {
-            chapters.push({ startTime: outroEnd, endTime: duration, title: '{% if user.preferences.title_language == "english" and anime_data.title.english %}{{ anime_data.title.english }}{% elif user.preferences.title_language == "native" and anime_data.title.native %}{{ anime_data.title.native }}{% else %}{{ anime_data.title.romaji }}{% endif %} — Episode {{ current_episode }} — {{current_episode_name}}' });
+            chapters.push({ startTime: outroEnd, endTime: duration, title: '{% if user.preferences.title_language == "english" and anime.title.english %}{{ anime.title.english }}{% elif user.preferences.title_language == "native" and anime.title.native %}{{ anime.title.native }}{% else %}{{ anime.title.romaji }}{% endif %} — {{ current_episode.title }}' });
         }
         
         const chaptersTrack = new TextTrack({
@@ -962,14 +962,14 @@
                 'X-CSRFToken': '{{ csrf_token }}'
             },
             body: JSON.stringify({
-                'anime_id': {{ anime_id }},
-                'episode': {{ current_episode }},
+                'anime': {{ anime.anime_id }},
+                'episode': {{ current_episode.episode_id }},
                 'time_watched': parseInt(player.currentTime)
             })
         });
 
         lastTime = currentTime;
-    }, 30000);
+    }, 3000);
 
 </script>
 {% endblock scripts %}

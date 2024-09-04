@@ -53,13 +53,13 @@ def get_all_episode_metadata(anime_data):
     return episode_metadata
 
 
-def update_anime_user_history(user, anime_id, episode, time_watched):
+def update_anime_user_history(user, anime, episode, time_watched):
     # per episode history
-    history, created = UserHistory.objects.get_or_create(user=user, anime_id=anime_id, episode=episode)
+    history, created = UserHistory.objects.get_or_create(user=user, anime=anime, episode=episode)
     history.time_watched = time_watched
 
     # last watched
-    last_watched = UserHistory.objects.filter(user=user, anime_id=anime_id, last_watched=True)
+    last_watched = UserHistory.objects.filter(user=user, anime=anime, last_watched=True)
     if last_watched:
         last_watched = last_watched[0]
         last_watched.last_watched = False
@@ -69,8 +69,8 @@ def update_anime_user_history(user, anime_id, episode, time_watched):
     history.last_updated = datetime.datetime.now()
     history.save()
 
-def get_anime_user_history(user, anime_id):
-    history = UserHistory.objects.filter(user=user, anime_id=anime_id).order_by("-episode")
+def get_anime_user_history(user, anime):
+    history = UserHistory.objects.filter(user=user, anime=anime)
     return history
 
 
@@ -84,4 +84,4 @@ def store_in_redis_cache(anime_id, data, cache_time=60*60*12):
 
 def get_from_redis_cache(anime_id):
     data = r.get(anime_id)
-    return data
+    return data if data else None

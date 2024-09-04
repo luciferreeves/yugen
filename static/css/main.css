@@ -2409,12 +2409,12 @@ main {
     height: 39vw;
   }
 
-  .lg\:max-h-\[761px\] {
-    max-height: 761px;
-  }
-
   .lg\:max-h-24 {
     max-height: 6rem;
+  }
+
+  .lg\:max-h-\[761px\] {
+    max-height: 761px;
   }
 
   .lg\:w-1\/2 {

@@ -1,4 +1,5 @@
 from django.db import models
+from watch.models import Anime, AnimeEpisode
 from django.conf import settings
 
 # Create your models here.
@@ -27,14 +28,14 @@ class UserPreferences(models.Model):
 
 class UserHistory(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    anime_id = models.IntegerField()
-    episode = models.IntegerField()
+    anime = models.ForeignKey(Anime, on_delete=models.CASCADE)
+    episode = models.ForeignKey(AnimeEpisode, on_delete=models.CASCADE)
     time_watched = models.IntegerField(default=0)
     last_watched = models.BooleanField(default=False)
     last_updated = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return f"{self.user.username} watched episode {self.episode} of anime {self.anime_id}"
+        return f"{self.user.username} - {self.anime.title.english} - {self.episode.episode_id}"
     
     class Meta:
         verbose_name_plural = "User Histories"

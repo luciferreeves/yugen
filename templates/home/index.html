@@ -107,22 +107,22 @@
 <div class="flex flex-row gap-2 mt-4 overflow-x-auto no-scrollbar swiper historySwiper">
   <div class="swiper-wrapper">
     {% for history in user_history_data %}
-    <a href="{% url "watch:watch_episode" history.anime_id history.episode %}" class="group rounded-lg aspect-video h-48 relative flex-shrink-0 overflow-hidden swiper-slide">
-      <div class="absolute inset-0 bg-center bg-cover transition-transform group-hover:scale-110" style="background-image: url('{% if history.metadata.image %}{{ history.metadata.image }}'){% else %}{{ history.cover }}{% endif %}"></div>
+    <a href="{% url "watch:watch_episode" history.anime.id history.episode.number %}" class="group rounded-lg aspect-video h-48 relative flex-shrink-0 overflow-hidden swiper-slide">
+      <div class="absolute inset-0 bg-center bg-cover transition-transform group-hover:scale-110" style="background-image: url('{% if history.episode.image %}{{ history.episode.image }}'){% else %}{{ history.anime.cover }}{% endif %}"></div>
       <div class="absolute inset-0 bg-{{ user.preferences.accent_colour }}-600 opacity-0 group-hover:opacity-30 transition-opacity"></div>
       <div class="absolute inset-0" style="background: linear-gradient(45deg, rgb(8, 8, 8) 15%, transparent 60%), linear-gradient(0deg, rgb(8, 8, 8) 0%, transparent 60%);"></div>
       <div class="flex flex-col justify-end h-full p-2 relative z-10">
         <h1 class="text-xl font-bold truncate max-w-full overflow-hidden text-ellipsis whitespace-nowrap">
-          {% if user.preferences.title_language == "english" and history.title.english %}
-          {{ history.title.english }}
-          {% elif user.preferences.title_language == "native" and history.title.native %}
-          {{ history.title.native }}
+          {% if user.preferences.title_language == "english" and history.anime.title.english %}
+          {{ history.anime.title.english }}
+          {% elif user.preferences.title_language == "native" and history.anime.title.native %}
+          {{ history.anime.title.native }}
           {% else %}
-          {{ history.title.romaji }}
+          {{ history.anime.title.romaji }}
           {% endif %}
         </h1>
-        <h2 class="font-bold truncate max-w-full overflow-hidden text-ellipsis whitespace-nowrap">{{ history.metadata.title }}</h2>
-        <p>Episode {{ history.episode }}</p>
+        <h2 class="font-bold truncate max-w-full overflow-hidden text-ellipsis whitespace-nowrap">{{ history.episode.title }}</h2>
+        <p>Episode {{ history.episode.number }}</p>
       </div>
     </a>
     {% endfor %}
