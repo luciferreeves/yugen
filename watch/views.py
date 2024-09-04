@@ -161,9 +161,10 @@ def update_anime(anime_id, anime_fetched):
         # Update sub and dub count
         z_anime_info = get_info_by_zid(anime.z_anime_id)
         try:
-            anime.sub = z_anime_info["anime"]["info"]["stats"]["sub"]
-            anime.dub = z_anime_info["anime"]["info"]["stats"]["dub"]
+            anime.sub = z_anime_info["anime"]["info"]["stats"]["episodes"]["sub"]
+            anime.dub = z_anime_info["anime"]["info"]["stats"]["episodes"]["dub"]
         except:
+            print("Error fetching sub and dub count:", z_anime_info)
             pass
         
         # Update genres

@@ -67,7 +67,7 @@ class Anime(models.Model):
 
     def needs_update(self):
         # Always update if the anime is ongoing and last updated was more than 1 day ago 
-        if self.status == "Ongoing" and (timezone.now() - self.last_updated) > datetime.timedelta(days=1):
+        if self.status == "Ongoing":
             return True
         
         if self.status == "Not yet aired":
