@@ -72,7 +72,12 @@ def get_episodes_by_zid(anime):
     fetched_episodes_metadata = get_all_episode_metadata(anime_data)
 
     for index, episode in enumerate(fetched_episodes["episodes"]):
-        episode["metadata"] = fetched_episodes_metadata[index]
+        episode["metadata"] = fetched_episodes_metadata[index] if index < len(fetched_episodes_metadata) else {
+            "title": episode["title"],
+            "description": "",
+            "airDate": "1970-01-01",
+            "image": anime.image
+        }
 
     return fetched_episodes
 
@@ -190,6 +195,9 @@ def update_anime(anime_id, anime_fetched):
     return anime
 
 def update_anime_episodes(anime):
+    if not anime.z_anime_id:
+        return anime
+
     fetched_episodes = get_episodes_by_zid(anime)
     
     with transaction.atomic():
@@ -210,7 +218,7 @@ def update_anime_episodes(anime):
             episode_data = {
                 'anime': anime,
                 'zEpisodeId': episode['episodeId'],
-                'title': metadata['title'],
+                'title': episode['title'],
                 'number': int(episode['number']),
                 'description': metadata.get('description', ''),
                 'air_date': dt.strptime(metadata.get('airDate', '1970-01-01'), '%Y-%m-%d').date(),
@@ -271,10 +279,10 @@ def watch(request, anime_id, episode=None):
     if mode == "dub" and anime.dub < episode:
         mode = "sub"
 
-    streaming_data = get_episode_streaming_data(episode_data.zEpisodeId, mode)
+    streaming_data = get_episode_streaming_data(episode_data.zEpisodeId, mode) if episode_data else None
 
     # if no captions are present and the mode is dub, and ingrain_sub_subtitles_in_dub is true, then fetch the sub track
-    if "tracks" in streaming_data and not any(t["kind"] == "captions" for t in streaming_data["tracks"]) and mode == "dub" and request.user.preferences.ingrain_sub_subtitles_in_dub:
+    if streaming_data and "tracks" in streaming_data and not any(t["kind"] == "captions" for t in streaming_data["tracks"]) and mode == "dub" and request.user.preferences.ingrain_sub_subtitles_in_dub:
         sub_streaming_data = get_episode_streaming_data(episode_data.zEpisodeId, "sub")
         captions = [t for t in sub_streaming_data["tracks"] if t["kind"] == "captions"]
         if captions:
@@ -284,6 +292,9 @@ def watch(request, anime_id, episode=None):
         mal_data = get_single_anime_mal(request.user.mal_access_token, anime.malId)
         if mal_data:
             mal_data["average_episode_duration"] = mal_data["average_episode_duration"] // 60 + 1
+
+    if anime and episode_data:
+        update_anime_user_history(request.user, anime, episode_data, current_watched_time)
 
     context = {
         "anime": anime,
@@ -301,8 +312,6 @@ def watch(request, anime_id, episode=None):
         "mal_data": mal_data,
         "mal_episode_range": range(1, mal_data["num_episodes"] + 1) if mal_data else None,
     }
-
-    update_anime_user_history(request.user, anime, episode_data, 0)
 
     return render(request, "watch/watch.html", context)
 
