@@ -278,10 +278,12 @@ def watch(request, anime_id, episode=None):
     anime_fetched = get_anime_by_id(anime_id)
     if anime_fetched["status"] == "Not yet aired":
         return redirect("detail:detail", anime_id=anime_id)
+    
+    forced_update = request.GET.get("refresh") == "true"
 
     try:
         anime = Anime.objects.get(id=anime_id)
-        if anime.needs_update():
+        if anime.needs_update() or forced_update:
             anime = update_anime(anime_id, anime_fetched)
     except Anime.DoesNotExist:
         anime = update_anime(anime_id, anime_fetched)
