@@ -3,6 +3,26 @@
 {% block css %}
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css"/>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+<style>
+  @keyframes fadeInUp {
+      from {
+          opacity: 0;
+          transform: translate3d(0, 20px, 0);
+      }
+      to {
+          opacity: 1;
+          transform: translate3d(0, 0, 0);
+      }
+  }
+  
+  .anime-item {
+      opacity: 0;
+  }
+  
+  .anime-item.fade-in {
+      animation: fadeInUp 0.5s ease-out forwards;
+  }
+</style>
 {% endblock css %} 
 {% block content %}
 <!-- Swiper: Trending Anime -->
@@ -158,7 +178,7 @@
       </button>      
     </section>
     <!-- Data Cards: Trending Anime -->
-    <section id="trending" class="flex flex-wrap justify-center mt-4 animate__animated animate__slideInUp max-w-full">
+    <section id="trending" class="flex flex-wrap justify-center mt-4 max-w-full">
       {% if user.preferences.card_layout == 'classic' %}
       {% include "partials/datacard_render.html" with data=trending_anime %}
       {% elif user.preferences.card_layout == 'wide' %}
@@ -168,7 +188,7 @@
       {% endif %}
     </section>
     <!-- Data Cards: Popular Anime -->
-    <section id="popular" class="flex-wrap justify-center mt-4 hidden animate__animated animate__slideInUp max-w-full">
+    <section id="popular" class="flex-wrap justify-center mt-4 hidden max-w-full">
       {% comment %} {% include "partials/datacard_render.html" with data=popular_anime %} {% endcomment %}
       {% if user.preferences.card_layout == 'classic' %}
       {% include "partials/datacard_render.html" with data=popular_anime %}
@@ -179,7 +199,7 @@
       {% endif %}
     </section>
     <!-- Data Cards: Top Rated Anime -->
-    <section id="top_rated" class="flex-wrap justify-center mt-4 hidden animate__animated animate__slideInUp max-w-full">
+    <section id="top_rated" class="flex-wrap justify-center mt-4 hidden max-w-full">
       {% comment %} {% include "partials/datacard_render.html" with data=top_anime %} {% endcomment %}
       {% if user.preferences.card_layout == 'classic' %}
       {% include "partials/datacard_render.html" with data=top_anime %}
@@ -193,12 +213,12 @@
   <section class="w-full xl:w-1/4 px-4 py-2">
     <h2 class="text-2xl font-bold text-white uppercase">Top Airing</h2>
     <!-- Wide Cards: Upcoming -->
-    <section class="flex flex-col gap-4 mt-4 animate__animated animate__slideInUp">
+    <section class="flex flex-col gap-4 mt-4">
       {% include "partials/sidebarwidecard_render.html" with data=top_airing_anime %}
     </section>
     <h2 class="text-2xl font-bold text-white uppercase mt-4">Upcoming {{ next_season }}</h2>
     <!-- Wide Cards: Upcoming -->
-    <section class="flex flex-col gap-4 mt-4 animate__animated animate__slideInUp">
+    <section class="flex flex-col gap-4 mt-4">
       {% include "partials/sidebarwidecard_render.html" with data=upcoming_anime %}
     </section>
   </section>
@@ -237,24 +257,54 @@
   });
 </script>
 <script>
-  const categorySwitch = document.querySelectorAll(".category-switch");
-  categorySwitch.forEach((button) => {
-    button.addEventListener("click", () => {
-      categorySwitch.forEach((button) => {
-        button.classList.remove("active-category");
-        button.classList.remove("bg-{{ user.preferences.accent_colour }}-600");
-      });
-      button.classList.add("active-category");
-      button.classList.add("bg-{{ user.preferences.accent_colour }}-600");
+  document.addEventListener('DOMContentLoaded', function() {
+    const categorySwitch = document.querySelectorAll(".category-switch");
+    const sections = ["trending", "popular", "top_rated"];
+    
+    function applyFadeInEffect(sectionId) {
+        const animeItems = document.querySelectorAll(`#${sectionId} .anime-item`);
+        animeItems.forEach((item, index) => {
+            item.classList.remove('fade-in');
+            item.style.animationDelay = `${index * 0.1}s`;
+            // Use setTimeout to trigger a reflow and apply the animation
+            setTimeout(() => {
+                item.classList.add('fade-in');
+            }, 10);
+        });
+    }
 
-      const target = button.getAttribute("data-target");
-      const sections = [document.getElementById("trending"), document.getElementById("popular"), document.getElementById("top_rated")];
-      sections.forEach((section) => {
-        section.classList.add("hidden");
-        section.classList.remove("flex");
-      });
-      document.getElementById(target).classList.remove("hidden");
-      document.getElementById(target).classList.add("flex");
+    function switchCategory(category) {
+        sections.forEach((sectionId) => {
+            const section = document.getElementById(sectionId);
+            if (sectionId === category) {
+                section.classList.remove("hidden");
+                section.classList.add("flex");
+                applyFadeInEffect(sectionId);
+            } else {
+                section.classList.add("hidden");
+                section.classList.remove("flex");
+            }
+        });
+
+        categorySwitch.forEach((button) => {
+            button.classList.remove("active-category", "bg-{{ user.preferences.accent_colour }}-600");
+            if (button.getAttribute("data-target") === category) {
+                button.classList.add("active-category", "bg-{{ user.preferences.accent_colour }}-600");
+            }
+        });
+
+        localStorage.setItem("activeCategory", category);
+    }
+
+    // Initial setup
+    const activeCategory = localStorage.getItem("activeCategory") || "trending";
+    switchCategory(activeCategory);
+
+    categorySwitch.forEach((button) => {
+        button.addEventListener("click", () => {
+            const target = button.getAttribute("data-target");
+            switchCategory(target);
+        });
     });
   });
 </script>

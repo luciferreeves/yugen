@@ -1,7 +1,7 @@
 {% load custom_filters %}
 {% for anime in data %}
 {% if not anime.status == "Not yet aired"%}
-<div class="w-full lg:w-1/2 px-2 mb-2">
+<div class="w-full lg:w-1/2 px-2 mb-2 anime-item">
     <div class="flex flex-row w-full bg-neutral-950 rounded hover:bg-{{ user.preferences.accent_colour }}-600 hover:bg-opacity-30 p-2 gap-4">
         <div class="flex flex-col gap-2 min-w-32">
             <a href="{% url 'watch:watch' anime.id %}"><img src="{{ anime.image }}" alt="{{ anime.title.english }}" class="rounded-lg w-32 h-48 object-cover"/></a>
