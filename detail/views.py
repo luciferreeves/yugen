@@ -1,10 +1,14 @@
 import json
 import os
-from django.shortcuts import render
+from django.shortcuts import redirect, render
 import requests
 from functools import lru_cache
 from authentication.utils import get_single_anime_mal
 from watch.utils import get_all_episode_metadata, get_from_redis_cache, store_in_redis_cache
+
+
+def index(request):
+    return redirect("home:index")
 
 def detail(request, anime_id):
     anime_data = get_anime_data(anime_id)

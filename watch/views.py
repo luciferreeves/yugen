@@ -16,6 +16,9 @@ import json
 
 dotenv.load_dotenv()
 
+def index(request):
+    return redirect("home:index")
+
 def get_anime_by_id(anime_id):
     cache_key = f"anime_{anime_id}_anime_data"
     try:

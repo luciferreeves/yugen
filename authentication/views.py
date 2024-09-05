@@ -5,6 +5,11 @@ from django.urls import reverse
 from authentication.utils import exchange_code, authenticate_user, exchange_mal_code, get_redirect_uri
 from django.shortcuts import redirect, render
 
+def index(request):
+    if request.user.is_authenticated:
+        return redirect("home:index")
+
+    return redirect(get_redirect_uri())
 
 def callback(request):
     if request.user.is_authenticated:
