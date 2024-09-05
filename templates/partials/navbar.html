@@ -42,7 +42,7 @@
 
       <!-- Trending icon -->
       <a href="{% url "home:search" %}?sort=%5B%22TRENDING_DESC%22%5D" class="flex flex-col gap-2 items-center">
-        {% if request.get_full_path == '/search?sort=%5B%22TRENDING_DESC%22%5D' %}
+        {% if 'sort=%5B%22TRENDING_DESC%22%5D' in request.get_full_path or 'sort=[%22TRENDING_DESC%22]' in request.get_full_path %}
         <svg
           xmlns="http://www.w3.org/2000/svg"
           viewBox="0 0 24 24"
@@ -293,7 +293,7 @@
 
           <!-- Trending icon -->
           <a href="{% url "home:search" %}?sort=%5B%22TRENDING_DESC%22%5D" class="flex flex-col gap-2 items-center">
-            {% if request.get_full_path == '/search?sort=%5B%22TRENDING_DESC%22%5D' %}
+            {% if 'sort=%5B%22TRENDING_DESC%22%5D' in request.get_full_path or 'sort=[%22TRENDING_DESC%22]' in request.get_full_path %}
             <svg
               xmlns="http://www.w3.org/2000/svg"
               viewBox="0 0 24 24"
