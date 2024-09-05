@@ -48,7 +48,7 @@ def index(request):
     }
 
     if request.user.preferences.show_history_on_home:
-        context["user_history_data"] = gather_watch_history(request.user)
+        context["user_history_data"] = gather_watch_history(request.user, 10)
 
     return render(request, "home/index.html", context)
 
