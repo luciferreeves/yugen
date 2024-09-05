@@ -95,13 +95,16 @@
             </a>
             {% endif %}
             {% endfor %}
+            {% if not all_episodes %}
+            <p class="text-white text-center">No episodes found.</p>
+            {% endif %}
         </div>
     </div>
 </div>
 <div class="flex flex-col lg:flex-row my-4 gap-2">
     <div class="w-full lg:w-3/4">
         <div class="flex flex-row gap-2 items-center justify-between">
-            <h2 class="text-xl font-bold truncate max-w-full overflow-hidden text-ellipsis whitespace-nowrap">Episode {{ current_episode.number }} — {{ current_episode.title }}</h2>
+            {% if current_episode %}<h2 class="text-xl font-bold truncate max-w-full overflow-hidden text-ellipsis whitespace-nowrap">Episode {{ current_episode.number }} — {{ current_episode.title }}</h2>{% endif %}
             <div class="flex flex-row gap-1 items-center">
                 {% if current_episode.number %}
                 <a href="{% if not viaMal %}{% url "watch:watch_episode" anime.id current_episode.number %}?mode=sub{% else %}{% url "watch:watch_via_zid_mal_id" anime.id anime.z_anime_id %}?ep={{ current_episode.episode.identifier }}&mode=sub{% endif %}" class="{% if mode == "sub" %}bg-{{ user.preferences.accent_colour }}-600{% else %}bg-white bg-opacity-10{% endif %} text-white text-sm font-bold px-4 py-2 rounded">Sub</a>
@@ -857,12 +860,13 @@
       spaceBetween: 8,
       freeMode: true,
     });
-  </script>
+</script>
+{% if current_episode %}
 <script type="module">
-    const introStart = {{ streaming_data.intro.start }};
-    const introEnd = {{ streaming_data.intro.end }};
-    const outroStart = {{ streaming_data.outro.start }};
-    const outroEnd = {{ streaming_data.outro.end }};
+    const introStart = {% if streaming_data.intro.start %}{{ streaming_data.intro.start }}{% else %}0{% endif %};
+    const introEnd = {% if streaming_data.intro.end %}{{ streaming_data.intro.end }}{% else %}0{% endif %};
+    const outroStart = {% if streaming_data.outro.start %}{{ streaming_data.outro.start }}{% else %}0{% endif %};
+    const outroEnd = {% if streaming_data.outro.end %}{{ streaming_data.outro.end }}{% else %}0{% endif %};
     const skipIntroButton = document.getElementById('skipIntro');
     const skipOutroButton = document.getElementById('skipOutro');
     const introOverlay = document.getElementById('intro-overlay');
@@ -1072,4 +1076,5 @@
     }, 30000);
     {% endif %}
 </script>
+{% endif %}
 {% endblock scripts %}
