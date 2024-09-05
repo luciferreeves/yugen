@@ -496,9 +496,10 @@ def watch_via_zid_mal_id(request, mal_id, zid):
 
     if streaming_data and "tracks" in streaming_data and not any(t["kind"] == "captions" for t in streaming_data["tracks"]) and mode == "dub" and request.user.preferences.ingrain_sub_subtitles_in_dub:
         sub_streaming_data = get_episode_streaming_data(current_episode["episodeId"], "sub")
-        captions = [t for t in sub_streaming_data["tracks"] if t["kind"] == "captions"]
-        if captions:
-            streaming_data["tracks"].extend(captions)
+        if "tracks" in sub_streaming_data:
+            captions = [t for t in sub_streaming_data["tracks"] if t["kind"] == "captions"]
+            if captions:
+                streaming_data["tracks"].extend(captions)
 
     anime = {
         "id": mal_id,
@@ -508,24 +509,24 @@ def watch_via_zid_mal_id(request, mal_id, zid):
         "image": anime_info["anime"]["info"]["poster"].replace("300x400/100", "600x800/100"),
         "countryOfOrigin": "JP",
         "titles": {
-            "english": anime_mal_info["alternative_titles"]["en"],
-            "romaji": anime_mal_info["title"],
-            "native": anime_mal_info["alternative_titles"]["ja"]
+            "english": anime_mal_info["alternative_titles"]["en"] if mal_id else anime_info["anime"]["info"]["name"],
+            "romaji": anime_mal_info["title"] if mal_id else anime_info["anime"]["info"]["name"],
+            "native": anime_mal_info["alternative_titles"]["ja"] if mal_id else anime_info["anime"]["moreInfo"]["japanese"],
         },
-        "type": anime_mal_info["media_type"].replace("_", " ").title(),
-        "popularity": anime_mal_info["popularity"],
-        "releaseDate": anime_mal_info["start_date"].split("-")[0],
-        "totalEpisodes": anime_mal_info["num_episodes"],
+        "type": anime_mal_info["media_type"].replace("_", " ").title() if mal_id else anime_info["anime"]["info"]["stats"]["type"],
+        "popularity": anime_mal_info["popularity"] if mal_id else 0,
+        "releaseDate": anime_mal_info["start_date"].split("-")[0] if mal_id else anime_info["anime"]["moreInfo"]["aired"],
+        "totalEpisodes": anime_mal_info["num_episodes"] if mal_id else len(anime_episodes["episodes"]),
         "currentEpisode": len(anime_episodes["episodes"]),
-        "rating": anime_mal_info["mean"],
-        "duration": anime_mal_info["average_episode_duration"] // 60 + 1,
+        "rating": anime_mal_info["mean"] if mal_id else 0,
+        "duration": anime_mal_info["average_episode_duration"] // 60 + 1 if mal_id else anime_info["anime"]["moreInfo"]["duration"],
         "genres": {
-            "all": anime_mal_info["genres"]
+            "all": anime_mal_info["genres"] if mal_id else [{"name": g} for g in anime_info["anime"]["moreInfo"]["genres"]],
         },
-        "status": anime_mal_info["status"].replace("_", " ").title(),
-        "season": anime_mal_info["start_season"]["season"].title(),
+        "status": anime_mal_info["status"].replace("_", " ").title() if mal_id else anime_info["anime"]["moreInfo"]["status"],
+        "season": anime_mal_info["start_season"]["season"].title() if mal_id else None,
         "studios": {
-            "all": anime_mal_info["studios"]
+            "all": anime_mal_info["studios"] if mal_id else [{"name": anime_info["anime"]["moreInfo"]["studios"]}],
         },
         "sub": anime_info["anime"]["info"]["stats"]["episodes"].get("sub", 0),
         "dub": anime_info["anime"]["info"]["stats"]["episodes"].get("dub", 0),
@@ -599,7 +600,7 @@ def watch_via_zid_mal_id(request, mal_id, zid):
         "characters": characters,
     }
 
-    if request.user.mal_access_token:
+    if request.user.mal_access_token and mal_id:
         context["mal_data"] = anime_mal_info
         context["mal_episode_range"] = range(1, anime_mal_info["num_episodes"] + 1)
 
