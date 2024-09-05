@@ -3,26 +3,6 @@
 {% block css %}
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css"/>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
-<style>
-  @keyframes fadeInUp {
-      from {
-          opacity: 0;
-          transform: translate3d(0, 20px, 0);
-      }
-      to {
-          opacity: 1;
-          transform: translate3d(0, 0, 0);
-      }
-  }
-  
-  .anime-item {
-      opacity: 0;
-  }
-  
-  .anime-item.fade-in {
-      animation: fadeInUp 0.5s ease-out forwards;
-  }
-</style>
 {% endblock css %} 
 {% block content %}
 <!-- Swiper: Trending Anime -->
@@ -104,24 +84,24 @@
 
 <!-- Genre Pills -->
 <section class="flex flex-row gap-2 mt-4 justify-center flex-wrap">
-  <a href="#" class="bg-green-100 bg-opacity-10 text-green-300 text-sm font-bold py-2 px-4 rounded-full">Action</a>
-  <a href="#" class="bg-pink-100 bg-opacity-10 text-pink-300 text-sm font-bold py-2 px-4 rounded-full">Adventure</a>
-  <a href="#" class="bg-orange-100 bg-opacity-10 text-orange-300 text-sm font-bold py-2 px-4 rounded-full">Cars</a>
-  <a href="#" class="bg-purple-100 bg-opacity-10 text-purple-300 text-sm font-bold py-2 px-4 rounded-full">Comedy</a>
-  <a href="#" class="bg-blue-100 bg-opacity-10 text-blue-300 text-sm font-bold py-2 px-4 rounded-full">Drama</a>
-  <a href="#" class="bg-yellow-100 bg-opacity-10 text-yellow-300 text-sm font-bold py-2 px-4 rounded-full">Fantasy</a>
-  <a href="#" class="bg-red-100 bg-opacity-10 text-red-300 text-sm font-bold py-2 px-4 rounded-full">Horror</a>
-  <a href="#" class="bg-teal-100 bg-opacity-10 text-teal-300 text-sm font-bold py-2 px-4 rounded-full">Mahou Shoujo</a>
-  <a href="#" class="bg-indigo-100 bg-opacity-10 text-indigo-300 text-sm font-bold py-2 px-4 rounded-full">Mecha</a>
-  <a href="#" class="bg-pink-100 bg-opacity-10 text-pink-300 text-sm font-bold py-2 px-4 rounded-full">Music</a>
-  <a href="#" class="bg-purple-100 bg-opacity-10 text-purple-300 text-sm font-bold py-2 px-4 rounded-full">Mystery</a>
-  <a href="#" class="bg-blue-100 bg-opacity-10 text-blue-300 text-sm font-bold py-2 px-4 rounded-full">Psychological</a>
-  <a href="#" class="bg-yellow-100 bg-opacity-10 text-yellow-300 text-sm font-bold py-2 px-4 rounded-full">Romance</a>
-  <a href="#" class="bg-red-100 bg-opacity-10 text-red-300 text-sm font-bold py-2 px-4 rounded-full">Sci-Fi</a>
-  <a href="#" class="bg-teal-100 bg-opacity-10 text-teal-300 text-sm font-bold py-2 px-4 rounded-full">Slice of Life</a>
-  <a href="#" class="bg-indigo-100 bg-opacity-10 text-indigo-300 text-sm font-bold py-2 px-4 rounded-full">Sports</a>
-  <a href="#" class="bg-green-100 bg-opacity-10 text-green-300 text-sm font-bold py-2 px-4 rounded-full">Supernatural</a>
-  <a href="#" class="bg-orange-100 bg-opacity-10 text-orange-300 text-sm font-bold py-2 px-4 rounded-full">Thriller</a>
+  <a href="{% url "home:search" %}?genres=%5B%22Action%22%5D" class="bg-green-100 bg-opacity-10 text-green-300 text-sm font-bold py-2 px-4 rounded-full">Action</a>
+  <a href="{% url "home:search" %}?genres=%5B%22Adventure%22%5D" class="bg-pink-100 bg-opacity-10 text-pink-300 text-sm font-bold py-2 px-4 rounded-full">Adventure</a>
+  <a href="{% url "home:search" %}?genres=%5B%22Cars%22%5D" class="bg-orange-100 bg-opacity-10 text-orange-300 text-sm font-bold py-2 px-4 rounded-full">Cars</a>
+  <a href="{% url "home:search" %}?genres=%5B%22Comedy%22%5D" class="bg-purple-100 bg-opacity-10 text-purple-300 text-sm font-bold py-2 px-4 rounded-full">Comedy</a>
+  <a href="{% url "home:search" %}?genres=%5B%22Drama%22%5D" class="bg-blue-100 bg-opacity-10 text-blue-300 text-sm font-bold py-2 px-4 rounded-full">Drama</a>
+  <a href="{% url "home:search" %}?genres=%5B%22Fantasy%22%5D" class="bg-yellow-100 bg-opacity-10 text-yellow-300 text-sm font-bold py-2 px-4 rounded-full">Fantasy</a>
+  <a href="{% url "home:search" %}?genres=%5B%22Horror%22%5D" class="bg-red-100 bg-opacity-10 text-red-300 text-sm font-bold py-2 px-4 rounded-full">Horror</a>
+  <a href="{% url "home:search" %}?genres=%5B%22Mahou%20Shoujo%22%5D" class="bg-teal-100 bg-opacity-10 text-teal-300 text-sm font-bold py-2 px-4 rounded-full">Mahou Shoujo</a>
+  <a href="{% url "home:search" %}?genres=%5B%22Mecha%22%5D" class="bg-indigo-100 bg-opacity-10 text-indigo-300 text-sm font-bold py-2 px-4 rounded-full">Mecha</a>
+  <a href="{% url "home:search" %}?genres=%5B%22Music%22%5D" class="bg-pink-100 bg-opacity-10 text-pink-300 text-sm font-bold py-2 px-4 rounded-full">Music</a>
+  <a href="{% url "home:search" %}?genres=%5B%22Mystery%22%5D" class="bg-purple-100 bg-opacity-10 text-purple-300 text-sm font-bold py-2 px-4 rounded-full">Mystery</a>
+  <a href="{% url "home:search" %}?genres=%5B%22Psychological%22%5D" class="bg-blue-100 bg-opacity-10 text-blue-300 text-sm font-bold py-2 px-4 rounded-full">Psychological</a>
+  <a href="{% url "home:search" %}?genres=%5B%22Romance%22%5D" class="bg-yellow-100 bg-opacity-10 text-yellow-300 text-sm font-bold py-2 px-4 rounded-full">Romance</a>
+  <a href="{% url "home:search" %}?genres=%5B%22Sci-Fi%22%5D" class="bg-red-100 bg-opacity-10 text-red-300 text-sm font-bold py-2 px-4 rounded-full">Sci-Fi</a>
+  <a href="{% url "home:search" %}?genres=%5B%22Slice%20of%20Life%22%5D" class="bg-teal-100 bg-opacity-10 text-teal-300 text-sm font-bold py-2 px-4 rounded-full">Slice of Life</a>
+  <a href="{% url "home:search" %}?genres=%5B%22Sports%22%5D" class="bg-indigo-100 bg-opacity-10 text-indigo-300 text-sm font-bold py-2 px-4 rounded-full">Sports</a>
+  <a href="{% url "home:search" %}?genres=%5B%22Supernatural%22%5D" class="bg-green-100 bg-opacity-10 text-green-300 text-sm font-bold py-2 px-4 rounded-full">Supernatural</a>
+  <a href="{% url "home:search" %}?genres=%5B%22Thriller%22%5D" class="bg-orange-100 bg-opacity-10 text-orange-300 text-sm font-bold py-2 px-4 rounded-full">Thriller</a>
 </section>
 
 {% if request.user.preferences.show_history_on_home and user_history_data %}
@@ -178,36 +158,50 @@
       </button>      
     </section>
     <!-- Data Cards: Trending Anime -->
-    <section id="trending" class="flex flex-wrap justify-center mt-4 max-w-full">
-      {% if user.preferences.card_layout == 'classic' %}
-      {% include "partials/datacard_render.html" with data=trending_anime %}
-      {% elif user.preferences.card_layout == 'wide' %}
-      {% include "partials/datacardwide_render.html" with data=trending_anime %}
-      {% elif user.preferences.card_layout == 'compact' %}
-      {% include "partials/datacardcompact_render.html" with data=trending_anime %}
-      {% endif %}
+    <section id="trending" class="flex flex-col mt-4 max-w-full">
+      <div class="flex flex-wrap justify-center">
+        {% if user.preferences.card_layout == 'classic' %}
+        {% include "partials/datacard_render.html" with data=trending_anime %}
+        {% elif user.preferences.card_layout == 'wide' %}
+        {% include "partials/datacardwide_render.html" with data=trending_anime %}
+        {% elif user.preferences.card_layout == 'compact' %}
+        {% include "partials/datacardcompact_render.html" with data=trending_anime %}
+        {% endif %}
+      </div>
+      <div class="text-right mt-4">
+        <a href="{% url "home:search" %}?sort=%5B%22TRENDING_DESC%22%5D" class="bg-{{ user.preferences.accent_colour }}-600 font-bold text-white text-sm px-4 py-2 rounded">View All Trending</a>
+      </div>
     </section>
+    
     <!-- Data Cards: Popular Anime -->
-    <section id="popular" class="flex-wrap justify-center mt-4 hidden max-w-full">
-      {% comment %} {% include "partials/datacard_render.html" with data=popular_anime %} {% endcomment %}
-      {% if user.preferences.card_layout == 'classic' %}
-      {% include "partials/datacard_render.html" with data=popular_anime %}
-      {% elif user.preferences.card_layout == 'wide' %}
-      {% include "partials/datacardwide_render.html" with data=popular_anime %}
-      {% elif user.preferences.card_layout == 'compact' %}
-      {% include "partials/datacardcompact_render.html" with data=popular_anime %}
-      {% endif %}
+    <section id="popular" class="flex-wrap flex flex-col mt-4 max-w-full">
+      <div class="flex flex-wrap justify-center">
+        {% if user.preferences.card_layout == 'classic' %}
+        {% include "partials/datacard_render.html" with data=popular_anime %}
+        {% elif user.preferences.card_layout == 'wide' %}
+        {% include "partials/datacardwide_render.html" with data=popular_anime %}
+        {% elif user.preferences.card_layout == 'compact' %}
+        {% include "partials/datacardcompact_render.html" with data=popular_anime %}
+        {% endif %}
+      </div>
+      <div class="text-right mt-4">
+        <a href="{% url "home:search" %}?sort=%5B%22POPULARITY_DESC%22%5D" class="bg-{{ user.preferences.accent_colour }}-600 font-bold text-white text-sm px-4 py-2 rounded">View All Popular</a>
+      </div>
     </section>
     <!-- Data Cards: Top Rated Anime -->
-    <section id="top_rated" class="flex-wrap justify-center mt-4 hidden max-w-full">
-      {% comment %} {% include "partials/datacard_render.html" with data=top_anime %} {% endcomment %}
-      {% if user.preferences.card_layout == 'classic' %}
-      {% include "partials/datacard_render.html" with data=top_anime %}
-      {% elif user.preferences.card_layout == 'wide' %}
-      {% include "partials/datacardwide_render.html" with data=top_anime %}
-      {% elif user.preferences.card_layout == 'compact' %}
-      {% include "partials/datacardcompact_render.html" with data=top_anime %}
-      {% endif %}
+    <section id="top_rated" class="flex-wrap flex flex-col mt-4 max-w-full">
+      <div class="flex flex-wrap justify-center">
+        {% if user.preferences.card_layout == 'classic' %}
+        {% include "partials/datacard_render.html" with data=top_anime %}
+        {% elif user.preferences.card_layout == 'wide' %}
+        {% include "partials/datacardwide_render.html" with data=top_anime %}
+        {% elif user.preferences.card_layout == 'compact' %}
+        {% include "partials/datacardcompact_render.html" with data=top_anime %}
+        {% endif %}
+      </div>
+      <div class="text-right mt-4">
+        <a href="{% url "home:search" %}?sort=%5B%22SCORE_DESC%22%5D" class="bg-{{ user.preferences.accent_colour }}-600 font-bold text-white text-sm px-4 py-2 rounded">View All Top Rated</a>
+      </div>
     </section>
   </section>
   <section class="w-full xl:w-1/4 px-4 py-2">

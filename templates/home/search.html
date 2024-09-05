@@ -1,0 +1,560 @@
+{% extends "partials/base.html" %} 
+{% block content %}
+<section class="flex flex-row flex-wrap items-center my-4">
+    <div class="relative w-1/2 md:w-1/3 lg:w-1/4 xl:w-auto xl:flex-1 p-1">
+        <input type="text" id="search" class="bg-neutral-900 text-white text-sm w-full outline-none focus:outline-none border border-neutral-800 rounded-lg pl-4 py-3 pr-12" placeholder="Search Anime" value="{{ q }}" autocomplete="off">
+        <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5 text-gray-400">
+                <path fill-rule="evenodd" d="M10.5 3.75a6.75 6.75 0 1 0 0 13.5 6.75 6.75 0 0 0 0-13.5ZM2.25 10.5a8.25 8.25 0 1 1 14.59 5.28l4.69 4.69a.75.75 0 1 1-1.06 1.06l-4.69-4.69A8.25 8.25 0 0 1 2.25 10.5Z" clip-rule="evenodd" />
+            </svg>
+        </div>
+    </div>
+
+    <div id="genre-multiselect" class="relative w-1/2 md:w-1/3 lg:w-1/4 xl:w-auto xl:flex-1 p-1" data-multiselect>
+        <div class="relative">
+            <div class="flex flex-wrap items-center gap-2 bg-neutral-900 text-white text-sm w-full border border-neutral-800 rounded-lg pl-4 py-3 pr-12 cursor-pointer" data-multiselect-display>
+                <div class="flex flex-wrap gap-2" data-multiselect-selected></div>
+                <div data-multiselect-placeholder>All Genres</div>
+            </div>
+            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-white">
+                <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                    <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/>
+                </svg>
+            </div>
+        </div>
+        <div class="absolute z-10 w-full mt-1 bg-neutral-900 border border-neutral-800 rounded-lg shadow-lg hidden" data-multiselect-options>
+            <div class="py-1">
+                <div class="cursor-pointer px-4 py-2 text-white text-sm hover:bg-{{ user.preferences.accent_colour }}-600" data-value="Action">Action</div>
+                <div class="cursor-pointer px-4 py-2 text-white text-sm hover:bg-{{ user.preferences.accent_colour }}-600" data-value="Adventure">Adventure</div>
+                <div class="cursor-pointer px-4 py-2 text-white text-sm hover:bg-{{ user.preferences.accent_colour }}-600" data-value="Cars">Cars</div>
+                <div class="cursor-pointer px-4 py-2 text-white text-sm hover:bg-{{ user.preferences.accent_colour }}-600" data-value="Comedy">Comedy</div>
+                <div class="cursor-pointer px-4 py-2 text-white text-sm hover:bg-{{ user.preferences.accent_colour }}-600" data-value="Drama">Drama</div>
+                <div class="cursor-pointer px-4 py-2 text-white text-sm hover:bg-{{ user.preferences.accent_colour }}-600" data-value="Fantasy">Fantasy</div>
+                <div class="cursor-pointer px-4 py-2 text-white text-sm hover:bg-{{ user.preferences.accent_colour }}-600" data-value="Horror">Horror</div>
+                <div class="cursor-pointer px-4 py-2 text-white text-sm hover:bg-{{ user.preferences.accent_colour }}-600" data-value="Mahou Shoujo">Mahou Shoujo</div>
+                <div class="cursor-pointer px-4 py-2 text-white text-sm hover:bg-{{ user.preferences.accent_colour }}-600" data-value="Mecha">Mecha</div>
+                <div class="cursor-pointer px-4 py-2 text-white text-sm hover:bg-{{ user.preferences.accent_colour }}-600" data-value="Music">Music</div>
+                <div class="cursor-pointer px-4 py-2 text-white text-sm hover:bg-{{ user.preferences.accent_colour }}-600" data-value="Mystery">Mystery</div>
+                <div class="cursor-pointer px-4 py-2 text-white text-sm hover:bg-{{ user.preferences.accent_colour }}-600" data-value="Psychological">Psychological</div>
+                <div class="cursor-pointer px-4 py-2 text-white text-sm hover:bg-{{ user.preferences.accent_colour }}-600" data-value="Romance">Romance</div>
+                <div class="cursor-pointer px-4 py-2 text-white text-sm hover:bg-{{ user.preferences.accent_colour }}-600" data-value="Sci-Fi">Sci-Fi</div>
+                <div class="cursor-pointer px-4 py-2 text-white text-sm hover:bg-{{ user.preferences.accent_colour }}-600" data-value="Slice of Life">Slice of Life</div>
+                <div class="cursor-pointer px-4 py-2 text-white text-sm hover:bg-{{ user.preferences.accent_colour }}-600" data-value="Sports">Sports</div>
+                <div class="cursor-pointer px-4 py-2 text-white text-sm hover:bg-{{ user.preferences.accent_colour }}-600" data-value="Supernatural">Supernatural</div>
+                <div class="cursor-pointer px-4 py-2 text-white text-sm hover:bg-{{ user.preferences.accent_colour }}-600" data-value="Thriller">Thriller</div>
+            </div>
+        </div>
+    </div>
+    <div id="year-dropdown" class="relative w-1/2 md:w-1/3 lg:w-1/4 xl:w-auto xl:flex-1 p-1" data-dropdown>
+        <div class="relative">
+            <div class="flex flex-wrap items-center gap-2 bg-neutral-900 text-white text-sm w-full border border-neutral-800 rounded-lg pl-4 py-3 pr-12 cursor-pointer" data-dropdown-display>
+                <div class="text-white" data-dropdown-value>
+                    All Years
+                </div>
+            </div>
+            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-white">
+                <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                    <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/>
+                </svg>
+            </div>
+        </div>
+        <div class="absolute z-10 w-full mt-1 bg-neutral-900 border border-neutral-800 rounded-lg shadow-lg hidden max-h-96 overflow-y-auto" data-dropdown-options>
+            <div class="py-1">
+                <div class="cursor-pointer px-4 py-2 text-white text-sm hover:bg-{{ user.preferences.accent_colour }}-600" data-default data-value="All Years">All Years</div>
+                {% for year in years %}
+                <div class="cursor-pointer px-4 py-2 text-white text-sm hover:bg-{{ user.preferences.accent_colour }}-600" data-value="{{ year }}">{{ year }}</div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    <div id="seasons-dropdown" class="relative w-1/2 md:w-1/3 lg:w-1/4 xl:w-auto xl:flex-1 p-1" data-dropdown>
+        <div class="relative">
+            <div class="flex flex-wrap items-center gap-2 bg-neutral-900 text-white text-sm w-full border border-neutral-800 rounded-lg pl-4 py-3 pr-12 cursor-pointer" data-dropdown-display>
+                <div class="text-white" data-dropdown-value>
+                    All Seasons
+                </div>
+            </div>
+            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-white">
+                <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                    <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/>
+                </svg>
+            </div>
+        </div>
+        <div class="absolute z-10 w-full mt-1 bg-neutral-900 border border-neutral-800 rounded-lg shadow-lg hidden max-h-96 overflow-y-auto" data-dropdown-options>
+            <div class="py-1">
+                <div class="cursor-pointer px-4 py-2 text-white text-sm hover:bg-{{ user.preferences.accent_colour }}-600" data-default data-value="All Seasons">All Seasons</div>
+                <div class="cursor-pointer px-4 py-2 text-white text-sm hover:bg-{{ user.preferences.accent_colour }}-600" data-value="WINTER">Winter</div>
+                <div class="cursor-pointer px-4 py-2 text-white text-sm hover:bg-{{ user.preferences.accent_colour }}-600" data-value="SPRING">Spring</div>
+                <div class="cursor-pointer px-4 py-2 text-white text-sm hover:bg-{{ user.preferences.accent_colour }}-600" data-value="SUMMER">Summer</div>
+                <div class="cursor-pointer px-4 py-2 text-white text-sm hover:bg-{{ user.preferences.accent_colour }}-600" data-value="FALL">Fall</div>
+            </div>
+        </div>
+    </div>
+    <div id="type-dropdown" class="relative w-1/2 md:w-1/3 lg:w-1/4 xl:w-auto xl:flex-1 p-1" data-dropdown>
+        <div class="relative">
+            <div class="flex flex-wrap items-center gap-2 bg-neutral-900 text-white text-sm w-full border border-neutral-800 rounded-lg pl-4 py-3 pr-12 cursor-pointer" data-dropdown-display>
+                <div class="text-white" data-dropdown-value>
+                    All Formats
+                </div>
+            </div>
+            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-white">
+                <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                    <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/>
+                </svg>
+            </div>
+        </div>
+        <div class="absolute z-10 w-full mt-1 bg-neutral-900 border border-neutral-800 rounded-lg shadow-lg hidden max-h-96 overflow-y-auto" data-dropdown-options>
+            <div class="py-1">
+                <div class="cursor-pointer px-4 py-2 text-white text-sm hover:bg-{{ user.preferences.accent_colour }}-600" data-default data-value="All Formats">All Formats</div>
+                <div class="cursor-pointer px-4 py-2 text-white text-sm hover:bg-{{ user.preferences.accent_colour }}-600" data-value="TV">TV</div>
+                <div class="cursor-pointer px-4 py-2 text-white text-sm hover:bg-{{ user.preferences.accent_colour }}-600" data-value="TV_SHORT">TV Short</div>
+                <div class="cursor-pointer px-4 py-2 text-white text-sm hover:bg-{{ user.preferences.accent_colour }}-600" data-value="OVA">OVA</div>
+                <div class="cursor-pointer px-4 py-2 text-white text-sm hover:bg-{{ user.preferences.accent_colour }}-600" data-value="ONA">ONA</div>
+                <div class="cursor-pointer px-4 py-2 text-white text-sm hover:bg-{{ user.preferences.accent_colour }}-600" data-value="MOVIE">Movie</div>
+                <div class="cursor-pointer px-4 py-2 text-white text-sm hover:bg-{{ user.preferences.accent_colour }}-600" data-value="SPECIAL">Special</div>
+                <div class="cursor-pointer px-4 py-2 text-white text-sm hover:bg-{{ user.preferences.accent_colour }}-600" data-value="MUSIC">Music</div>
+            </div>
+        </div>
+    </div>
+    <div id="status-dropdown" class="relative w-1/2 md:w-1/3 lg:w-1/4 xl:w-auto xl:flex-1 p-1" data-dropdown>
+        <div class="relative">
+            <div class="flex flex-wrap items-center gap-2 bg-neutral-900 text-white text-sm w-full border border-neutral-800 rounded-lg pl-4 py-3 pr-12 cursor-pointer" data-dropdown-display>
+                <div class="text-white" data-dropdown-value>
+                    All Statuses
+                </div>
+            </div>
+            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-white">
+                <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                    <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/>
+                </svg>
+            </div>
+        </div>
+        <div class="absolute z-10 w-full mt-1 bg-neutral-900 border border-neutral-800 rounded-lg shadow-lg hidden max-h-96 overflow-y-auto" data-dropdown-options>
+            <div class="py-1">
+                <div class="cursor-pointer px-4 py-2 text-white text-sm hover:bg-{{ user.preferences.accent_colour }}-600" data-default data-value="All Statuses">All Statuses</div>
+                <div class="cursor-pointer px-4 py-2 text-white text-sm hover:bg-{{ user.preferences.accent_colour }}-600" data-value="RELEASING">Ongoing</div>
+                <div class="cursor-pointer px-4 py-2 text-white text-sm hover:bg-{{ user.preferences.accent_colour }}-600" data-value="FINISHED">Finished</div>
+                <div class="cursor-pointer px-4 py-2 text-white text-sm hover:bg-{{ user.preferences.accent_colour }}-600" data-value="NOT_YET_RELEASED">Not Yet Aired</div>
+                <div class="cursor-pointer px-4 py-2 text-white text-sm hover:bg-{{ user.preferences.accent_colour }}-600" data-value="CANCELLED">Cancelled</div>
+                <div class="cursor-pointer px-4 py-2 text-white text-sm hover:bg-{{ user.preferences.accent_colour }}-600" data-value="HIATUS">On Hiatus</div>
+            </div>
+        </div>
+    </div>
+    <div id="sort-multiselect" class="relative w-1/2 md:w-1/3 lg:w-1/4 xl:w-auto xl:flex-1 p-1" data-multiselect>
+        <div class="relative">
+            <div class="flex flex-wrap items-center gap-2 bg-neutral-900 text-white text-sm w-full border border-neutral-800 rounded-lg pl-4 py-3 pr-12 cursor-pointer" data-multiselect-display>
+                <div class="flex flex-wrap gap-2" data-multiselect-selected></div>
+                <div data-multiselect-placeholder>Sort By</div>
+            </div>
+            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-white">
+                <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                    <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/>
+                </svg>
+            </div>
+        </div>
+        <div class="absolute z-10 w-full mt-1 bg-neutral-900 border border-neutral-800 rounded-lg shadow-lg hidden" data-multiselect-options>
+            <div class="py-1">
+                <div class="cursor-pointer px-4 py-2 text-white text-sm hover:bg-{{ user.preferences.accent_colour }}-600" data-value="POPULARITY_DESC">Popularity (Descending)</div>
+                <div class="cursor-pointer px-4 py-2 text-white text-sm hover:bg-{{ user.preferences.accent_colour }}-600" data-value="TRENDING_DESC">Trending (Descending)</div>
+                <div class="cursor-pointer px-4 py-2 text-white text-sm hover:bg-{{ user.preferences.accent_colour }}-600" data-value="UPDATED_AT_DESC">Updated At (Descending)</div>
+                <div class="cursor-pointer px-4 py-2 text-white text-sm hover:bg-{{ user.preferences.accent_colour }}-600" data-value="START_DATE_DESC">Start Date (Descending)</div>
+                <div class="cursor-pointer px-4 py-2 text-white text-sm hover:bg-{{ user.preferences.accent_colour }}-600" data-value="END_DATE_DESC">End Date (Descending)</div>
+                <div class="cursor-pointer px-4 py-2 text-white text-sm hover:bg-{{ user.preferences.accent_colour }}-600" data-value="FAVOURITES_DESC">Favourites (Descending)</div>
+                <div class="cursor-pointer px-4 py-2 text-white text-sm hover:bg-{{ user.preferences.accent_colour }}-600" data-value="SCORE_DESC">Score (Descending)</div>
+                <div class="cursor-pointer px-4 py-2 text-white text-sm hover:bg-{{ user.preferences.accent_colour }}-600" data-value="TITLE_ROMAJI_DESC">Title Romaji (Descending)</div>
+                <div class="cursor-pointer px-4 py-2 text-white text-sm hover:bg-{{ user.preferences.accent_colour }}-600" data-value="TITLE_ENGLISH_DESC">Title English (Descending)</div>
+                <div class="cursor-pointer px-4 py-2 text-white text-sm hover:bg-{{ user.preferences.accent_colour }}-600" data-value="TITLE_NATIVE_DESC">Title Native (Descending)</div>
+                <div class="cursor-pointer px-4 py-2 text-white text-sm hover:bg-{{ user.preferences.accent_colour }}-600" data-value="EPISODES_DESC">Episodes (Descending)</div>
+                <div class="cursor-pointer px-4 py-2 text-white text-sm hover:bg-{{ user.preferences.accent_colour }}-600" data-value="ID_DESC">ID (Descending)</div>
+                <div class="cursor-pointer px-4 py-2 text-white text-sm hover:bg-{{ user.preferences.accent_colour }}-600" data-value="POPULARITY">Popularity (Ascending)</div>
+                <div class="cursor-pointer px-4 py-2 text-white text-sm hover:bg-{{ user.preferences.accent_colour }}-600" data-value="TRENDING">Trending (Ascending)</div>
+                <div class="cursor-pointer px-4 py-2 text-white text-sm hover:bg-{{ user.preferences.accent_colour }}-600" data-value="UPDATED_AT">Updated At (Ascending)</div>
+                <div class="cursor-pointer px-4 py-2 text-white text-sm hover:bg-{{ user.preferences.accent_colour }}-600" data-value="START_DATE">Start Date (Ascending)</div>
+                <div class="cursor-pointer px-4 py-2 text-white text-sm hover:bg-{{ user.preferences.accent_colour }}-600" data-value="END_DATE">End Date (Ascending)</div>
+                <div class="cursor-pointer px-4 py-2 text-white text-sm hover:bg-{{ user.preferences.accent_colour }}-600" data-value="FAVOURITES">Favourites (Ascending)</div>
+                <div class="cursor-pointer px-4 py-2 text-white text-sm hover:bg-{{ user.preferences.accent_colour }}-600" data-value="SCORE">Score (Ascending)</div>
+                <div class="cursor-pointer px-4 py-2 text-white text-sm hover:bg-{{ user.preferences.accent_colour }}-600" data-value="TITLE_ROMAJI">Title Romaji (Ascending)</div>
+                <div class="cursor-pointer px-4 py-2 text-white text-sm hover:bg-{{ user.preferences.accent_colour }}-600" data-value="TITLE_ENGLISH">Title English (Ascending)</div>
+                <div class="cursor-pointer px-4 py-2 text-white text-sm hover:bg-{{ user.preferences.accent_colour }}-600" data-value="TITLE_NATIVE">Title Native (Ascending)</div>
+                <div class="cursor-pointer px-4 py-2 text-white text-sm hover:bg-{{ user.preferences.accent_colour }}-600" data-value="EPISODES">Episodes (Ascending)</div>
+                <div class="cursor-pointer px-4 py-2 text-white text-sm hover:bg-{{ user.preferences.accent_colour }}-600" data-value="ID">ID (Ascending)</div>
+            </div>
+        </div>
+    </div>
+    <button id="search-button" class="bg-neutral-900 text-white text-sm border border-neutral-800 rounded-lg px-4 py-3 mx-1 flex items-center justify-center hover:bg-neutral-800 transition-colors duration-200">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-5">
+            <path fill-rule="evenodd" d="M10.5 3.75a6.75 6.75 0 1 0 0 13.5 6.75 6.75 0 0 0 0-13.5ZM2.25 10.5a8.25 8.25 0 1 1 14.59 5.28l4.69 4.69a.75.75 0 1 1-1.06 1.06l-4.69-4.69A8.25 8.25 0 0 1 2.25 10.5Z" clip-rule="evenodd" />
+        </svg>
+    </button>
+
+    <button id="clear-button" class="bg-neutral-900 text-white text-sm border border-neutral-800 rounded-lg px-4 py-3 mx-1 flex items-center justify-center hover:bg-neutral-800 transition-colors duration-200">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-5">
+            <path fill-rule="evenodd" d="M16.5 4.478v.227a48.816 48.816 0 0 1 3.878.512.75.75 0 1 1-.256 1.478l-.209-.035-1.005 13.07a3 3 0 0 1-2.991 2.77H8.084a3 3 0 0 1-2.991-2.77L4.087 6.66l-.209.035a.75.75 0 0 1-.256-1.478A48.567 48.567 0 0 1 7.5 4.705v-.227c0-1.564 1.213-2.9 2.816-2.951a52.662 52.662 0 0 1 3.369 0c1.603.051 2.815 1.387 2.815 2.951Zm-6.136-1.452a51.196 51.196 0 0 1 3.273 0C14.39 3.05 15 3.684 15 4.478v.113a49.488 49.488 0 0 0-6 0v-.113c0-.794.609-1.428 1.364-1.452Zm-.355 5.945a.75.75 0 1 0-1.5.058l.347 9a.75.75 0 1 0 1.499-.058l-.346-9Zm5.48.058a.75.75 0 1 0-1.498-.058l-.347 9a.75.75 0 0 0 1.5.058l.345-9Z" clip-rule="evenodd" />
+        </svg>
+    </button>
+</section>
+<section id="results" class="flex flex-wrap justify-center my-4 max-w-full">
+    {% if user.preferences.card_layout == 'classic' %}
+    {% include "partials/datacard_render.html" with data=results %}
+    {% elif user.preferences.card_layout == 'wide' %}
+    {% include "partials/datacardwide_render.html" with data=results %}
+    {% elif user.preferences.card_layout == 'compact' %}
+    {% include "partials/datacardcompact_render.html" with data=results %}
+    {% endif %}
+</section>
+<section class="flex justify-center items-center my-8">
+    <nav class="inline-flex rounded-md shadow-sm transform scale-[0.80] sm:scale-100" style="transform-origin: center;" aria-label="Pagination">
+        {% if page > 1 %}
+        <a href="{% url 'home:search' %}?{% if q %}q={{ q|urlencode }}&{% endif %}{% if sort %}sort={{ sort }}&{% endif %}page=1" 
+           class="w-24 px-3 py-2 rounded-l-md bg-{{ user.preferences.accent_colour }}-600 bg-opacity-30 text-sm font-medium flex items-center justify-center text-white hover:bg-opacity-40">
+            First
+        </a>
+        {% else %}
+        <span class="w-24 px-3 py-2 rounded-l-md bg-{{ user.preferences.accent_colour }}-600 bg-opacity-10 text-sm font-medium flex items-center justify-center text-white text-opacity-30 cursor-not-allowed">
+            First
+        </span>
+        {% endif %}
+
+        {% if page > 1 %}
+        <a href="{% url 'home:search' %}?{% if q %}q={{ q|urlencode }}&{% endif %}{% if sort %}sort={{ sort }}&{% endif %}page={{ page|add:'-1' }}"
+           class="w-24 px-3 py-2 bg-{{ user.preferences.accent_colour }}-600 bg-opacity-30 text-sm font-medium flex items-center justify-center text-white text-opacity-90 hover:bg-opacity-40 hover:text-opacity-100">
+            Previous
+        </a>
+        {% else %}
+        <span class="w-24 px-3 py-2 bg-{{ user.preferences.accent_colour }}-600 bg-opacity-10 text-sm font-medium flex items-center justify-center text-white text-opacity-30 cursor-not-allowed">
+            Previous
+        </span>
+        {% endif %}
+
+        <span class="w-28 px-3 py-2 bg-{{ user.preferences.accent_colour }}-600 bg-opacity-50 text-sm font-medium text-white flex items-center justify-center">
+            {{ page }} of {{ total_pages }}
+        </span>
+
+        {% if has_next %}
+        <a href="{% url 'home:search' %}?{% if q %}q={{ q|urlencode }}&{% endif %}{% if sort %}sort={{ sort }}&{% endif %}page={{ page|add:'1' }}"
+           class="w-24 px-3 py-2 bg-{{ user.preferences.accent_colour }}-600 bg-opacity-30 text-sm font-medium flex items-center justify-center text-white text-opacity-90 hover:bg-opacity-40 hover:text-opacity-100">
+            Next
+        </a>
+        {% else %}
+        <span class="w-24 px-3 py-2 bg-{{ user.preferences.accent_colour }}-600 bg-opacity-10 text-sm font-medium flex items-center justify-center text-white text-opacity-30 cursor-not-allowed">
+            Next
+        </span>
+        {% endif %}
+
+        {% if page < total_pages %}
+        <a href="{% url 'home:search' %}?{% if q %}q={{ q|urlencode }}&{% endif %}{% if sort %}sort={{ sort }}&{% endif %}page={{ total_pages }}"
+           class="w-24 px-3 py-2 rounded-r-md bg-{{ user.preferences.accent_colour }}-600 bg-opacity-30 text-sm font-medium flex items-center justify-center text-white hover:bg-opacity-40">
+            Last
+        </a>
+        {% else %}
+        <span class="w-24 px-3 py-2 rounded-r-md bg-{{ user.preferences.accent_colour }}-600 bg-opacity-10 text-sm font-medium flex items-center justify-center text-white text-opacity-30 cursor-not-allowed">
+            Last
+        </span>
+        {% endif %}
+    </nav>
+</section>
+
+{% endblock content %}
+{% block scripts %}
+<script>
+    function applyFadeInEffect(sectionId) {
+        const animeItems = document.querySelectorAll(`#${sectionId} .anime-item`);
+        
+        // Set initial state for all items
+        animeItems.forEach(item => {
+            item.style.opacity = '0';
+            item.style.transform = 'translate3d(0, 20px, 0)';
+        });
+    
+        void document.body.offsetHeight;
+    
+        animeItems.forEach((item, index) => {
+            setTimeout(() => {
+                item.classList.add('fade-in');
+            }, index * 50);
+        });
+    }
+    
+    document.addEventListener('DOMContentLoaded', function() {
+        applyFadeInEffect('results');
+    });
+
+
+    class Multiselect {
+        constructor(container) {
+            this.container = container;
+            this.display = container.querySelector('[data-multiselect-display]');
+            this.options = container.querySelector('[data-multiselect-options]');
+            this.selectedContainer = container.querySelector('[data-multiselect-selected]');
+            this.placeholder = container.querySelector('[data-multiselect-placeholder]');
+            this.selectedOptions = new Set();
+    
+            this.initEventListeners();
+        }
+    
+        initEventListeners() {
+            this.display.addEventListener('click', () => this.toggleOptions());
+            this.options.addEventListener('click', (e) => this.handleOptionClick(e));
+            document.addEventListener('click', (e) => this.handleOutsideClick(e));
+        }
+    
+        toggleOptions() {
+            this.options.classList.toggle('hidden');
+        }
+    
+        handleOptionClick(e) {
+            if (e.target.hasAttribute('data-value')) {
+                const value = e.target.getAttribute('data-value');
+                const text = e.target.textContent;
+                if (!this.selectedOptions.has(value)) {
+                    this.addOption(value, text);
+                    this.selectedOptions.add(value);
+                    this.updatePlaceholder();
+                }
+            }
+            e.stopPropagation();
+        }
+    
+        addOption(value, text) {
+            const optionElement = document.createElement('div');
+            optionElement.className = 'flex items-center bg-{{ user.preferences.accent_colour }}-600 text-white text-sm rounded px-2 py-1';
+            optionElement.innerHTML = `
+                ${text}
+                <button class="ml-1 focus:outline-none" data-remove="${value}">
+                    <svg class="h-4 w-4 fill-current" viewBox="0 0 20 20">
+                        <path d="M10 8.586L2.929 1.515 1.515 2.929 8.586 10l-7.071 7.071 1.414 1.414L10 11.414l7.071 7.071 1.414-1.414L11.414 10l7.071-7.071-1.414-1.414L10 8.586z"/>
+                    </svg>
+                </button>
+            `;
+            optionElement.querySelector('button').addEventListener('click', () => this.removeOption(value, optionElement));
+            this.selectedContainer.appendChild(optionElement);
+        }
+    
+        removeOption(value, element) {
+            this.selectedOptions.delete(value);
+            element.remove();
+            this.updatePlaceholder();
+        }
+    
+        updatePlaceholder() {
+            if (this.selectedOptions.size > 0) {
+                this.placeholder.classList.add('hidden');
+            } else {
+                this.placeholder.classList.remove('hidden');
+            }
+        }
+    
+        handleOutsideClick(e) {
+            if (!this.container.contains(e.target)) {
+                this.options.classList.add('hidden');
+            }
+        }
+
+        getSelectedValues() {
+            return Array.from(this.selectedOptions);
+        }
+
+        clearSelection() {
+            this.selectedOptions.clear();
+            this.selectedContainer.innerHTML = '';
+            this.updatePlaceholder();
+        }
+    }
+
+    class Dropdown {
+        constructor(container) {
+            this.container = container;
+            this.display = container.querySelector('[data-dropdown-display]');
+            this.options = container.querySelector('[data-dropdown-options]');
+            this.valueElement = container.querySelector('[data-dropdown-value]');
+            this.selectedValue = null;
+    
+            this.initEventListeners();
+        }
+    
+        initEventListeners() {
+            this.display.addEventListener('click', () => this.toggleOptions());
+            this.options.addEventListener('click', (e) => this.handleOptionClick(e));
+            document.addEventListener('click', (e) => this.handleOutsideClick(e));
+        }
+    
+        toggleOptions() {
+            this.options.classList.toggle('hidden');
+        }
+    
+        handleOptionClick(e) {
+            if (e.target.hasAttribute('data-value')) {
+                const value = e.target.getAttribute('data-value');
+                const text = e.target.textContent;
+                this.selectOption(value, text);
+            }
+            e.stopPropagation();
+        }
+    
+        selectOption(value, text) {
+            this.selectedValue = value;
+            this.valueElement.textContent = text;
+            this.toggleOptions();
+        }
+    
+        handleOutsideClick(e) {
+            if (!this.container.contains(e.target)) {
+                this.options.classList.add('hidden');
+            }
+        }
+    
+        getValue() {
+            return this.selectedValue;
+        }
+
+        clearSelection() {
+            this.selectedValue = null;
+            // get the data-default element
+            const defaultOption = this.options.querySelector('[data-default]');
+            if (defaultOption) {
+                const value = defaultOption.getAttribute('data-value');
+                const text = defaultOption.textContent;
+                this.selectOption(value, text);
+            }
+        }
+    }
+    
+    const multiselectInstances = {};
+    const dropdownInstances = {};
+
+    function initializeComponents() {
+        document.querySelectorAll('[data-multiselect]').forEach(container => {
+            const id = container.id;
+            multiselectInstances[id] = new Multiselect(container);
+        });
+    
+        document.querySelectorAll('[data-dropdown]').forEach(container => {
+            const id = container.id;
+            dropdownInstances[id] = new Dropdown(container);
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        initializeComponents();
+    
+        const searchInput = document.getElementById('search');
+        const genreMultiselect = multiselectInstances['genre-multiselect'];
+        const yearDropdown = dropdownInstances['year-dropdown'];
+        const seasonsDropdown = dropdownInstances['seasons-dropdown'];
+        const typeDropdown = dropdownInstances['type-dropdown'];
+        const statusDropdown = dropdownInstances['status-dropdown'];
+        const sortMultiselect = multiselectInstances['sort-multiselect'];
+
+        const searchButton = document.getElementById('search-button');
+        const clearButton = document.getElementById('clear-button');
+
+        searchButton.addEventListener('click', performSearch);
+        clearButton.addEventListener('click', clearFilters);
+        searchInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                performSearch();
+            }
+        });
+
+        {% if genres %}
+        const selectedGenres = {{ genres|safe }};
+        selectedGenres.forEach(genre => {
+            const genreElement = document.querySelector(`#genre-multiselect [data-value="${genre}"]`);
+            if (genreElement) {
+                genreElement.click();
+            }
+        });
+        {% endif %}
+
+        {% if sort %}
+        const selectedSort = {{ sort|safe }};
+        selectedSort.forEach(sort => {
+            const sortElement = document.querySelector(`#sort-multiselect [data-value="${sort}"]`);
+            if (sortElement) {
+                sortElement.click();
+            }
+        });
+        {% endif %}
+
+        {% if year %}
+        const year = {{ year }};
+        const yearElement = document.querySelector(`#year-dropdown [data-value="${year}"]`);
+        if (yearElement) {
+            yearElement.click();
+        }
+        yearDropdown.toggleOptions();
+        {% endif %}
+
+        {% if season %}
+        const season = "{{ season }}";
+        const seasonElement = document.querySelector(`#seasons-dropdown [data-value="${season}"]`);
+        if (seasonElement) {
+            seasonElement.click();
+        }
+        seasonsDropdown.toggleOptions();
+        {% endif %}
+
+        {% if type %}
+        const type = "{{ type }}";
+        const typeElement = document.querySelector(`#type-dropdown [data-value="${type}"]`);
+        if (typeElement) {
+            typeElement.click();
+        }
+        typeDropdown.toggleOptions();
+        {% endif %}
+
+        {% if status %}
+        const status = "{{ status }}";
+        const statusElement = document.querySelector(`#status-dropdown [data-value="${status}"]`);
+        if (statusElement) {
+            statusElement.click();
+        }
+        statusDropdown.toggleOptions();
+        {% endif %}
+
+        function performSearch() {
+            const searchValue = searchInput.value;
+            const selectedGenres = genreMultiselect.getSelectedValues();
+            const selectedYear = yearDropdown.getValue();
+            const selectedSeason = seasonsDropdown.getValue();
+            const selectedType = typeDropdown.getValue();
+            const selectedStatus = statusDropdown.getValue();
+            const selectedSort = sortMultiselect.getSelectedValues();
+
+            // Implement your search logic here
+            const url = `{% url "home:search" %}`;
+            const params = new URLSearchParams();
+            if (searchValue) {
+                params.append('q', searchValue);
+            }
+            if (selectedGenres.length > 0) {
+                const genres = JSON.stringify(selectedGenres);
+                params.append('genres', genres);
+            }
+            if (selectedYear) {
+                params.append('year', selectedYear);
+            }
+            if (selectedSeason) {
+                params.append('season', selectedSeason);
+            }
+            if (selectedType) {
+                params.append('type', selectedType);
+            }
+            if (selectedStatus) {
+                params.append('status', selectedStatus);
+            }
+            if (selectedSort.length > 0) {
+                const sort = JSON.stringify(selectedSort);
+                params.append('sort', sort);
+            }
+
+            window.location.href = `${url}?${params.toString()}`;
+        }
+
+        function clearFilters() {
+            // Simplest way to clear all selections is to load empty search page
+            window.location.href = `{% url 'home:search' %}`;
+        }
+    });
+</script>
+{% endblock scripts %}

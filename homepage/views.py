@@ -2,6 +2,7 @@ import os
 from django.http import JsonResponse
 from django.shortcuts import render
 import requests
+from datetime import datetime
 from watch.utils import get_from_redis_cache, store_in_redis_cache
 import json
 from homepage.utils import (
@@ -53,7 +54,54 @@ def index(request):
 
 
 def search(request):
-    return render(request, "home/search.html")
+    q = request.GET.get("q")
+    page = request.GET.get("page", 1)
+    sort = request.GET.get("sort")
+    status = request.GET.get("status")
+    season = request.GET.get("season")
+    year = request.GET.get("year")
+    genres = request.GET.get("genres")
+    type = request.GET.get("type")
+    per_page = 48
+
+    base_url = f"{os.getenv("CONSUMET_URL")}/meta/anilist/advanced-search?page={page}&perPage={per_page}&type=ANIME"
+    if q:
+        base_url += f"&query={q}"
+    if sort:
+        base_url += f"&sort={sort}"
+    if status:
+        base_url += f"&status={status}"
+    if season:
+        base_url += f"&season={season}"
+    if year:
+        base_url += f"&year={year}"
+    if genres:
+        base_url += f"&genres={genres}"
+    if type:
+        base_url += f"&format={type}"
+
+    response = requests.get(base_url)
+    search_results = response.json()
+    
+    years = list(range(1940, datetime.now().year + 1))[::-1]
+
+    context = {
+        "results": search_results["results"] if "results" in search_results else [],
+        "page": search_results["currentPage"] if "currentPage" in search_results else 1,
+        "total_pages": search_results["totalPages"] if "totalPages" in search_results else 1,
+        "has_next": search_results["hasNextPage"] if "hasNextPage" in search_results else False,
+        "total_results": search_results["totalResults"] if "totalResults" in search_results else 0,
+        "q": q if q else "",
+        "sort": sort,
+        "years": years,
+        "year": year,
+        "season": season,
+        "status": status,
+        "genres": genres,
+        "type": type,
+    }
+
+    return render(request, "home/search.html", context)
 
 
 def gather_watch_history(user, limit=None):

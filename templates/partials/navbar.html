@@ -41,8 +41,8 @@
       </a>
 
       <!-- Trending icon -->
-      <a href="#trending" class="flex flex-col gap-2 items-center">
-        {% if request.path == '/trending/' %}
+      <a href="{% url "home:search" %}?sort=%5B%22TRENDING_DESC%22%5D" class="flex flex-col gap-2 items-center">
+        {% if request.get_full_path == '/search?sort=%5B%22TRENDING_DESC%22%5D' %}
         <svg
           xmlns="http://www.w3.org/2000/svg"
           viewBox="0 0 24 24"
@@ -186,6 +186,8 @@
         onkeyup="handleSearchInput(event, 'mobile')"
         onfocus="handleInputFocus('mobile')"
         onblur="handleBlur('mobile')"
+        value="{{ q }}"
+        autocomplete="off"
       />
     </div>
     <!-- Mobile Full-Width Dropdown -->
@@ -219,6 +221,8 @@
             onkeyup="handleSearchInput(event, 'desktop')"
             onfocus="handleInputFocus('desktop')"
             onblur="handleBlur('desktop')"
+            value="{{ q }}"
+            autocomplete="off"
           />
           <svg id="search-icon"
             xmlns="http://www.w3.org/2000/svg"
@@ -248,7 +252,6 @@
       <!-- Centered Icons -->
       <div class="absolute left-1/2 transform -translate-x-1/2">
         <div class="flex flex-row items-center gap-8">
-          <!-- Icons (Home, Trending, Schedule, Watchlist) -->
           <a
             href="{% url 'home:index' %}"
             class="flex flex-col gap-2 items-center"
@@ -289,8 +292,8 @@
           </a>
 
           <!-- Trending icon -->
-          <a href="#trending" class="flex flex-col gap-2 items-center">
-            {% if request.path == '/trending/' %}
+          <a href="{% url "home:search" %}?sort=%5B%22TRENDING_DESC%22%5D" class="flex flex-col gap-2 items-center">
+            {% if request.get_full_path == '/search?sort=%5B%22TRENDING_DESC%22%5D' %}
             <svg
               xmlns="http://www.w3.org/2000/svg"
               viewBox="0 0 24 24"
@@ -461,7 +464,7 @@
     const query = searchInput.value.trim();
   
     // Handle Enter key press immediately
-    if (event.key === "Enter" && query) {
+    if (event.key === "Enter") {
       event.preventDefault();
       window.location.href = "{% url 'home:search' %}?q=" + encodeURIComponent(query);
       return; 
@@ -485,9 +488,7 @@
   function handleSearchIconClick(platform) {
     const searchInput = document.getElementById(platform + "-search");
     const query = searchInput.value.trim();
-    if (query) {
-      window.location.href = "{% url 'home:search' %}?q=" + encodeURIComponent(query);
-    }
+    window.location.href = "{% url 'home:search' %}?q=" + encodeURIComponent(query);
   }
 
   function handleInputFocus(platform) {
@@ -538,5 +539,10 @@
       platform === "mobile" ? "mobile-dropdown" : "desktop-dropdown";
     document.getElementById(dropdownId).classList.toggle("hidden", !show);
   }
+
+  const searchIcon = document.getElementById("search-icon");
+  searchIcon.addEventListener("click", () => {
+    handleSearchIconClick("desktop");
+  });
 </script>
 {% endblock scripts %}
