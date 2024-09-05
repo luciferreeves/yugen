@@ -3,6 +3,7 @@ import os
 from django.shortcuts import render
 import requests
 from functools import lru_cache
+from authentication.utils import get_single_anime_mal
 from watch.utils import get_all_episode_metadata, get_from_redis_cache, store_in_redis_cache
 
 def detail(request, anime_id):
@@ -15,10 +16,17 @@ def detail(request, anime_id):
     if anime_episodes:
         attach_episode_metadata(anime_data, anime_episodes)
 
+    if request.user.mal_access_token and anime_data.get("malId"):
+        mal_data = get_single_anime_mal(request.user.mal_access_token, anime_data["malId"])
+
     context = {
         "anime": anime_data,
         "episodes": anime_episodes,
     }
+
+    if mal_data:
+        context["mal_data"] = mal_data
+        context["mal_episode_range"] = range(1, mal_data["num_episodes"] + 1)
 
     return render(request, "detail/detail.html", context)
 

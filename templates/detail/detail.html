@@ -8,8 +8,9 @@
           left: -8.5rem;
           width: 100vw;
         }
-      }
+    }
 </style>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
 {% endblock css %}
 {% block content %}
 <div style="background-image: url('{{ anime.cover }}')" class="relative bg-center bg-cover h-32 lg:h-96 my-4 rounded-lg" >
@@ -30,7 +31,7 @@
                 <svg stroke="currentColor" fill="currentColor" stroke-width="0" role="img" viewBox="0 0 24 24" height="1.5rem" width="1.5rem" xmlns="http://www.w3.org/2000/svg"><path d="M8.273 7.247v8.423l-2.103-.003v-5.216l-2.03 2.404-1.989-2.458-.02 5.285H.001L0 7.247h2.203l1.865 2.545 2.015-2.546 2.19.001zm8.628 2.069l.025 6.335h-2.365l-.008-2.871h-2.8c.07.499.21 1.266.417 1.779.155.381.298.751.583 1.128l-1.705 1.125c-.349-.636-.622-1.337-.878-2.082a9.296 9.296 0 0 1-.507-2.179c-.085-.75-.097-1.471.107-2.212a3.908 3.908 0 0 1 1.161-1.866c.313-.293.749-.5 1.1-.687.351-.187.743-.264 1.107-.359a7.405 7.405 0 0 1 1.191-.183c.398-.034 1.107-.066 2.39-.028l.545 1.749H14.51c-.593.008-.878.001-1.341.209a2.236 2.236 0 0 0-1.278 1.92l2.663.033.038-1.81h2.309zm3.992-2.099v6.627l3.107.032-.43 1.775h-4.807V7.187l2.13.03z"></path></svg>
             </a>
         </div>
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 my-4 max-w-4xl mx-auto">
+        <div class="flex flex-col">
             <div>
                 <span class="font-bold">Format: </span>{{ anime.type }}
             </div>
@@ -165,9 +166,104 @@
             {{ anime.title.romaji }}
             {% endif %}
         </h2>
-        <p class="h-96 lg:max-h-24 overflow-auto text-sm text-white mb-4 no-scrollbar">
+        <p class="h-96 lg:max-h-24 overflow-auto text-sm text-white no-scrollbar">
             {{ anime.description|strip_html }}
         </p>
+        {% if mal_data %}
+        <section class="flex flex-col lg:flex-row gap-4">
+            <div class="flex-1 flex flex-col gap-2">
+                <span>Update MAL Status</span>
+                <div class="relative w-full custom-select text-sm" data-select="status">
+                    <div class="select-none cursor-pointer bg-neutral-900 py-2 px-4 pr-8 rounded leading-tight focus:outline-none capitalize" id="status">
+                        {% if mal_data.my_list_status.status == "completed" %}
+                            completed
+                        {% elif mal_data.my_list_status.status == "watching" %}
+                            watching
+                        {% elif mal_data.my_list_status.status == "on_hold" %}
+                            on hold
+                        {% elif mal_data.my_list_status.status == "dropped" %}
+                            dropped
+                        {% elif mal_data.my_list_status.status == "plan_to_watch" %}
+                            plan to watch
+                        {% else %}
+                            Add to List
+                        {% endif %}
+                    </div>
+                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-white">
+                        <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                            <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/>
+                        </svg>
+                    </div>
+                    <div class="absolute z-10 w-full mt-1 bg-neutral-900 rounded shadow-lg hidden max-h-96 overflow-y-scroll no-scrollbar" id="status_options">
+                        <div class="py-1">
+                            <div class="cursor-pointer px-4 py-2 text-white hover:bg-{{ user.preferences.accent_colour }}-600 capitalize" data-value="watching">watching</div>
+                            <div class="cursor-pointer px-4 py-2 text-white hover:bg-{{ user.preferences.accent_colour }}-600 capitalize" data-value="completed">completed</div>
+                            <div class="cursor-pointer px-4 py-2 text-white hover:bg-{{ user.preferences.accent_colour }}-600 capitalize" data-value="on hold">on hold</div>
+                            <div class="cursor-pointer px-4 py-2 text-white hover:bg-{{ user.preferences.accent_colour }}-600 capitalize" data-value="dropped">dropped</div>
+                            <div class="cursor-pointer px-4 py-2 text-white hover:bg-{{ user.preferences.accent_colour }}-600 capitalize" data-value="plan to watch">plan to watch</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="flex-1 flex flex-col gap-2">
+                <span>Update MAL Score</span>
+                <div class="relative w-full custom-select text-sm" data-select="score">
+                    <div class="select-none cursor-pointer bg-neutral-900 py-2 px-4 pr-8 rounded leading-tight focus:outline-none" id="score">
+                        {% if mal_data.my_list_status.score %}
+                            {{ mal_data.my_list_status.score }}
+                        {% else %}
+                            Score
+                        {% endif %}
+                    </div>
+                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-white">
+                        <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                            <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/>
+                        </svg>
+                    </div>
+                    <div class="absolute z-10 w-full mt-1 bg-neutral-900 rounded shadow-lg hidden max-h-96 overflow-y-scroll no-scrollbar" id="score_options">
+                        <div class="py-1">
+                            <div class="cursor-pointer px-4 py-2 text-white hover:bg-{{ user.preferences.accent_colour }}-600" data-value="10">10</div>
+                            <div class="cursor-pointer px-4 py-2 text-white hover:bg-{{ user.preferences.accent_colour }}-600" data-value="9">9</div>
+                            <div class="cursor-pointer px-4 py-2 text-white hover:bg-{{ user.preferences.accent_colour }}-600" data-value="8">8</div>
+                            <div class="cursor-pointer px-4 py-2 text-white hover:bg-{{ user.preferences.accent_colour }}-600" data-value="7">7</div>
+                            <div class="cursor-pointer px-4 py-2 text-white hover:bg-{{ user.preferences.accent_colour }}-600" data-value="6">6</div>
+                            <div class="cursor-pointer px-4 py-2 text-white hover:bg-{{ user.preferences.accent_colour }}-600" data-value="5">5</div>
+                            <div class="cursor-pointer px-4 py-2 text-white hover:bg-{{ user.preferences.accent_colour }}-600" data-value="4">4</div>
+                            <div class="cursor-pointer px-4 py-2 text-white hover:bg-{{ user.preferences.accent_colour }}-600" data-value="3">3</div>
+                            <div class="cursor-pointer px-4 py-2 text-white hover:bg-{{ user.preferences.accent_colour }}-600" data-value="2">2</div>
+                            <div class="cursor-pointer px-4 py-2 text-white hover:bg-{{ user.preferences.accent_colour }}-600" data-value="1">1</div>
+                            <div class="cursor-pointer px-4 py-2 text-white hover:bg-{{ user.preferences.accent_colour }}-600" data-value="Score">0</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="flex-1 flex flex-col gap-2">
+                <span>Update MAL Episodes</span>
+                <div class="relative w-full custom-select text-sm" data-select="episodes">
+                    <div class="select-none cursor-pointer bg-neutral-900 py-2 px-4 pr-8 rounded leading-tight focus:outline-none" id="episodes">
+                        {% if mal_data.my_list_status.num_episodes_watched %}
+                            {{ mal_data.my_list_status.num_episodes_watched }}
+                        {% else %}
+                            Episodes
+                        {% endif %}
+                    </div>
+                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-white">
+                        <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                            <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/>
+                        </svg>
+                    </div>
+                    <div class="absolute z-10 w-full mt-1 bg-neutral-900 rounded shadow-lg hidden max-h-96 overflow-y-scroll no-scrollbar" id="episodes_options">
+                        <div class="py-1">
+                            <div class="cursor-pointer px-4 py-2 text-white hover:bg-{{ user.preferences.accent_colour }}-600" data-value="Episodes">0</div>
+                            {% for i in mal_episode_range %}
+                                <div class="cursor-pointer px-4 py-2 text-white hover:bg-{{ user.preferences.accent_colour }}-600" data-value="{{ i }}">{{ i }}</div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        {% endif %}     
         <section class="w-full flex flex-col items-center justify-center p-2 relative detail-section">
             <section class="inline-flex w-max flex-row gap-4 rounded-full mb-8 bg-white bg-opacity-10 mx-auto">
               <button class="flex flex-row items-center focus:outline-none gap-2 text-sm font-bold py-2 px-4 rounded-full category-switch" data-target="characters">
@@ -259,7 +355,7 @@
         </section>
     </div>
 </div>
-
+<div id="toastContainer" class="fixed bottom-4 left-1/2 transform -translate-x-1/2 z-50 flex flex-col space-y-2"></div>
 {% endblock content %}
 {% block scripts %}
 <script>
@@ -283,5 +379,110 @@
         document.getElementById(target).classList.add("flex");
       });
     });
+
+    function showToast(message, isSuccess) {
+        const toast = document.createElement('div');
+        toast.className = `flex items-center p-4 rounded-md shadow-lg transition-opacity duration-500 ease-in-out animate__animated ${
+            isSuccess ? 'bg-green-100 text-green-700 animate__fadeInUp' : 'bg-red-100 text-red-700 animate__fadeInUp'
+        }`;
+
+        const checkSVG = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4"><path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" /></svg>`
+
+        const errorSVG = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6"> <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" /></svg>`
+
+        toast.innerHTML = `
+            <div class="flex items-center">
+                ${isSuccess ? checkSVG : errorSVG}
+                <span class="ml-2">${message}</span>
+            </div>
+        `;
+
+        // Append the toast to the container
+        toastContainer.appendChild(toast);
+
+        // Remove the toast after 3 seconds
+        setTimeout(() => {
+            toast.classList.add('animate__fadeOutDown');
+            setTimeout(() => {
+                toastContainer.removeChild(toast);
+            }, 500);
+        }, 3000);
+    }
+
+    {% if mal_data %}
+    const customSelects = document.querySelectorAll('.custom-select')
+    customSelects.forEach(customSelect => {
+        const selectId = customSelect.getAttribute('data-select')
+        const customSelectDisplay = document.getElementById(selectId)
+        const customSelectOptions = document.getElementById(`${selectId}_options`)
+        let selectedValue = '';
+
+        customSelectDisplay.addEventListener('click', function() {
+            customSelectOptions.classList.toggle('hidden');
+        });
+
+        customSelectOptions.addEventListener('click', function(e) {
+            if (e.target.hasAttribute('data-value')) {
+                selectedValue = e.target.getAttribute('data-value');
+                customSelectDisplay.textContent = selectedValue;
+                customSelectOptions.classList.add('hidden');
+            }
+        });
+
+        // Close the dropdown when clicking outside
+        document.addEventListener('click', function(e) {
+            if (!customSelectDisplay.contains(e.target) && !customSelectOptions.contains(e.target)) {
+                customSelectOptions.classList.add('hidden');
+            }
+        });
+    });
+
+    const statusSelect = document.getElementById('status');
+    const scoreSelect = document.getElementById('score');
+    const episodesSelect = document.getElementById('episodes');
+
+    // Call the API to update the user's list
+    const observer = new MutationObserver(function(mutations){
+        mutations.forEach(function(mutation){
+            if (mutation.type === 'characterData' || mutation.type === 'childList') {
+                const statusSelectedOption = statusSelect.textContent.trim().toLowerCase().replace(/\s/g, '_');
+                const scoreSelectedOption = scoreSelect.textContent.trim();
+                const episodesSelectedOption = episodesSelect.textContent.trim();
+
+                const data = {
+                    'status': statusSelectedOption === 'Add to List' ? 'add_to_list' : statusSelectedOption,
+                    'score': scoreSelectedOption === 'Score' ? 0 : parseInt(scoreSelectedOption),
+                    'episodes': episodesSelectedOption === 'Episodes' ? 0 : parseInt(episodesSelectedOption),
+                    'mal_id': {{ mal_data.id }},
+                };
+
+                fetch('{% url "user_profile:update_user_mal_list" %}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': '{{ csrf_token }}',
+                    },
+                    body: JSON.stringify(data),
+                }).then(response => {
+                    if (response.ok) {
+                        return response.json();
+                    } else {
+                        return response.json().then(data => {
+                            throw new Error(data.error);
+                        });
+                    }
+                }).then(data => {
+                    showToast(data.success, true);
+                }).catch(error => {
+                    showToast(error, false);
+                });
+            }
+        });
+    });
+
+    observer.observe(statusSelect, {childList: true, characterData: true});
+    observer.observe(scoreSelect, {childList: true, characterData: true});
+    observer.observe(episodesSelect, {childList: true, characterData: true});
+    {% endif %}
 </script>
 {% endblock scripts %}
