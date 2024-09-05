@@ -33,7 +33,7 @@ ALLOWED_HOSTS = ["127.0.0.1", "localhost", ".vercel.app", ".rize.moe"]
 
 AUTH_USER_MODEL = "authentication.User"
 X_FRAME_OPTIONS = "SAMEORIGIN"
-
+APPEND_SLASH = False
 CORS_ALLOWED_ORIGINS = [
        "https://www.youtube.com",
 ]
@@ -63,6 +63,7 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "django.middleware.gzip.GZipMiddleware",
+    "middleware.remove_slash.RemoveSlashMiddleware",
     "middleware.authentication.AuthMiddleware",
     "middleware.preferences.PreferencesMiddleware",
 ]

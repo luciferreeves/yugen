@@ -51,6 +51,11 @@ def index(request):
 
     return render(request, "home/index.html", context)
 
+
+def search(request):
+    return render(request, "home/search.html")
+
+
 def gather_watch_history(user, limit=None):
     history = UserHistory.objects.filter(user=user, last_watched=True).order_by("-last_updated")
     if limit:
