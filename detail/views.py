@@ -5,6 +5,7 @@ import requests
 from functools import lru_cache
 from authentication.utils import get_single_anime_mal
 from watch.utils import get_all_episode_metadata, get_from_redis_cache, store_in_redis_cache
+from watch.views import get_seasons_by_zid
 
 
 def index(request):
@@ -26,7 +27,18 @@ def detail(request, anime_id):
     context = {
         "anime": anime_data,
         "episodes": anime_episodes,
+        "related": anime_data.get("relations", []),
+        "recommendations": anime_data.get("recommendations", []),
     }
+
+    zid = anime_data["episodes"][0]["id"].split("$")[0] if len(anime_data["episodes"]) > 0 else None
+    if zid:
+        seasons = get_seasons_by_zid(zid)
+        if seasons:
+            context["seasons"] = seasons
+
+    if "nextAiringEpisode" in anime_data:
+        context["nextAiringEpisode"] = anime_data["nextAiringEpisode"]
 
     if mal_data:
         context["mal_data"] = mal_data
