@@ -195,11 +195,11 @@
 </section>
 <section id="results" class="flex flex-wrap justify-center my-4 max-w-full">
     {% if user.preferences.card_layout == 'classic' %}
-    {% include "partials/datacard_render.html" with data=results %}
+    {% include "partials/datacard_render.html" with data=results all=True %}
     {% elif user.preferences.card_layout == 'wide' %}
-    {% include "partials/datacardwide_render.html" with data=results %}
+    {% include "partials/datacardwide_render.html" with data=results all=True %}
     {% elif user.preferences.card_layout == 'compact' %}
-    {% include "partials/datacardcompact_render.html" with data=results %}
+    {% include "partials/datacardcompact_render.html" with data=results all=True %}
     {% endif %}
 </section>
 <section class="flex justify-center items-center my-8">
@@ -515,10 +515,10 @@
         function performSearch() {
             const searchValue = searchInput.value;
             const selectedGenres = genreMultiselect.getSelectedValues();
-            const selectedYear = yearDropdown.getValue();
-            const selectedSeason = seasonsDropdown.getValue();
-            const selectedType = typeDropdown.getValue();
-            const selectedStatus = statusDropdown.getValue();
+            const selectedYear = yearDropdown.getValue() !== 'All Years' ? yearDropdown.getValue() : null;
+            const selectedSeason = seasonsDropdown.getValue() !== 'All Seasons' ? seasonsDropdown.getValue() : null;
+            const selectedType = typeDropdown.getValue() !== 'All Formats' ? typeDropdown.getValue() : null;
+            const selectedStatus = statusDropdown.getValue() !== 'All Statuses' ? statusDropdown.getValue() : null;
             const selectedSort = sortMultiselect.getSelectedValues();
 
             // Implement your search logic here
