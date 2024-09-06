@@ -166,11 +166,11 @@
             {{ anime.title.romaji }}
             {% endif %}
         </h2>
-        <p class="h-96 lg:max-h-24 overflow-auto text-sm text-white no-scrollbar">
+        <p class="h-96 lg:max-h-24 overflow-auto my-2 text-sm text-white no-scrollbar">
             {{ anime.description|strip_html }}
-        </p>
+        </p>     
         {% if mal_data %}
-        <section class="flex flex-col lg:flex-row gap-4">
+        <section class="flex flex-col lg:flex-row gap-4 my-2">
             <div class="flex-1 flex flex-col gap-2">
                 <span>Update MAL Status</span>
                 <div class="relative w-full custom-select text-sm" data-select="status">
@@ -239,8 +239,8 @@
             </div>
             <div class="flex-1 flex flex-col gap-2">
                 <span>Update MAL Episodes</span>
-                <div class="relative w-full custom-select text-sm" data-select="episodes">
-                    <div class="select-none cursor-pointer bg-neutral-900 py-2 px-4 pr-8 rounded leading-tight focus:outline-none" id="episodes">
+                <div class="relative w-full custom-select text-sm" data-select="episodes_m">
+                    <div class="select-none cursor-pointer bg-neutral-900 py-2 px-4 pr-8 rounded leading-tight focus:outline-none" id="episodes_m">
                         {% if mal_data.my_list_status.num_episodes_watched %}
                             {{ mal_data.my_list_status.num_episodes_watched }}
                         {% else %}
@@ -252,7 +252,7 @@
                             <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/>
                         </svg>
                     </div>
-                    <div class="absolute z-10 w-full mt-1 bg-neutral-900 rounded shadow-lg hidden max-h-96 overflow-y-scroll no-scrollbar" id="episodes_options">
+                    <div class="absolute z-10 w-full mt-1 bg-neutral-900 rounded shadow-lg hidden max-h-96 overflow-y-scroll no-scrollbar" id="episodes_m_options">
                         <div class="py-1">
                             <div class="cursor-pointer px-4 py-2 text-white hover:bg-{{ user.preferences.accent_colour }}-600" data-value="Episodes">0</div>
                             {% for i in mal_episode_range %}
@@ -263,7 +263,7 @@
                 </div>
             </div>
         </section>
-        {% endif %}     
+        {% endif %}
         <section class="w-full flex flex-col items-center justify-center p-2 relative detail-section">
             <section class="inline-flex w-max flex-row gap-4 rounded-full mb-8 bg-white bg-opacity-10 mx-auto">
               <button class="flex flex-row items-center focus:outline-none gap-2 text-sm font-bold py-2 px-4 rounded-full category-switch" data-target="characters">
@@ -439,7 +439,7 @@
 
     const statusSelect = document.getElementById('status');
     const scoreSelect = document.getElementById('score');
-    const episodesSelect = document.getElementById('episodes');
+    const episodesSelect = document.getElementById('episodes_m');
 
     // Call the API to update the user's list
     const observer = new MutationObserver(function(mutations){
