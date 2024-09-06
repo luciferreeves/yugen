@@ -344,7 +344,7 @@ def watch(request, anime_id, episode=None):
         mode = "sub"
 
     streaming_data = get_episode_streaming_data(episode_data.zEpisodeId, mode) if episode_data else None
-    if "message" in streaming_data:
+    if streaming_data and "message" in streaming_data:
         server, mode = find_alternate_server(episode_data.zEpisodeId, mode)
         streaming_data = get_episode_streaming_data(episode_data.zEpisodeId, mode, server)
         
