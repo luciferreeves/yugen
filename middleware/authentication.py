@@ -3,22 +3,24 @@ from django.utils import timezone
 from datetime import timedelta
 from django.shortcuts import render
 from django.contrib.auth import logout
+from django.conf import settings
+from django.http import HttpResponse
 from authentication.utils import (
     get_redirect_uri,
     get_discord_user,
 )
-
 
 class AuthMiddleware:
     def __init__(self, get_response):
         self.get_response = get_response
 
     def __call__(self, request):
-        # Skip authentication if the path contains "admin" or is not a view
+        # Skip authentication if the path contains "admin", "static", or is not a view
         if (
             "admin" in request.path
             or "auth" in request.path
             or "favicon.ico" in request.path
+            or request.path.startswith(settings.STATIC_URL)  # Exclude static files
             or not hasattr(request, "user")
         ):
             response = self.get_response(request)
