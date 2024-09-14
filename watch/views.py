@@ -320,10 +320,12 @@ def get_gogo_streaming_data(episode_id):
 
 def watch(request, anime_id, episode=None):
     forward_detail = request.GET.get("forward") == "detail"
+    preload_request = request.GET.get("preload") == "true"
     if not episode and request.user.preferences.default_watch_page == "detail" and not forward_detail:
         return redirect("detail:detail", anime_id=anime_id)
     
     anime_fetched, provider = get_anime_data(anime_id)
+    provider = provider.decode() if isinstance(provider, bytes) else provider
     if anime_fetched["status"] == "Not yet aired":
         return redirect("detail:detail", anime_id=anime_id)
     
@@ -384,7 +386,7 @@ def watch(request, anime_id, episode=None):
             if mal_data:
                 mal_data["average_episode_duration"] = mal_data["average_episode_duration"] // 60 + 1
 
-        if anime and episode_data:
+        if anime and episode_data and not preload_request:
             update_anime_user_history(request.user, anime, episode_data, current_watched_time)
 
         seasons = get_seasons_by_zid(anime.z_anime_id)
@@ -403,8 +405,12 @@ def watch(request, anime_id, episode=None):
         stream_url = streaming_data["sources"][0]["url"] if streaming_data and "sources" in streaming_data else None
         episode_data["episodeId"] = episode_data["number"]
 
+    if preload_request:
+        return JsonResponse({"status": f"Preloaded episode {episode}"})
+
     context = {
         "anime": anime,
+        "animeID": anime_id,
         "current_episode_number": episode,
         "current_episode": episode_data,
         "all_episodes": episodes,
