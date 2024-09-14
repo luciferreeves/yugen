@@ -29,7 +29,7 @@ SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True if os.environ.get("DEBUG") == "True" else False
 
-ALLOWED_HOSTS = ["127.0.0.1", "localhost", ".vercel.app", ".rize.moe"]
+ALLOWED_HOSTS = ["127.0.0.1", "localhost", "anime.rize.moe"]
 
 AUTH_USER_MODEL = "authentication.User"
 X_FRAME_OPTIONS = "SAMEORIGIN"
