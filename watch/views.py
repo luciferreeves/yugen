@@ -4,11 +4,11 @@ import os
 from django.http import Http404, JsonResponse
 from django.urls import reverse
 import dotenv
-from django.shortcuts import get_object_or_404, render, redirect
+from django.shortcuts import render, redirect
 import requests
 from authentication.utils import get_single_anime_mal
 from watch.tmdbmapper import parse_title_and_season
-from watch.utils import get_all_episode_metadata, get_from_redis_cache, store_in_redis_cache, update_anime_user_history, get_anime_user_history
+from watch.utils import attach_episode_metadata, get_anime_episodes, get_all_episode_metadata, get_anime_data, get_episodes_by_zid, get_from_redis_cache, get_info_by_zid, get_seasons_by_zid, store_in_redis_cache, update_anime_user_history, get_anime_user_history
 from watch.models import Anime, AnimeEpisode, AnimeTitle, AnimeTrailer, AnimeGenre, AnimeStudio
 from django.db import transaction
 from authentication.models import User
@@ -21,61 +21,40 @@ def index(request):
 
 def get_anime_by_id(anime_id):
     cache_key = f"anime_{anime_id}_anime_data"
-    try:
-        anime_data = get_from_redis_cache(cache_key)
-        anime_data = json.loads(anime_data)
-    except:
+    anime_data = get_from_redis_cache(cache_key)
+    provider = get_from_redis_cache(f"anime_{anime_id}_provider")
+    if not provider:
+        provider = "zoro"
+    if not anime_data:
         base_url = f"{os.getenv('CONSUMET_URL')}/meta/anilist/info/{anime_id}?provider=zoro"
-        response = requests.get(base_url)
-        anime_data = response.json()
+        try:
+            response = requests.get(base_url, timeout=10)
+            anime_data = response.json()
+            if ("message" not in anime_data or response.status_code == 200) and anime_data["episodes"]:
+                if anime_data["status"] == "Completed":
+                    store_in_redis_cache(cache_key, json.dumps(anime_data), 3600 * 24 * 30)  # Cache for 30 days
+                else:
+                    store_in_redis_cache(cache_key, json.dumps(anime_data), 3600 * 12) # Cache for 12 hours
+                store_in_redis_cache(f"anime_{anime_id}_provider", "zoro")
+            else:
+                provider = "gogo"
+                base_url = f"{os.getenv('CONSUMET_URL')}/meta/anilist/info/{anime_id}"
+                response = requests.get(base_url, timeout=10)
+                anime_data = response.json()
+                store_in_redis_cache(cache_key, json.dumps(anime_data), 3600 * 12) # Cache for 12 hours
+                store_in_redis_cache(f"anime_{anime_id}_provider", "gogo")
+        except requests.RequestException as e:
+            print(f"Error fetching anime data for ID {anime_id}: {e}")
+            return None
+    else:
+        anime_data = json.loads(anime_data)
 
-        if "message" not in anime_data and anime_data["status"] == "Completed":
-            store_in_redis_cache(cache_key, json.dumps(anime_data), 3600 * 24 * 30)  # Cache for 30 days
-        else:
-            store_in_redis_cache(cache_key, json.dumps(anime_data), 3600 * 12) # Cache for 12 hours
+    if not anime_data:
+        print(f"Anime data not found for ID {anime_id}")
+    
+    return anime_data, provider
 
-    return anime_data
 
-def get_info_by_zid(zid):
-    cache_key = f"anime_{zid}_anime_selected"
-    print(cache_key)
-    try:
-        anime_selected = get_from_redis_cache(cache_key)
-        anime_selected = json.loads(anime_selected)
-    except:
-        base_url = f"{os.getenv('ZORO_URL')}/anime/info?id={zid}"
-        response = requests.get(base_url)
-        anime_selected = response.json()
-
-        if "message" not in anime_selected:
-            store_in_redis_cache(cache_key, json.dumps(anime_selected), 3600 * 12)
-
-    return anime_selected
-
-def get_seasons_by_zid(zid):
-    if not zid:
-        return []
-
-    fetched_info = get_info_by_zid(zid)
-    seasons = fetched_info["seasons"]
-
-    for season in seasons:
-        season["poster"] = season["poster"].replace("100x200/100", "400x800/100")
-
-    return seasons
-
-def get_episodes_by_zid(z_anime_id):
-    cache_key = f"anime_{z_anime_id}_episodes"
-    try:
-        fetched_episodes = get_from_redis_cache(cache_key)
-        fetched_episodes = json.loads(fetched_episodes)
-    except:
-        base_url = f"{os.getenv('ZORO_URL')}/anime/episodes/{z_anime_id}"
-        response = requests.get(base_url)
-        fetched_episodes = response.json()
-        store_in_redis_cache(cache_key, json.dumps(fetched_episodes), 3600 * 12)
-
-    return fetched_episodes
 
 def get_episodes_and_metadata(anime):
     fetched_episodes = get_episodes_by_zid(anime.z_anime_id)
@@ -305,66 +284,124 @@ def find_alternate_server(episode_id, mode):
 
     return server_id, mode
 
+def convert_gogo_stream_data(input_data):
+    # Create the new structure
+    new_data = {
+        'tracks': [],
+        'intro': {'start': 0, 'end': 0},
+        'outro': {'start': 0, 'end': 0},
+        'sources': [],
+        'anilistID': 0,
+        'malID': 0
+    }
+    
+    # Add the default stream to sources
+    default_source = next((s for s in input_data['sources'] if s['quality'] == 'default'), None)
+    if default_source:
+        new_data['sources'].append({
+            'url': default_source['url'],
+            'type': 'hls'
+        })
+    
+    return new_data
+
+def get_gogo_streaming_data(episode_id):
+    cache_key = f"episode_{episode_id}_streaming_data"
+    try:
+        episode_data = get_from_redis_cache(cache_key)
+        episode_data = json.loads(episode_data)
+    except:
+        base_url = f"{os.getenv('CONSUMET_URL')}/meta/anilist/watch/{episode_id}"
+        response = requests.get(base_url)
+        episode_data = response.json()
+        store_in_redis_cache(cache_key, json.dumps(episode_data), 3600 * 24 * 7)
+
+    return convert_gogo_stream_data(episode_data)
 
 def watch(request, anime_id, episode=None):
     forward_detail = request.GET.get("forward") == "detail"
     if not episode and request.user.preferences.default_watch_page == "detail" and not forward_detail:
         return redirect("detail:detail", anime_id=anime_id)
     
-    anime_fetched = get_anime_by_id(anime_id)
+    anime_fetched, provider = get_anime_data(anime_id)
     if anime_fetched["status"] == "Not yet aired":
         return redirect("detail:detail", anime_id=anime_id)
     
     forced_update = request.GET.get("refresh") == "true"
 
-    try:
-        anime = Anime.objects.get(id=anime_id)
-        if anime.needs_update() or forced_update:
+    if provider == "zoro":
+        try:
+            anime = Anime.objects.get(id=anime_id)
+            if (anime.needs_update() or forced_update):
+                anime = update_anime(anime_id, anime_fetched)
+        except Anime.DoesNotExist:
             anime = update_anime(anime_id, anime_fetched)
-    except Anime.DoesNotExist:
-        anime = update_anime(anime_id, anime_fetched)
+    else:
+        anime = anime_fetched
+        anime["anime_id"] = anime["id"]
 
-    history = get_anime_user_history(request.user, anime)
-    current_watched_time = [h.time_watched for h in history if h.episode.number == episode]
-    current_watched_time = current_watched_time[0] if current_watched_time else 0
+    if provider == "zoro":
+        history = get_anime_user_history(request.user, anime)
+        current_watched_time = [h.time_watched for h in history if h.episode.number == episode]
+        current_watched_time = current_watched_time[0] if current_watched_time else 0
+
+        if episode > anime.currentEpisode:
+            return redirect("watch:watch_episode", anime_id=anime_id, episode=anime.currentEpisode)
+    else:
+        history = []
+        current_watched_time = 0
 
     if not episode or episode < 1:
         episode = [h.episode.number for h in history if h.last_watched]
         episode = episode[0] if episode else 1
         return redirect("watch:watch_episode", anime_id=anime_id, episode=episode)
 
-    if episode > anime.currentEpisode:
-        return redirect("watch:watch_episode", anime_id=anime_id, episode=anime.currentEpisode)
 
     mode = request.GET.get("mode", request.user.preferences.default_language)
-    episodes = AnimeEpisode.objects.filter(anime=anime).order_by('number')
-    episode_data = episodes.filter(number=episode).first()
+    
+    if provider == "zoro":
+        episodes = AnimeEpisode.objects.filter(anime=anime).order_by('number')
+        episode_data = episodes.filter(number=episode).first()
 
-    if mode == "dub" and anime.dub < episode:
+        if mode == "dub" and anime.dub < episode:
+            mode = "sub"
+
+        streaming_data = get_episode_streaming_data(episode_data.zEpisodeId, mode) if episode_data else None
+        if streaming_data and "message" in streaming_data:
+            server, mode = find_alternate_server(episode_data.zEpisodeId, mode)
+            streaming_data = get_episode_streaming_data(episode_data.zEpisodeId, mode, server)
+            
+        # if no captions are present and the mode is dub, and ingrain_sub_subtitles_in_dub is true, then fetch the sub track
+        if streaming_data and "tracks" in streaming_data and not any(t["kind"] == "captions" for t in streaming_data["tracks"]) and mode == "dub" and request.user.preferences.ingrain_sub_subtitles_in_dub:
+            sub_streaming_data = get_episode_streaming_data(episode_data.zEpisodeId, "sub")
+            if "tracks" in sub_streaming_data:
+                captions = [t for t in sub_streaming_data["tracks"] if t["kind"] == "captions"]
+                if captions:
+                    streaming_data["tracks"].extend(captions)
+
+        if request.user.mal_access_token and anime.malId:
+            mal_data = get_single_anime_mal(request.user.mal_access_token, anime.malId)
+            if mal_data:
+                mal_data["average_episode_duration"] = mal_data["average_episode_duration"] // 60 + 1
+
+        if anime and episode_data:
+            update_anime_user_history(request.user, anime, episode_data, current_watched_time)
+
+        seasons = get_seasons_by_zid(anime.z_anime_id)
+        stream_url = streaming_data["sources"][0]["url"] if streaming_data and "sources" in streaming_data else None
+    else:
+        episodes = get_anime_episodes(anime_id)
+        if episodes:
+            attach_episode_metadata(anime_fetched, episodes)
+        episodes = episodes["episodes"]
+        episode_data = next((e for e in episodes if e["number"] == int(episode)), None)
         mode = "sub"
-
-    streaming_data = get_episode_streaming_data(episode_data.zEpisodeId, mode) if episode_data else None
-    if streaming_data and "message" in streaming_data:
-        server, mode = find_alternate_server(episode_data.zEpisodeId, mode)
-        streaming_data = get_episode_streaming_data(episode_data.zEpisodeId, mode, server)
-        
-    # if no captions are present and the mode is dub, and ingrain_sub_subtitles_in_dub is true, then fetch the sub track
-    if streaming_data and "tracks" in streaming_data and not any(t["kind"] == "captions" for t in streaming_data["tracks"]) and mode == "dub" and request.user.preferences.ingrain_sub_subtitles_in_dub:
-        sub_streaming_data = get_episode_streaming_data(episode_data.zEpisodeId, "sub")
-        if "tracks" in sub_streaming_data:
-            captions = [t for t in sub_streaming_data["tracks"] if t["kind"] == "captions"]
-            if captions:
-                streaming_data["tracks"].extend(captions)
-
-    if request.user.mal_access_token and anime.malId:
-        mal_data = get_single_anime_mal(request.user.mal_access_token, anime.malId)
-        if mal_data:
-            mal_data["average_episode_duration"] = mal_data["average_episode_duration"] // 60 + 1
-
-    if anime and episode_data:
-        update_anime_user_history(request.user, anime, episode_data, current_watched_time)
-
-    seasons = get_seasons_by_zid(anime.z_anime_id)
+        seasons = []
+        streaming_data = get_gogo_streaming_data(episode_data["id"]) if episode_data else None
+        streaming_data["anilistID"] = anime_id
+        streaming_data["malID"] = anime_fetched["malId"] if "malId" in anime_fetched else 0
+        stream_url = streaming_data["sources"][0]["url"] if streaming_data and "sources" in streaming_data else None
+        episode_data["episodeId"] = episode_data["number"]
 
     context = {
         "anime": anime,
@@ -375,14 +412,15 @@ def watch(request, anime_id, episode=None):
         "recommendations": anime_fetched.get("recommendations", []),
         "related": anime_fetched.get("relations", []),
         "streaming_data": streaming_data,
-        "stream_url": streaming_data["sources"][0]["url"] if streaming_data and "sources" in streaming_data else None,
+        "stream_url": stream_url,
         "mode": mode,
         "watched_episodes": [h.episode.number for h in history],
         "current_watched_time": current_watched_time,
         "seasons": seasons,
+        "provider": provider,
     }
 
-    if request.user.mal_access_token and anime.malId:
+    if provider == "zoro" and request.user.mal_access_token and anime.malId:
         context["mal_data"] = mal_data
         context["mal_episode_range"] = range(1, mal_data["num_episodes"] + 1)
 

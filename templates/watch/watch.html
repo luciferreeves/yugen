@@ -113,7 +113,12 @@
             </div>
         </div>
         <p class="my-4">
+            {% if current_episode.description %}
             {{ current_episode.description }}
+            {% endif %}
+            {% if current_episode.metadata.description %}
+            {{ current_episode.metadata.description }}
+            {% endif %}
         </p>
         {% if nextAiringEpisode %}
         <p id="nextAiringEpisodeMessage"></p>
@@ -1050,7 +1055,7 @@
     });
     {% endif %}
 
-    {% if not viaMal %}
+    {% if not viaMal and provider == "zoro" %}
     let lastTime = 0;
     setInterval(() => {
         const {
