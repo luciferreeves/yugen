@@ -4,3 +4,4 @@ psycopg2-binary
 requests
 django-cors-headers
 redis
+gunicorn
