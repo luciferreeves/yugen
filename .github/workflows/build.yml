@@ -29,6 +29,7 @@ jobs:
         context: .
         file: ./Dockerfile
         push: true
+        platforms: linux/arm64/v8
         tags: ${{ env.IMAGE_URL }}
 
     - name: Deploy Image to CapRrover
