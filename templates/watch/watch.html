@@ -1087,7 +1087,7 @@
     }, 30000);
     {% endif %}
     
-    {% if anime.totalEpisodes > current_episode_number %}
+    {% if anime.totalEpisodes > current_episode_number and animeId %}
     // If current episode is less than total episodes, preload the next episode
     const nextEpisode = {{ current_episode_number }} + 1;
     let nextEpisodeUrl = window.location.href.replace(`/watch/{{animeID}}/{{ current_episode_number }}`, `/watch/{{animeID}}/${nextEpisode}`);
