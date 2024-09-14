@@ -788,6 +788,14 @@
         }
     });
 
+    function decodeHTMLEntities(text) {
+        const textArea = document.createElement('textarea');
+        textArea.innerHTML = text;
+        const decodedText = textArea.value;
+        textArea.remove(); // Remove the textarea from the DOM
+        return decodedText;
+    }
+
     {% if mal_data %}
     const customSelects = document.querySelectorAll('.custom-select')
     customSelects.forEach(customSelect => {
@@ -904,7 +912,7 @@
         logLevel: 'warn',
         crossOrigin: true,
         playsInline: true,
-        title: '{% if user.preferences.title_language == "english" and anime.title.english %}{{ anime.title.english }}{% elif user.preferences.title_language == "native" and anime.title.native %}{{ anime.title.native }}{% else %}{{ anime.title.romaji }}{% endif %} — {{ current_episode.title }}',
+        title: decodeHTMLEntities('{% if user.preferences.title_language == "english" and anime.title.english %}{{ anime.title.english }}{% elif user.preferences.title_language == "native" and anime.title.native %}{{ anime.title.native }}{% else %}{{ anime.title.romaji }}{% endif %} — {{ current_episode.title }}'),
         subtitlePreference: {
             lang: 'English',
         },
@@ -935,16 +943,16 @@
 
         const chapters = [
             { startTime: introStart, endTime: introEnd, title: 'Intro' },
-            { startTime: introEnd, endTime: outroStart, title: '{% if user.preferences.title_language == "english" and anime.title.english %}{{ anime.title.english }}{% elif user.preferences.title_language == "native" and anime.title.native %}{{ anime.title.native }}{% else %}{{ anime.title.romaji }}{% endif %} — {{ current_episode.title }}' },
+            { startTime: introEnd, endTime: outroStart, title: decodeHTMLEntities('{% if user.preferences.title_language == "english" and anime.title.english %}{{ anime.title.english }}{% elif user.preferences.title_language == "native" and anime.title.native %}{{ anime.title.native }}{% else %}{{ anime.title.romaji }}{% endif %} — {{ current_episode.title }}') },
             { startTime: outroStart, endTime: outroEnd, title: 'Outro' }
         ];
     
         if (introStart > 0 && introStart < introEnd) {
-            chapters.unshift({ startTime: 0, endTime: introStart, title: '{% if user.preferences.title_language == "english" and anime.title.english %}{{ anime.title.english }}{% elif user.preferences.title_language == "native" and anime.title.native %}{{ anime.title.native }}{% else %}{{ anime.title.romaji }}{% endif %} — {{ current_episode.title }}' });
+            chapters.unshift({ startTime: 0, endTime: introStart, title: decodeHTMLEntities('{% if user.preferences.title_language == "english" and anime.title.english %}{{ anime.title.english }}{% elif user.preferences.title_language == "native" and anime.title.native %}{{ anime.title.native }}{% else %}{{ anime.title.romaji }}{% endif %} — {{ current_episode.title }}') });
         }
 
         if (outroEnd > 0 && outroStart < outroEnd && duration > outroEnd) {
-            chapters.push({ startTime: outroEnd, endTime: duration, title: '{% if user.preferences.title_language == "english" and anime.title.english %}{{ anime.title.english }}{% elif user.preferences.title_language == "native" and anime.title.native %}{{ anime.title.native }}{% else %}{{ anime.title.romaji }}{% endif %} — {{ current_episode.title }}' });
+            chapters.push({ startTime: outroEnd, endTime: duration, title: decodeHTMLEntities('{% if user.preferences.title_language == "english" and anime.title.english %}{{ anime.title.english }}{% elif user.preferences.title_language == "native" and anime.title.native %}{{ anime.title.native }}{% else %}{{ anime.title.romaji }}{% endif %} — {{ current_episode.title }}') });
         }
         
         const chaptersTrack = new TextTrack({

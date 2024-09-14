@@ -117,7 +117,7 @@ def update_anime(anime_id, anime_fetched, zid=None):
         start_date = None
         if anime_fetched.get('startDate'):
             start_date = datetime.date(
-                year=anime_fetched['startDate'].get('year'),
+                year=anime_fetched['startDate'].get('year') or 1970,
                 month=anime_fetched['startDate'].get('month') or 1,
                 day=anime_fetched['startDate'].get('day') or 1
             )
@@ -347,16 +347,23 @@ def watch(request, anime_id, episode=None):
         current_watched_time = [h.time_watched for h in history if h.episode.number == episode]
         current_watched_time = current_watched_time[0] if current_watched_time else 0
 
+        if not episode or episode < 1:
+            episode = [h.episode.number for h in history if h.last_watched]
+            episode = episode[0] if episode else 1
+            return redirect("watch:watch_episode", anime_id=anime_id, episode=episode)
+
         if episode > anime.currentEpisode:
             return redirect("watch:watch_episode", anime_id=anime_id, episode=anime.currentEpisode)
     else:
         history = []
         current_watched_time = 0
 
-    if not episode or episode < 1:
-        episode = [h.episode.number for h in history if h.last_watched]
-        episode = episode[0] if episode else 1
-        return redirect("watch:watch_episode", anime_id=anime_id, episode=episode)
+        if not episode or episode < 1:
+            episode = 1
+            return redirect("watch:watch_episode", anime_id=anime_id, episode=episode)
+        
+        if episode > anime["totalEpisodes"]:
+            return redirect("watch:watch_episode", anime_id=anime_id, episode=anime["totalEpisodes"])
 
 
     mode = request.GET.get("mode", request.user.preferences.default_language)
@@ -491,7 +498,7 @@ def watch_via_zid(request, zid):
                 break
     
     if anilist_id:
-        anime_fetched = get_anime_by_id(anilist_id)
+        anime_fetched, provider = get_anime_by_id(anilist_id)
         if "message" not in anime_fetched:
             print("Updating anime with zid:", zid)
             update_anime(anilist_id, anime_fetched, zid)
