@@ -31,9 +31,9 @@ DEBUG = True if os.environ.get("DEBUG") == "True" else False
 
 ALLOWED_HOSTS = ["127.0.0.1", "localhost", "anime.rize.moe"]
 CSRF_TRUSTED_ORIGINS = [
-    "anime.rize.moe",
-    "localhost",
-    "127.0.0.1",
+    "https://anime.rize.moe",
+    "http://localhost",
+    "http://127.0.0.1",
 ]
 
 AUTH_USER_MODEL = "authentication.User"
