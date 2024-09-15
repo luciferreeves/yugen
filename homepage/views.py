@@ -125,6 +125,15 @@ def search_json(request):
 
     return JsonResponse(search_results)
 
+def watchlist(request):
+    watchlist = gather_watch_history(request.user)
+
+    context = {
+        "watchlist": watchlist,
+    }
+
+    return render(request, "home/watchlist.html", context)
+
 def schedule(request):
     start = request.GET.get("start")
     end = request.GET.get("end")

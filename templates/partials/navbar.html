@@ -119,8 +119,8 @@
       </a>
 
       <!-- Watchlist icon -->
-      <a href="#watchlist" class="flex flex-col gap-2 items-center">
-        {% if request.path == '/watchlist/' %}
+      <a href="{% url "home:watchlist" %}" class="flex flex-col gap-2 items-center">
+        {% if request.path == '/watchlist' %}
         <svg
           xmlns="http://www.w3.org/2000/svg"
           viewBox="0 0 24 24"
@@ -370,8 +370,8 @@
           </a>
 
           <!-- Watchlist icon -->
-          <a href="#watchlist" class="flex flex-col gap-2 items-center">
-            {% if request.path == '/watchlist/' %}
+          <a href="{% url "home:watchlist" %}" class="flex flex-col gap-2 items-center">
+            {% if request.path == '/watchlist' %}
             <svg
               xmlns="http://www.w3.org/2000/svg"
               viewBox="0 0 24 24"

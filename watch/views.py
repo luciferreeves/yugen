@@ -7,6 +7,7 @@ import dotenv
 from django.shortcuts import render, redirect
 import requests
 from authentication.utils import get_single_anime_mal
+from user_profile.models import UserHistory
 from watch.tmdbmapper import parse_title_and_season
 from watch.utils import attach_episode_metadata, get_anime_episodes, get_all_episode_metadata, get_anime_data, get_episodes_by_zid, get_from_redis_cache, get_info_by_zid, get_seasons_by_zid, store_in_redis_cache, update_anime_user_history, get_anime_user_history
 from watch.models import Anime, AnimeEpisode, AnimeTitle, AnimeTrailer, AnimeGenre, AnimeStudio
@@ -656,3 +657,18 @@ def watch_via_zid_mal_id(request, mal_id, zid):
         context["mal_episode_range"] = range(1, anime_mal_info["num_episodes"] + 1)
 
     return render(request, "watch/watch.html", context)
+
+def remove_anime_from_watchlist(request):
+    if request.method != "POST":
+        return JsonResponse({"status": "error", "message": "Invalid request"})
+
+    data = json.loads(request.body)
+    anime_id = data.get("anime_id")
+
+    if request.user.is_authenticated:
+        anime = Anime.objects.get(id=anime_id)
+        history = UserHistory.objects.filter(user=request.user, anime=anime)
+        history.delete()
+        return JsonResponse({"status": "success"})
+    else:
+        return JsonResponse({"status": "error", "message": "User not authenticated"})
