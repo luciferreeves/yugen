@@ -331,6 +331,8 @@ def watch(request, anime_id, episode=None):
         return redirect("detail:detail", anime_id=anime_id)
     
     anime_fetched, provider = get_anime_data(anime_id)
+    print("Anime fetched:", anime_fetched)
+    print("Provider:", provider)
     provider = provider.decode() if isinstance(provider, bytes) else provider
     if anime_fetched["status"] == "Not yet aired":
         return redirect("detail:detail", anime_id=anime_id)
