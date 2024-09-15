@@ -1,0 +1,192 @@
+{% extends "partials/base.html" %}
+{% block css %}
+<style>
+    .anime-card::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 9.5rem;
+        height: 12.25rem;
+        background-position: center center;
+        background-size: cover;
+        background-repeat: no-repeat;
+        clip-path: polygon(100% 0, 100% 100%, 0 0);
+        z-index: 1;
+        filter: brightness(50%);
+    }
+    .sticker {
+        transform-origin: 0px 0px;
+        box-shadow: -2px 2px 4px var(--global-shadow);
+        transition: transform 0.2s;
+        display: flex;
+        align-items: flex-end;
+        justify-content: flex-start;
+        padding: 0.2rem;
+    }
+</style>
+<script>
+    function convertTime(unixTimestamp) {
+        const date = new Date(unixTimestamp * 1000);
+        return date.toLocaleTimeString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true });
+    }
+
+    function convertDay(unixTimestamp) {
+        const date = new Date(unixTimestamp * 1000);
+        return date.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
+    }
+</script>
+{% endblock css %}
+{% block content %}
+<div class="text-2xl font-bold mt-4">
+    <span id="todayTime"></span>
+</div>
+<section class="mt-4 flex flex-col lg:flex-row gap-2">
+    {% for anime in recently_aired %}
+    <style>
+        .anime-card-{{ forloop.counter }}::after {
+            background-image: url('{{ anime.media.bannerImage }}');
+        }
+    </style>
+    <a href="{% url "watch:watch_episode" anime.mediaId anime.episode %}" class="flex flex-1 bg-neutral-950 rounded pt-2 pb-2 pl-2 pr-8 relative overflow-hidden anime-card anime-card-{{ forloop.counter }}">
+        {% if forloop.counter == 1 %}
+        <div class="sticker text-pink-500 absolute top-1 -left-[0.35rem] w-10 h-8 rounded-b-lg bg-pink-300 border-2 border-pink-400 z-10 transform rotate-[-45deg]">
+            <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 512 512" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M173.898 439.404l-166.4-166.4c-9.997-9.997-9.997-26.206 0-36.204l36.203-36.204c9.997-9.998 26.207-9.998 36.204 0L192 312.69 432.095 72.596c9.997-9.997 26.207-9.997 36.204 0l36.203 36.204c9.997 9.997 9.997 26.206 0 36.204l-294.4 294.401c-9.998 9.997-26.207 9.997-36.204-.001z"></path></svg>
+        </div>
+        {% else %}
+        <div class="sticker text-red-500 absolute top-1 -left-[0.35rem] w-10 h-8 rounded-b-lg bg-red-300 border-2 border-red-400 z-10 transform rotate-[-45deg]">
+            <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 192 512" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M176 432c0 44.112-35.888 80-80 80s-80-35.888-80-80 35.888-80 80-80 80 35.888 80 80zM25.26 25.199l13.6 272C39.499 309.972 50.041 320 62.83 320h66.34c12.789 0 23.331-10.028 23.97-22.801l13.6-272C167.425 11.49 156.496 0 142.77 0H49.23C35.504 0 24.575 11.49 25.26 25.199z"></path></svg>
+        </div>
+        {% endif %}
+        <div class="flex justify-between items-center w-full z-10">
+            <div class="flex flex-col gap-1 max-w-[calc(100%-8rem)]">
+                <span class="mt-4 truncate max-w-full overflow-hidden text-ellipsis whitespace-nowrap font-bold text-xl text-white">
+                    {% if user.preferences.title_language == "english" and anime.media.title.english %}
+                        {{ anime.media.title.english }}
+                    {% elif user.preferences.title_language == "native" and anime.media.title.native %}
+                        {{ anime.media.title.native }}
+                    {% else %}
+                        {{ anime.media.title.romaji }}
+                    {% endif %}
+                </span>
+                <div class="flex flex-row gap-2 items-center text-sm text-gray-300">
+                    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 512 512" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M371.7 238l-176-107c-15.8-8.8-35.7 2.5-35.7 21v208c0 18.4 19.8 29.8 35.7 21l176-101c16.4-9.1 16.4-32.8 0-42zM504 256C504 119 393 8 256 8S8 119 8 256s111 248 248 248 248-111 248-248zm-448 0c0-110.5 89.5-200 200-200s200 89.5 200 200-89.5 200-200 200S56 366.5 56 256z"></path></svg>
+                    <span>Episode {{ anime.episode }}</span>
+                </div>
+                <div class="flex flex-row gap-2 items-center text-sm text-gray-300">
+                    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 512 512" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M256 8C119 8 8 119 8 256s111 248 248 248 248-111 248-248S393 8 256 8zm0 448c-110.5 0-200-89.5-200-200S145.5 56 256 56s200 89.5 200 200-89.5 200-200 200zm61.8-104.4l-84.9-61.7c-3.1-2.3-4.9-5.9-4.9-9.7V116c0-6.6 5.4-12 12-12h32c6.6 0 12 5.4 12 12v141.7l66.8 48.6c5.4 3.9 6.5 11.4 2.6 16.8L334.6 349c-3.9 5.3-11.4 6.5-16.8 2.6z"></path></svg>
+                    <span>
+                        {% if anime.timeUntilAiring > 0 %}
+                            Airing
+                        {% else %}
+                            Aired
+                        {% endif %}
+                        at <script>document.write(convertTime({{ anime.airingAt }}))</script>
+                    </span>
+                </div>
+            </div>
+            <img src="{{ anime.media.coverImage.medium }}" alt="{{ anime.media.title.romaji }}" class="rounded w-16 h-24" />
+        </div>
+    </a>
+    {% endfor %}
+    <style>
+        .anime-card-next-airing::after {
+            background-image: url('{{ next_airing.media.bannerImage }}');
+        }
+    </style>
+    <a href="{% url "watch:watch_episode" next_airing.mediaId next_airing.episode %}" class="flex flex-1 bg-neutral-950 rounded pt-2 pb-2 pl-2 pr-8 relative overflow-hidden anime-card anime-card-next-airing">
+        <div class="sticker text-orange-500 absolute top-1 -left-[0.35rem] w-10 h-8 rounded-b-lg bg-orange-300 border-2 border-orange-400 z-10 transform rotate-[-45deg]">
+            <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 24 24" height="1rem" width="1rem" xmlns="http://www.w3.org/2000/svg"><path fill="none" d="M0 0h24v24H0z"></path><path d="m23 12-2.44-2.78.34-3.68-3.61-.82-1.89-3.18L12 3 8.6 1.54 6.71 4.72l-3.61.81.34 3.68L1 12l2.44 2.78-.34 3.69 3.61.82 1.89 3.18L12 21l3.4 1.46 1.89-3.18 3.61-.82-.34-3.68L23 12zm-10 5h-2v-2h2v2zm0-4h-2V7h2v6z"></path></svg>
+        </div>
+        <div class="flex justify-between items-center w-full z-10">
+            <div class="flex flex-col gap-1 mr-2 max-w-[calc(100%-8rem)]">
+                <span class="truncate mt-4 max-w-full overflow-hidden text-ellipsis whitespace-nowrap font-bold text-xl text-white">
+                    {% if user.preferences.title_language == "english" and next_airing.media.title.english %}
+                        {{ next_airing.media.title.english }}
+                    {% elif user.preferences.title_language == "native" and next_airing.media.title.native %}
+                        {{ next_airing.media.title.native }}
+                    {% else %}
+                        {{ next_airing.media.title.romaji }}
+                    {% endif %}
+                </span>
+                <div class="flex flex-row gap-2 items-center text-sm text-gray-300">
+                    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 512 512" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M371.7 238l-176-107c-15.8-8.8-35.7 2.5-35.7 21v208c0 18.4 19.8 29.8 35.7 21l176-101c16.4-9.1 16.4-32.8 0-42zM504 256C504 119 393 8 256 8S8 119 8 256s111 248 248 248 248-111 248-248zm-448 0c0-110.5 89.5-200 200-200s200 89.5 200 200-89.5 200-200 200S56 366.5 56 256z"></path></svg>
+                    <span>Episode {{ next_airing.episode }}</span>
+                </div>
+                <div class="flex flex-row gap-2 items-center text-sm text-gray-300">
+                    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 512 512" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M256 8C119 8 8 119 8 256s111 248 248 248 248-111 248-248S393 8 256 8zm0 448c-110.5 0-200-89.5-200-200S145.5 56 256 56s200 89.5 200 200-89.5 200-200 200zm61.8-104.4l-84.9-61.7c-3.1-2.3-4.9-5.9-4.9-9.7V116c0-6.6 5.4-12 12-12h32c6.6 0 12 5.4 12 12v141.7l66.8 48.6c5.4 3.9 6.5 11.4 2.6 16.8L334.6 349c-3.9 5.3-11.4 6.5-16.8 2.6z"></path></svg>
+                    <span>
+                        {% if next_airing.timeUntilAiring > 0 %}
+                            Airing
+                        {% else %}
+                            Aired
+                        {% endif %}
+                        at <script>document.write(convertTime({{ next_airing.airingAt }}))</script>
+                    </span>
+                </div>
+            </div>
+            <img src="{{ next_airing.media.coverImage.medium }}" alt="{{ next_airing.media.title.romaji }}" class="rounded w-16 h-24" />
+        </div>
+    </a>
+</section>
+<section class="mt-8 mx-auto flex justify-center px-4">
+    <section class="inline-flex w-full lg:max-w-fit sm:max-w-96 flex-row gap-4 rounded-full bg-white bg-opacity-10 overflow-x-auto">
+        {% for time in times %}
+        <a href="{% url "home:schedule" %}?start={{ time.start }}&end={{ time.end }}" class="flex flex-row items-center focus:outline-none gap-2 text-sm font-bold py-2 px-4 rounded-full {% if time.today %}bg-{{ user.preferences.accent_colour }}-600{% else %}{% endif %}">
+            <span>{{ time.day }}</span>
+        </a>
+        {% endfor %}
+    </section>
+</section>
+<h1 class="mt-8 text-2xl font-bold"><script>document.write(convertDay({{ start }}))</script></h1>
+{% for time, items in schedule.items %}
+<section class="my-4">
+    <h1 class="text-xl my-2 font-bold"><script>document.write(convertTime({{ time.timestamp }}))</script></h1>
+    <div class="flex flex-col lg:flex-row gap-2">
+        {% for anime in items %}
+        <a href="{% url "watch:watch_episode" anime.mediaId anime.episode %}" class="flex flex-none bg-neutral-950 rounded p-2 gap-4 items-center max-w-96 w-full {% if anime.timeUntilAiring < 0 %}border-2 border-{{ user.preferences.accent_colour }}-600{% endif %}">
+            <img src="{{ anime.media.coverImage.medium }}" alt="{{ anime.media.title.romaji }}" class="rounded w-16 h-24" />
+            <div class="flex flex-col gap-1 max-w-[calc(100%-8rem)]">
+                <span class="truncate max-w-full overflow-hidden text-ellipsis whitespace-nowrap font-bold text-xl text-white">
+                    {% if user.preferences.title_language == "english" and anime.media.title.english %}
+                        {{ anime.media.title.english }}
+                    {% elif user.preferences.title_language == "native" and anime.media.title.native %}
+                        {{ anime.media.title.native }}
+                    {% else %}
+                        {{ anime.media.title.romaji }}
+                    {% endif %}
+                </span>
+                <div class="flex flex-row gap-2 items-center text-sm text-gray-300">
+                    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 512 512" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M371.7 238l-176-107c-15.8-8.8-35.7 2.5-35.7 21v208c0 18.4 19.8 29.8 35.7 21l176-101c16.4-9.1 16.4-32.8 0-42zM504 256C504 119 393 8 256 8S8 119 8 256s111 248 248 248 248-111 248-248zm-448 0c0-110.5 89.5-200 200-200s200 89.5 200 200-89.5 200-200 200S56 366.5 56 256z"></path></svg>
+                    <span>Episode {{ anime.episode }}</span>
+                </div>
+                <div class="flex flex-row gap-2 items-center text-sm text-gray-300">
+                    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 512 512" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M256 8C119 8 8 119 8 256s111 248 248 248 248-111 248-248S393 8 256 8zm0 448c-110.5 0-200-89.5-200-200S145.5 56 256 56s200 89.5 200 200-89.5 200-200 200zm61.8-104.4l-84.9-61.7c-3.1-2.3-4.9-5.9-4.9-9.7V116c0-6.6 5.4-12 12-12h32c6.6 0 12 5.4 12 12v141.7l66.8 48.6c5.4 3.9 6.5 11.4 2.6 16.8L334.6 349c-3.9 5.3-11.4 6.5-16.8 2.6z"></path></svg>
+                    <span>
+                        {% if anime.timeUntilAiring > 0 %}
+                            Airing
+                        {% else %}
+                            Aired
+                        {% endif %}
+                        at <script>document.write(convertTime({{ anime.airingAt }}))</script>
+                    </span>
+                </div>
+            </div>
+        </a>
+        {% endfor %}
+    </div>
+{% endfor %}
+</section>
+{% endblock content %}
+{% block scripts %}
+<script>
+    function updateTime() {
+        const today = new Date();
+        const time = today.toLocaleTimeString('en-US', { hour: 'numeric', minute: 'numeric', second: 'numeric', hour12: true });
+        document.getElementById('todayTime').innerText = time;
+    }
+
+    setInterval(updateTime, 1000);
+    updateTime();
+</script>
+{% endblock scripts %}

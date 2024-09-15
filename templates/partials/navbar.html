@@ -81,8 +81,8 @@
       </a>
 
       <!-- Schedule icon -->
-      <a href="#schedule" class="flex flex-col gap-2 items-center">
-        {% if request.path == '/schedule/' %}
+      <a href="{% url "home:schedule" %}" class="flex flex-col gap-2 items-center">
+        {% if request.path == '/schedule' %}
         <svg
           xmlns="http://www.w3.org/2000/svg"
           viewBox="0 0 24 24"
@@ -332,8 +332,8 @@
           </a>
 
           <!-- Schedule icon -->
-          <a href="#schedule" class="flex flex-col gap-2 items-center">
-            {% if request.path == '/schedule/' %}
+          <a href="{% url "home:schedule" %}" class="flex flex-col gap-2 items-center">
+            {% if request.path == '/schedule' %}
             <svg
               xmlns="http://www.w3.org/2000/svg"
               viewBox="0 0 24 24"

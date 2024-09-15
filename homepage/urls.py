@@ -6,5 +6,6 @@ app_name = "home"
 urlpatterns = [
     path("", views.index, name="index"),
     path("search", views.search, name="search"),
+    path("schedule", views.schedule, name="schedule"),
     path("q_search", views.search_json, name="q_search"),
 ]

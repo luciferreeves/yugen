@@ -5,3 +5,4 @@ requests
 django-cors-headers
 redis
 gunicorn
+pytz

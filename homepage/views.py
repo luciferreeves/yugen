@@ -6,12 +6,16 @@ from datetime import datetime
 from watch.utils import get_from_redis_cache, store_in_redis_cache
 import json
 from homepage.utils import (
+    find_target_anime,
+    get_anime_schedule,
+    get_start_end_times,
     get_trending_anime,
     get_popular_anime,
     get_top_anime,
     get_top_airing_anime,
     get_upcoming_anime,
     get_next_season,
+    group_anime_schedules,
 )
 from functools import lru_cache
 from user_profile.models import UserHistory
@@ -120,3 +124,56 @@ def search_json(request):
     search_results = response.json()
 
     return JsonResponse(search_results)
+
+def schedule(request):
+    start = request.GET.get("start")
+    end = request.GET.get("end")
+
+    times = get_start_end_times()
+    today = times[
+        next(
+            (
+                index
+                for index, time in enumerate(times)
+                if time["today"]
+            ),
+            None,
+        )
+    ]
+
+    schedule_data = get_anime_schedule(today["start"], today["end"])
+    grouped_schedule_data = group_anime_schedules(schedule_data)
+    target, last_two = find_target_anime(grouped_schedule_data)
+
+    if start and end:
+        today = next(
+            (
+                time
+                for time in times
+                if time["start"] == int(start) and time["end"] == int(end)
+            ),
+            None,
+        )
+
+        if today:
+            schedule_data = get_anime_schedule(today["start"], today["end"])
+            grouped_schedule_data = group_anime_schedules(schedule_data)
+
+            # change today in times
+            for time in times:
+                time["today"] = False
+            today["today"] = True
+    else:
+        start = today["start"]
+        end = today["end"]
+
+    context = {
+        "schedule": grouped_schedule_data,
+        "next_airing": target,
+        "recently_aired": last_two,
+        "times": times,
+        "start": start,
+        "end": end,
+    }
+
+    return render(request, "home/schedule.html", context)
