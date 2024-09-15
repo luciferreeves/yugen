@@ -898,7 +898,7 @@
     const layout = new VidstackPlayerLayout({
         {% for track in streaming_data.tracks %}
             {% if track.kind == 'thumbnails' %}
-                thumbnails: "https://proxy-worker.bobbyskhs.workers.dev?url={{ track.file }}",
+                thumbnails: "{{ track.file }}",
             {% endif %}
         {% endfor %}
     });
@@ -906,7 +906,7 @@
     const player = await VidstackPlayer.create({
         target: '#video-player',
         autoStartLoad: true,
-        src: 'https://proxy-worker.bobbyskhs.workers.dev?url={{ stream_url }}',
+        src: '{{ stream_url }}',
         viewType: 'video',
         streamType: 'on-demand',
         logLevel: 'warn',
@@ -921,7 +921,7 @@
             {% for track in streaming_data.tracks %}
             {% if track.kind == "captions" %}
             {
-                src: 'https://proxy-worker.bobbyskhs.workers.dev?url={{ track.file }}',
+                src: '{{ track.file }}',
                 label: '{{ track.label }}',
                 kind: 'subtitles',
                 type: 'vtt',

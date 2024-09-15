@@ -97,6 +97,7 @@ def get_episode_streaming_data(episode_id, category, server=None):
         episode_data = json.loads(episode_data)
     except:
         base_url = f"{os.getenv('ZORO_URL')}/anime/episode-srcs?id={episode_id}&category={category}"
+        print(base_url)
         if server:
             base_url += f"&server={server}"
 
