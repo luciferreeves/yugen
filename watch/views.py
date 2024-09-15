@@ -273,15 +273,17 @@ def update_anime_episodes(anime):
 
 def find_alternate_server(episode_id, mode):
     base_url = f"{os.getenv('ZORO_URL')}/anime/servers?episodeId={episode_id}"
+    print(base_url)
     response = requests.get(base_url)
     response = response.json()
 
-    print(response  )
+    if "message" in response:
+        return None, mode
 
-    if mode == "dub" and len(response["dub"]) > 0:
+    if mode == "dub" and "dub" in response and len(response["dub"]) > 0:
         server_id = response["dub"][0]["serverName"]
         mode = "dub"
-    elif len(response["sub"]) > 0:
+    elif len(response["sub"]) > 0 and "sub" in response:
         server_id = response["sub"][0]["serverName"]
         mode = "sub"
     elif len(response["raw"]) > 0:
@@ -331,8 +333,6 @@ def watch(request, anime_id, episode=None):
         return redirect("detail:detail", anime_id=anime_id)
     
     anime_fetched, provider = get_anime_data(anime_id)
-    print("Anime fetched:", anime_fetched)
-    print("Provider:", provider)
     provider = provider.decode() if isinstance(provider, bytes) else provider
     if anime_fetched["status"] == "Not yet aired":
         return redirect("detail:detail", anime_id=anime_id)
