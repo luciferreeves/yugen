@@ -276,12 +276,17 @@ def find_alternate_server(episode_id, mode):
     response = requests.get(base_url)
     response = response.json()
 
+    print(response  )
+
     if mode == "dub" and len(response["dub"]) > 0:
         server_id = response["dub"][0]["serverName"]
         mode = "dub"
-    else:
+    elif len(response["sub"]) > 0:
         server_id = response["sub"][0]["serverName"]
         mode = "sub"
+    elif len(response["raw"]) > 0:
+        server_id = response["raw"][0]["serverName"]
+        mode = "raw"
 
     return server_id, mode
 
