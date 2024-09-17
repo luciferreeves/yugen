@@ -185,7 +185,7 @@ def authenticate_user(exchange_response):
                 "discord_refresh_token": refresh_token,
                 "discord_token_type": token_type,
                 "discord_username": discord_user["username"],
-                "discord_avatar": discord_user["avatar"],
+                "discord_avatar": discord_user["avatar"] if discord_user["avatar"] is not None else "",
                 "discord_banner": discord_user["banner"] if discord_user["banner"] is not None else "",
                 "discord_global_name": discord_user["global_name"],
                 "discord_guild_name": discord_user["guild_name"],
