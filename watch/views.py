@@ -335,7 +335,7 @@ def watch(request, anime_id, episode=None):
     
     anime_fetched, provider, gogodub = get_anime_data(anime_id)
     provider = provider.decode() if isinstance(provider, bytes) else provider
-    
+    provider = "gogo" if request.user.preferences.default_provider == "gogoanime" else "zoro"
     provider = request.GET.get("provider", provider)
     if anime_fetched["status"] == "Not yet aired":
         return redirect("detail:detail", anime_id=anime_id)
@@ -358,7 +358,7 @@ def watch(request, anime_id, episode=None):
         current_watched_time = [h.time_watched for h in history if h.episode.number == episode]
         current_watched_time = current_watched_time[0] if current_watched_time else 0
 
-        if not episode or episode < 1:
+        if not episode or episode < 0:
             episode = [h.episode.number for h in history if h.last_watched]
             episode = episode[0] if episode else 1
             return redirect("watch:watch_episode", anime_id=anime_id, episode=episode)
@@ -369,7 +369,7 @@ def watch(request, anime_id, episode=None):
         history = []
         current_watched_time = 0
 
-        if not episode or episode < 1:
+        if not episode or episode < 0:
             episode = 1
             return redirect("watch:watch_episode", anime_id=anime_id, episode=episode)
         
@@ -410,12 +410,15 @@ def watch(request, anime_id, episode=None):
         seasons = get_seasons_by_zid(anime.z_anime_id)
         stream_url = streaming_data["sources"][0]["url"] if streaming_data and "sources" in streaming_data else None
     else:
+        gogodub = True if mode == "dub" else False
+        anime_fetched, provider, gogodub = get_anime_data(anime_id, provider="gogo", gogodub=gogodub)
         episodes, m = get_anime_episodes_gogo(anime_id, mode)
         if episodes:
             attach_episode_metadata(anime_fetched, episodes)
+
         if not gogodub and mode == "dub":
-            print("Dub not available, fallback to sub")
             mode = "sub"
+
         episodes = episodes["episodes"]
         episode_data = next((e for e in episodes if e["number"] == int(episode)), None)
         seasons = []

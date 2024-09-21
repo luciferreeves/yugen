@@ -16,8 +16,8 @@ r = redis.Redis(
     password=os.getenv("REDIS_PASSWORD"),
 )
 
-# r.flushall()
-# print("Redis cache flushed")
+r.flushall()
+print("Redis cache flushed")
 
 def get_episode_metadata(anime_data, episode):
     episode_metadata = get_all_episode_metadata(anime_data)
@@ -28,40 +28,63 @@ def get_episode_metadata(anime_data, episode):
 def get_anime_data(anime_id, provider="zoro", gogodub=False):
     cache_key = f"anime_{anime_id}_anime_data_{provider}"
     anime_data = get_from_redis_cache(cache_key)
+    original_provider = provider
+
     if provider == "gogo":
         provider = "gogoanime"
-        print("anime data got provider=>", provider)
-        if gogodub:
-            print("anime data got dub=>", gogodub)
-            cache_key = f"anime_{anime_id}_anime_data_{provider}_dub"
+    
+    print(f"Fetching anime data: ID={anime_id}, provider={provider}, initial gogodub={gogodub}")
+    
     if not anime_data:
         base_url = f"{os.getenv('CONSUMET_URL')}/meta/anilist/info/{anime_id}?provider={provider}"
-        if gogodub:
-            print("gogodub passed")
-            base_url += "&dub=true"
-        print("base_url=>", base_url)
-        response = requests.get(base_url, timeout=10)
-        anime_data = response.json()
+        
+        def fetch_data(dub):
+            url = base_url + ("&dub=true" if dub else "")
+            print(f"Trying URL: {url}")
+            response = requests.get(url, timeout=10)
+            data = response.json()
+            return data if "message" not in data and response.status_code == 200 and data.get("episodes") else None
 
-        print(f"Fetched {len(anime_data["episodes"])} episodes for ID {anime_id} with provider {provider} and dub=>{gogodub}")
+        # Try to fetch the requested version (dub or sub)
+        anime_data = fetch_data(gogodub)
+        
+        # If dub was requested but not found, try sub
+        if gogodub and not anime_data:
+            print(f"No dub episodes found for ID {anime_id}, trying sub")
+            anime_data = fetch_data(False)
+            if anime_data:
+                gogodub = False  # We found sub episodes, so set gogodub to False
 
-        if ("message" not in anime_data or response.status_code == 200) and anime_data["episodes"]:
-            if anime_data["status"] == "Completed":
-                store_in_redis_cache(cache_key, json.dumps(anime_data), 3600 * 24 * 30)
+        # If we still don't have data, try switching providers
+        if not anime_data:
+            if original_provider != "gogo":
+                print(f"No episodes found for ID {anime_id} with {provider}, switching to gogo")
+                return get_anime_data(anime_id, "gogo", gogodub)
             else:
-                store_in_redis_cache(cache_key, json.dumps(anime_data), 3600 * 12)
-            print(f"Anime data found for ID {anime_id} with provider {provider}, dub=>{gogodub}, episodes=>{len(anime_data['episodes'])}") 
+                print(f"No episodes found for ID {anime_id} with any provider or mode")
+                return None, None, False
+
+        # We have valid data at this point
+        episode_count = len(anime_data["episodes"])
+        print(f"Found {episode_count} episodes for ID {anime_id}, gogodub={gogodub}")
+
+        # Cache the data
+        cache_key = f"anime_{anime_id}_anime_data_{provider}_{'dub' if gogodub else 'sub'}"
+        if anime_data["status"] == "Completed":
+            store_in_redis_cache(cache_key, json.dumps(anime_data), 3600 * 24 * 30)
         else:
-            provider = "gogo"
-            return get_anime_data(anime_id, provider, gogodub)
+            store_in_redis_cache(cache_key, json.dumps(anime_data), 3600 * 12)
+        
+        print(f"Anime data found: ID={anime_id}, provider={provider}, final gogodub={gogodub}, episodes={episode_count}")
     else:
         anime_data = json.loads(anime_data)
+        episode_count = len(anime_data.get("episodes", []))
+        print(f"Loaded cached anime data: ID={anime_id}, provider={provider}, gogodub={gogodub}, episodes={episode_count}")
 
-    if not anime_data:
-        print(f"Anime data not found for ID {anime_id}")
     if provider == "gogoanime":
         provider = "gogo"
 
+    print(f"Returning: provider={provider}, gogodub={gogodub}")
     return anime_data, provider, gogodub
 
 @lru_cache(maxsize=100)
@@ -105,6 +128,10 @@ def get_anime_episodes_gogo(anime_id, mode="sub"):
         store_in_redis_cache(cache_key, json.dumps(anime_episodes), 86400)
     else:
         anime_episodes = json.loads(anime_episodes)
+
+    # Convert everything to 1-based index
+    for i, episode in enumerate(anime_episodes, start=1):
+        episode["number"] = i
 
     anime_episode_data = {
         "episodes": anime_episodes,

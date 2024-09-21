@@ -29,7 +29,7 @@
             {% for episode in all_episodes %}
             {% if not viaMal and episode.number == current_episode_number or viaMal and episode.episode.number == current_episode_number %}
             <a id="selected-episode" href="{% if not viaMal %}{% url "watch:watch_episode" anime.id episode.number %}{% if request.GET.mode %}?mode={{ request.GET.mode }}{% endif %}{% if request.GET.mode and request.GET.provider %}&provider={{ request.GET.provider }}{% elif request.GET.provider %}?provider={{ request.GET.provider }}{% endif %}{% else %}{% url "watch:watch_via_zid_mal_id" anime.id anime.z_anime_id %}?ep={{ episode.episode.identifier }}{% if request.GET.mode %}&mode={{ request.GET.mode }}{% endif %}{% if request.GET.mode and request.GET.provider %}&provider={{ request.GET.provider }}{% elif request.GET.provider %}?provider={{ request.GET.provider }}{% endif %}{% endif %}" class="flex flex-row gap-4 justify-between items-center w-full bg-{{ user.preferences.accent_colour }}-600 p-2 rounded hover:bg-{{ user.preferences.accent_colour }}-600 hover:bg-opacity-30">
-                <span class="truncate max-w-full overflow-hidden text-ellipsis whitespace-nowrap">{{ episode.number }}. {{ episode.title }}</span>
+                <span class="truncate max-w-full overflow-hidden text-ellipsis whitespace-nowrap">{{ episode.number }}. {% if episode.title %}{{ episode.title }}{% elif episode.metadata.title %}{{ episode.metadata.title }}{% else %}Episode {{ episode.number }}{% endif %}</span>
                 
                 <span class="flex flex-row item-center gap-2">
                 {% if episode.filler %}
@@ -63,7 +63,7 @@
             </a>
             {% else %}
             <a href="{% if not viaMal %}{% url "watch:watch_episode" anime.id episode.number %}{% if request.GET.mode %}?mode={{ request.GET.mode }}{% endif %}{% if request.GET.mode and request.GET.provider %}&provider={{ request.GET.provider }}{% elif request.GET.provider %}?provider={{ request.GET.provider }}{% endif %}{% else %}{% url "watch:watch_via_zid_mal_id" anime.id anime.z_anime_id %}?ep={{ episode.episode.identifier }}{% if request.GET.mode %}&mode={{ request.GET.mode }}{% endif %}{% if request.GET.mode and request.GET.provider %}&provider={{ request.GET.provider }}{% elif request.GET.provider %}?provider={{ request.GET.provider }}{% endif %}{% endif %}" class="flex flex-row justify-between w-full gap-4 {% if episode.number in watched_episodes %}bg-{{ user.preferences.accent_colour }}-600 bg-opacity-20{% else %}bg-white bg-opacity-10{% endif %} p-2 rounded hover:bg-{{ user.preferences.accent_colour }}-600 hover:bg-opacity-30">
-                <span class="truncate max-w-full overflow-hidden text-ellipsis whitespace-nowrap">{{ episode.number }}. {{ episode.title }}</span>
+                <span class="truncate max-w-full overflow-hidden text-ellipsis whitespace-nowrap">{{ episode.number }}. {% if episode.title %}{{ episode.title }}{% elif episode.metadata.title %}{{ episode.metadata.title }}{% else %}Episode {{ episode.number }}{% endif %}</span>
                 <span class="flex flex-row item-center gap-2">
                 {% if episode.filler %}
                 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" fill="#fff" class="size-3" style="margin-top:0.35rem;" version="1.1" id="Capa_1" viewBox="0 0 23.758 23.758" xml:space="preserve">
@@ -104,7 +104,7 @@
 <div class="flex flex-col lg:flex-row my-4 gap-2">
     <div class="w-full lg:w-3/4">
         <div class="flex flex-row gap-2 items-center justify-between">
-            {% if current_episode %}<h2 class="text-xl font-bold truncate max-w-full overflow-hidden text-ellipsis whitespace-nowrap">Episode {{ current_episode.number }} — {{ current_episode.title }}</h2>{% endif %}
+            {% if current_episode %}<h2 class="text-xl font-bold truncate max-w-full overflow-hidden text-ellipsis whitespace-nowrap">Episode {{ current_episode.number }} — {% if current_episode.title %}{{ current_episode.title }}{% elif current_episode.metadata.title %}{{ current_episode.metadata.title }}{% else %}Episode {{ current_episode.number }}{% endif %}</h2>{% endif %}
             <div class="flex flex-row gap-1 items-center">
                 <span class="font-bold">Episode Provider: </span>
                 <a href="{% if not viaMal %}
