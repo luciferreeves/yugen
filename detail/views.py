@@ -1,6 +1,6 @@
 from django.shortcuts import redirect, render
 from authentication.utils import get_single_anime_mal
-from watch.utils import attach_episode_metadata, get_anime_data, get_anime_episodes
+from watch.utils import attach_episode_metadata, get_anime_data, get_anime_episodes, get_anime_episodes_gogo
 from watch.views import get_seasons_by_zid
 
 
@@ -8,11 +8,14 @@ def index(request):
     return redirect("home:index")
 
 def detail(request, anime_id):
-    anime_data, provider = get_anime_data(anime_id)
+    anime_data, provider, gd = get_anime_data(anime_id)
     if not anime_data:
         return render(request, "detail/detail.html", {"error": "Anime not found"}, status=404)
 
     anime_episodes = get_anime_episodes(anime_id)
+    if "message" in anime_episodes:
+        anime_data, provider, gd = get_anime_data(anime_id, provider="gogo")
+        anime_episodes, _ = get_anime_episodes_gogo(anime_id)
     
     if anime_episodes:
         attach_episode_metadata(anime_data, anime_episodes)

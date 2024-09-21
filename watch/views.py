@@ -9,7 +9,7 @@ import requests
 from authentication.utils import get_single_anime_mal
 from user_profile.models import UserHistory
 from watch.tmdbmapper import parse_title_and_season
-from watch.utils import attach_episode_metadata, get_anime_episodes, get_all_episode_metadata, get_anime_data, get_episodes_by_zid, get_from_redis_cache, get_info_by_zid, get_seasons_by_zid, store_in_redis_cache, update_anime_user_history, get_anime_user_history
+from watch.utils import attach_episode_metadata, get_anime_episodes_gogo, get_all_episode_metadata, get_anime_data, get_episodes_by_zid, get_from_redis_cache, get_info_by_zid, get_seasons_by_zid, store_in_redis_cache, update_anime_user_history, get_anime_user_history
 from watch.models import Anime, AnimeEpisode, AnimeTitle, AnimeTrailer, AnimeGenre, AnimeStudio
 from django.db import transaction
 from authentication.models import User
@@ -333,8 +333,10 @@ def watch(request, anime_id, episode=None):
     if not episode and request.user.preferences.default_watch_page == "detail" and not forward_detail:
         return redirect("detail:detail", anime_id=anime_id)
     
-    anime_fetched, provider = get_anime_data(anime_id)
+    anime_fetched, provider, gogodub = get_anime_data(anime_id)
     provider = provider.decode() if isinstance(provider, bytes) else provider
+    
+    provider = request.GET.get("provider", provider)
     if anime_fetched["status"] == "Not yet aired":
         return redirect("detail:detail", anime_id=anime_id)
     
@@ -408,12 +410,14 @@ def watch(request, anime_id, episode=None):
         seasons = get_seasons_by_zid(anime.z_anime_id)
         stream_url = streaming_data["sources"][0]["url"] if streaming_data and "sources" in streaming_data else None
     else:
-        episodes = get_anime_episodes(anime_id)
+        episodes, m = get_anime_episodes_gogo(anime_id, mode)
         if episodes:
             attach_episode_metadata(anime_fetched, episodes)
+        if not gogodub and mode == "dub":
+            print("Dub not available, fallback to sub")
+            mode = "sub"
         episodes = episodes["episodes"]
         episode_data = next((e for e in episodes if e["number"] == int(episode)), None)
-        mode = "sub"
         seasons = []
         streaming_data = get_gogo_streaming_data(episode_data["id"]) if episode_data else None
         streaming_data["anilistID"] = anime_id
@@ -423,6 +427,8 @@ def watch(request, anime_id, episode=None):
 
     if preload_request:
         return JsonResponse({"status": f"Preloaded episode {episode}"})
+    
+    should_preload = episode < len(episodes)
 
     context = {
         "anime": anime,
@@ -440,6 +446,7 @@ def watch(request, anime_id, episode=None):
         "current_watched_time": current_watched_time,
         "seasons": seasons,
         "provider": provider,
+        "should_preload": should_preload,
     }
 
     if provider == "zoro" and request.user.mal_access_token and anime.malId:
