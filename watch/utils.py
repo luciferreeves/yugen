@@ -228,7 +228,6 @@ def get_episodes_by_zid(z_anime_id):
     return fetched_episodes
 
 def get_all_episode_metadata(anime_data):
-    print("Fetching episode metadata for anime", anime_data)
     special_case = False
 
     special_cases = {

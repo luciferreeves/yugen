@@ -432,6 +432,11 @@ def watch(request, anime_id, episode=None):
         stream_url = streaming_data["sources"][0]["url"] if streaming_data and "sources" in streaming_data else None
         episode_data["episodeId"] = episode_data["number"]
 
+        if request.user.mal_access_token and anime_fetched["malId"]:
+            mal_data = get_single_anime_mal(request.user.mal_access_token, anime_fetched["malId"])
+            if mal_data:
+                mal_data["average_episode_duration"] = mal_data["average_episode_duration"] // 60 + 1
+
     if preload_request:
         return JsonResponse({"status": f"Preloaded episode {episode}"})
     
@@ -456,7 +461,9 @@ def watch(request, anime_id, episode=None):
         "should_preload": should_preload,
     }
 
-    if provider == "zoro" and request.user.mal_access_token and anime.malId:
+    mal_id_present = anime.get("malId") or anime_fetched.get("malId")
+
+    if request.user.mal_access_token and mal_id_present:
         context["mal_data"] = mal_data
         context["mal_episode_range"] = range(1, mal_data["num_episodes"] + 1)
 

@@ -1073,12 +1073,12 @@
                 return;
             }
             
-            const MALEpisodesWatched = {{ mal_data.my_list_status.num_episodes_watched }};
+            const MALEpisodesWatched = {% if mal_data.my_list_status.num_episodes_watched %}{{ mal_data.my_list_status.num_episodes_watched }}{% else %}0{% endif %};
             if (currentEpisode <= MALEpisodesWatched) {
                 return;
             }
 
-            const MALScore = {{ mal_data.my_list_status.score }};
+            const MALScore = {% if mal_data.my_list_status.score %}{{ mal_data.my_list_status.score }}{% else %}0{% endif %};
             const score = MALScore > 0 ? MALScore : 0;
             
             const data = {
