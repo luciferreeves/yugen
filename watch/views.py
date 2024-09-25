@@ -462,8 +462,9 @@ def watch(request, anime_id, episode=None):
     }
 
     mal_id_present = anime_fetched.get("malId")
-    if anime and anime.malId and not mal_id_present:
-        mal_id_present = True
+    if isinstance(anime, Anime):
+        if not mal_id_present and anime.malId:
+            mal_id_present = True
 
     if request.user.mal_access_token and mal_id_present:
         context["mal_data"] = mal_data
