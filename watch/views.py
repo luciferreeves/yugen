@@ -461,7 +461,7 @@ def watch(request, anime_id, episode=None):
         "should_preload": should_preload,
     }
 
-    mal_id_present = anime.get("malId") or anime_fetched.get("malId")
+    mal_id_present = anime.malId or anime_fetched.get("malId")
 
     if request.user.mal_access_token and mal_id_present:
         context["mal_data"] = mal_data
