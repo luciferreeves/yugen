@@ -810,6 +810,30 @@
     }
 
     {% if mal_data %}
+    const syncToMAL = (data) => {
+        fetch('{% url "user_profile:update_user_mal_list" %}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}',
+            },
+            body: JSON.stringify(data),
+        }).then(response => {
+            if (response.ok) {
+                return response.json();
+            } else {
+                return response.json().then(data => {
+                    throw new Error(data.error);
+                });
+            }
+        }).then(data => {
+            showToast(data.success, true);
+        }).catch(error => {
+            showToast(error, false);
+        });
+    }
+
+
     const customSelects = document.querySelectorAll('.custom-select')
     customSelects.forEach(customSelect => {
         const selectId = customSelect.getAttribute('data-select')
@@ -859,26 +883,7 @@
                     'mal_id': {{ mal_data.id }},
                 };
 
-                fetch('{% url "user_profile:update_user_mal_list" %}', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRFToken': '{{ csrf_token }}',
-                    },
-                    body: JSON.stringify(data),
-                }).then(response => {
-                    if (response.ok) {
-                        return response.json();
-                    } else {
-                        return response.json().then(data => {
-                            throw new Error(data.error);
-                        });
-                    }
-                }).then(data => {
-                    showToast(data.success, true);
-                }).catch(error => {
-                    showToast(error, false);
-                });
+                syncToMAL(data);
             }
         });
     });
@@ -896,8 +901,8 @@
       freeMode: true,
     });
 </script>
-{% if current_episode %}
 <script type="module">
+{% if current_episode %}
     const introStart = {% if streaming_data.intro.start %}{{ streaming_data.intro.start }}{% else %}0{% endif %};
     const introEnd = {% if streaming_data.intro.end %}{{ streaming_data.intro.end }}{% else %}0{% endif %};
     const outroStart = {% if streaming_data.outro.start %}{{ streaming_data.outro.start }}{% else %}0{% endif %};
@@ -1014,7 +1019,7 @@
     player.subscribe(({ autoQuality }) => {
         window.localStorage.setItem('autoQuality', autoQuality);
     });
-    
+    var MALSyncUpdated = false;
     player.addEventListener('time-update', (event) => {
         const currentTime = event.detail.currentTime;
 
@@ -1049,6 +1054,50 @@
             const nextEpisode = currentEpisode + 1;
             const nextUrl = currentUrl.replace(`/watch/${animeId}/${currentEpisode}`, `/watch/${animeId}/${nextEpisode}`);
             window.location.href = nextUrl;
+        }
+        {% endif %}
+
+        /// If 80% watched and smart MAL sync on, update user MAL list automatically
+        {% if user.preferences.smart_mal_sync and mal_data %}
+        
+        const percentageWatched = (currentTime / player.duration) * 100;
+        if (percentageWatched >= 80 && !MALSyncUpdated) {
+            MALSyncUpdated = true;
+            const currentEpisode = {{ current_episode_number }};
+            const totalEpisodes = {{ anime.totalEpisodes }};
+            const status = currentEpisode === totalEpisodes ? 'completed' : 'watching';
+            const MALListStatus = "{{ mal_data.my_list_status.status }}";
+            const alreadyCompleted = MALListStatus === 'completed';
+            
+            if (alreadyCompleted) {
+                return;
+            }
+            
+            const MALEpisodesWatched = {{ mal_data.my_list_status.num_episodes_watched }};
+            if (currentEpisode <= MALEpisodesWatched) {
+                return;
+            }
+
+            const MALScore = {{ mal_data.my_list_status.score }};
+            const score = MALScore > 0 ? MALScore : 0;
+            
+            const data = {
+                'status': status,
+                'score': score,
+                'episodes': currentEpisode,
+                'mal_id': {{ mal_data.id }},
+            };
+            
+            syncToMAL(data);
+
+            // Update Text Values of Selects
+            const statusSelect = document.getElementById('status');
+            const scoreSelect = document.getElementById('score');
+            const episodesSelect = document.getElementById('episodes');
+
+            statusSelect.textContent = status.charAt(0).toUpperCase() + status.slice(1).replace(/_/g, ' ');
+            scoreSelect.textContent = score;
+            episodesSelect.textContent = currentEpisode;
         }
         {% endif %}
     });
@@ -1110,15 +1159,16 @@
         lastTime = currentTime;
     }, 30000);
     {% endif %}
-    
-    {% if should_preload %}
+{% endif %}
+</script>
+<script>
+{% if should_preload %}
     // If current episode is less than total episodes, preload the next episode
     const nextEpisode = {{ current_episode_number }} + 1;
     let nextEpisodeUrl = window.location.href.replace(`/watch/{{animeID}}/{{ current_episode_number }}`, `/watch/{{animeID}}/${nextEpisode}`);
     nextEpisodeUrl = new URL(nextEpisodeUrl);
     nextEpisodeUrl.searchParams.set('preload', 'true');
     fetch(nextEpisodeUrl.href);
-    {% endif %}
-</script>
 {% endif %}
+</script>
 {% endblock scripts %}
