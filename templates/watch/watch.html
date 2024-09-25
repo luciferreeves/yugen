@@ -846,6 +846,9 @@
         mutations.forEach(function(mutation){
             if (mutation.type === 'characterData' || mutation.type === 'childList') {
                 const statusSelectedOption = statusSelect.textContent.trim().toLowerCase().replace(/\s/g, '_');
+                if (statusSelectedOption === 'completed') {
+                    episodesSelect.textContent = '{{ anime.totalEpisodes }}';
+                }
                 const scoreSelectedOption = scoreSelect.textContent.trim();
                 const episodesSelectedOption = episodesSelect.textContent.trim();
 

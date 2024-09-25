@@ -337,12 +337,14 @@ def watch(request, anime_id, episode=None):
     provider = provider.decode() if isinstance(provider, bytes) else provider
     provider = "gogo" if request.user.preferences.default_provider == "gogoanime" else "zoro"
     provider = request.GET.get("provider", provider)
-    if anime_fetched["status"] == "Not yet aired":
+    if not anime_fetched:
+        provider = "gogo"
+    if anime_fetched and "status" in anime_fetched and anime_fetched["status"] == "Not yet aired":
         return redirect("detail:detail", anime_id=anime_id)
     
     forced_update = request.GET.get("refresh") == "true"
 
-    if provider == "zoro":
+    if anime_fetched and provider == "zoro":
         try:
             anime = Anime.objects.get(id=anime_id)
             if (anime.needs_update() or forced_update):
@@ -351,8 +353,8 @@ def watch(request, anime_id, episode=None):
             anime = update_anime(anime_id, anime_fetched)
     else:
         anime = anime_fetched
-        anime["anime_id"] = anime["id"]
-
+        if anime:
+            anime["anime_id"] = anime["id"]
     if provider == "zoro":
         history = get_anime_user_history(request.user, anime)
         current_watched_time = [h.time_watched for h in history if h.episode.number == episode]
@@ -373,7 +375,7 @@ def watch(request, anime_id, episode=None):
             episode = 1
             return redirect("watch:watch_episode", anime_id=anime_id, episode=episode)
         
-        if episode > anime["totalEpisodes"]:
+        if anime and "totalEpisodes" in anime and episode > anime["totalEpisodes"]:
             return redirect("watch:watch_episode", anime_id=anime_id, episode=anime["totalEpisodes"])
 
 
@@ -412,6 +414,8 @@ def watch(request, anime_id, episode=None):
     else:
         gogodub = True if mode == "dub" else False
         anime_fetched, provider, gogodub = get_anime_data(anime_id, provider="gogo", gogodub=gogodub)
+        if anime_fetched and "status" in anime_fetched and anime_fetched["status"] == "Not yet aired":
+            return redirect("detail:detail", anime_id=anime_id)
         episodes, m = get_anime_episodes_gogo(anime_id, mode)
         if episodes:
             attach_episode_metadata(anime_fetched, episodes)

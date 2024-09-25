@@ -43,7 +43,7 @@ def get_anime_data(anime_id, provider="zoro", gogodub=False):
             print(f"Trying URL: {url}")
             response = requests.get(url, timeout=10)
             data = response.json()
-            return data if "message" not in data and response.status_code == 200 and data.get("episodes") else None
+            return data if "message" not in data and response.status_code == 200 else None
 
         # Try to fetch the requested version (dub or sub)
         anime_data = fetch_data(gogodub)
@@ -62,7 +62,7 @@ def get_anime_data(anime_id, provider="zoro", gogodub=False):
                 return get_anime_data(anime_id, "gogo", gogodub)
             else:
                 print(f"No episodes found for ID {anime_id} with any provider or mode")
-                return None, None, False
+                return anime_data, provider, gogodub
 
         # We have valid data at this point
         episode_count = len(anime_data["episodes"])
@@ -95,7 +95,7 @@ def get_anime_episodes(anime_id): #only returns episodes from zoro
     if not anime_episodes:
         anime_data, provider, gd = get_anime_data(anime_id, "zoro")
         if not anime_data or not anime_data.get("episodes"):
-            return None
+            return []
 
         z_anime_id = anime_data["episodes"][0]["id"].split("$")[0]
 
@@ -108,7 +108,7 @@ def get_anime_episodes(anime_id): #only returns episodes from zoro
             store_in_redis_cache(cache_key, json.dumps(anime_episodes), 86400)  # Cache for 24 hours
         except requests.RequestException as e:
             print(f"Error fetching anime episodes for ID {anime_id}: {e}")
-            return None
+            return []
     else:
         anime_episodes = json.loads(anime_episodes)
 
@@ -123,9 +123,11 @@ def get_anime_episodes_gogo(anime_id, mode="sub"):
         gogodub = True if mode == "dub" else False
         print(f"Fetching episodes for ID {anime_id} with mode {mode} and dub=>{gogodub}")
         anime_data, provider, gd = get_anime_data(anime_id, "gogo", gogodub)
-        anime_episodes = anime_data["episodes"]
-
-        store_in_redis_cache(cache_key, json.dumps(anime_episodes), 86400)
+        if anime_data and "episodes" in anime_data:
+            anime_episodes = anime_data["episodes"]
+            store_in_redis_cache(cache_key, json.dumps(anime_episodes), 86400)
+        else:
+            anime_episodes = []
     else:
         anime_episodes = json.loads(anime_episodes)
 
@@ -226,6 +228,7 @@ def get_episodes_by_zid(z_anime_id):
     return fetched_episodes
 
 def get_all_episode_metadata(anime_data):
+    print("Fetching episode metadata for anime", anime_data)
     special_case = False
 
     special_cases = {

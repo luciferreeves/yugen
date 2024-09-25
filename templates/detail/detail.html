@@ -24,7 +24,7 @@
     <div class="absolute inset-0" style="background: linear-gradient(45deg, rgb(8, 8, 8) 15%, transparent 60%), linear-gradient(0deg, rgb(8, 8, 8) 0%, transparent 60%);"></div>
     <div class="w-4/12 lg:w-2/12 absolute px-2 lg:px-8 top-16 lg:top-48">
         <img src="{{ anime.image }}" alt="{{ anime.title.english }}" class="rounded-lg" class="w-full h-full rounded-lg object-cover"/>
-        <a href="{% url "watch:watch" anime.id %}?forward=detail" class="bg-{{ user.preferences.accent_colour }}-600 hover:bg-{{ user.preferences.accent_colour }}-700 text-white text-xs sm:text-sm font-bold py-1 px-2 sm:py-2 sm:px-4 rounded-lg my-2 flex flex-row items-center justify-center gap-1">
+        <a href="{% if anime.id %}{% url "watch:watch" anime.id %}?forward=detail{% endif %}" class="bg-{{ user.preferences.accent_colour }}-600 hover:bg-{{ user.preferences.accent_colour }}-700 text-white text-xs sm:text-sm font-bold py-1 px-2 sm:py-2 sm:px-4 rounded-lg my-2 flex flex-row items-center justify-center gap-1">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-4">
                 <path fill-rule="evenodd" d="M4.5 5.653c0-1.427 1.529-2.33 2.779-1.643l11.54 6.347c1.295.712 1.295 2.573 0 3.286L7.28 19.99c-1.25.687-2.779-.217-2.779-1.643V5.653Z" clip-rule="evenodd" />
             </svg>
