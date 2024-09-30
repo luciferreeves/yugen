@@ -522,7 +522,7 @@
                 </div>
                 {% endif %}
                 {% if related.type == "TV" or related.type == "MOVIE" or related.type == "OVA" or related.type == "ONA" or related.type == "SPECIAL" or related.type == "TV_SHORT" %}
-                <a href="{% if not viaMal %}{% url 'watch:watch' related.id %}{% else %}{% url "watch:watch_via_zid" related.zid %}{% endif %}" class="flex flex-row w-full gap-4 bg-white bg-opacity-10 p-2 rounded hover:bg-{{ user.preferences.accent_colour }}-600 hover:bg-opacity-30">        
+                <a href="{% url 'watch:watch' related.id %}" class="flex flex-row w-full gap-4 bg-white bg-opacity-10 p-2 rounded hover:bg-{{ user.preferences.accent_colour }}-600 hover:bg-opacity-30">       
                     <img loading="lazy" src="{{ related.image }}" alt="{{ related.title.english }}" class="rounded-lg w-12 h-16 object-cover"/>
                     <div class="flex flex-col gap-2">
                         <span class="font-bold flex gap-2 flex-row items-center">
@@ -603,7 +603,7 @@
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-2">
                 {% for recommendation in recommendations|slice:":10" %}
                 {% if recommendation.id or recommendation.zid %}
-                <a href="{% if not viaMal %}{% url 'watch:watch' recommendation.id %}{% else %}{% url "watch:watch_via_zid" recommendation.zid %}{% endif %}" class="flex flex-row w-full gap-4 bg-white bg-opacity-10 p-2 rounded hover:bg-{{ user.preferences.accent_colour }}-600 hover:bg-opacity-30">        
+                <a href="{% url 'watch:watch' recommendation.id %}" class="flex flex-row w-full gap-4 bg-white bg-opacity-10 p-2 rounded hover:bg-{{ user.preferences.accent_colour }}-600 hover:bg-opacity-30">        
                     <img loading="lazy" src="{{ recommendation.image }}" alt="{{ recommendation.title.english }}" class="rounded-lg w-12 h-16 object-cover"/>
                     <div class="flex flex-col gap-2 max-w-[calc(100%-4rem)]">
                         <span class="font-bold flex gap-2 flex-row items-center">

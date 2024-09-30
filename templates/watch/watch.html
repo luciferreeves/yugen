@@ -6,6 +6,35 @@
 <link rel="stylesheet" href="https://cdn.vidstack.io/player/video.css" />
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css"/>
+<style>
+    .custom-scrollbar::-webkit-scrollbar {
+        width: 10px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+        background: rgba(0, 0, 0, 0.1);
+        border-radius: 5px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+        background-color: var(--scrollbar-color);
+        border-radius: 5px;
+        border: 2px solid transparent;
+        background-clip: padding-box;
+        transition: opacity 0.3s ease;
+    }
+    .custom-scrollbar {
+        scrollbar-width: thin;
+        scrollbar-color: var(--scrollbar-color) rgba(0, 0, 0, 0.1);
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+        opacity: 0;
+    }
+    .custom-scrollbar.show-scrollbar::-webkit-scrollbar-thumb {
+        opacity: 0.5;
+    }
+    .custom-scrollbar.show-scrollbar:hover::-webkit-scrollbar-thumb {
+        opacity: 1;
+    }
+</style>
 {% endblock css %}
 {% block content %}
 <div class="flex flex-col lg:flex-row mt-4 gap-2">
@@ -39,7 +68,7 @@
                 </button>
             </div>
         </div>
-        <div class="flex flex-col gap-2 h-full max-h-96 lg:h-[39vw] lg:max-h-[761px] overflow-y-auto">
+        <div id="episodeContainer" class="flex flex-col gap-2 h-full max-h-96 lg:h-[39vw] lg:max-h-[761px] overflow-y-auto custom-scrollbar">
             <div id="listView" class="hidden">
                 {% for episode in all_episodes %}
                 <a href="{% url "watch:watch_episode" anime.id episode.number %}{% if request.GET.mode %}?mode={{ request.GET.mode }}{% endif %}{% if request.GET.mode and request.GET.provider %}&provider={{ request.GET.provider }}{% elif request.GET.provider %}?provider={{ request.GET.provider }}{% endif %}" 
@@ -80,7 +109,7 @@
             <div id="gridView" class="hidden">
             {% for episode in all_episodes %}
                 <a href="{% url "watch:watch_episode" anime.id episode.number %}{% if request.GET.mode %}?mode={{ request.GET.mode }}{% endif %}{% if request.GET.mode and request.GET.provider %}&provider={{ request.GET.provider }}{% elif request.GET.provider %}?provider={{ request.GET.provider }}{% endif %}" 
-                   class="flex flex-row w-full gap-4 {% if episode.number == current_episode_number %}bg-{{ user.preferences.accent_colour }}-600{% elif episode.number in watched_episodes %}bg-{{ user.preferences.accent_colour }}-600 bg-opacity-20{% else %}bg-white bg-opacity-10{% endif %} p-2 rounded hover:bg-{{ user.preferences.accent_colour }}-600 hover:bg-opacity-30 mb-4" id="{% if episode.number == current_episode_number %}active-episode-grid{% endif %}">
+                   class="flex flex-row w-full gap-2 {% if episode.number == current_episode_number %}bg-{{ user.preferences.accent_colour }}-600{% elif episode.number in watched_episodes %}bg-{{ user.preferences.accent_colour }}-600 bg-opacity-20{% else %}bg-white bg-opacity-10{% endif %} p-2 rounded my-1 hover:bg-{{ user.preferences.accent_colour }}-600 hover:bg-opacity-30" id="{% if episode.number == current_episode_number %}active-episode-grid{% endif %}">
                     <div class="w-32 h-18 flex-shrink-0">
                         <img loading="lazy" src="{{ episode.metadata.image }}" alt="Episode {{ episode.number }}" class="w-full h-full object-cover rounded" style="aspect-ratio: 16/9;">
                     </div>
@@ -129,21 +158,18 @@
             {% if current_episode %}<h2 class="text-xl font-bold truncate max-w-full overflow-hidden text-ellipsis whitespace-nowrap">Episode {{ current_episode.number }} — {% if current_episode.title %}{{ current_episode.title }}{% elif current_episode.metadata.title %}{{ current_episode.metadata.title }}{% else %}Episode {{ current_episode.number }}{% endif %}</h2>{% endif %}
             <div class="flex flex-row gap-1 items-center">
                 <span class="font-bold">Episode Provider: </span>
-                <a href="{% if not viaMal %}
-                    {% url "watch:watch_episode" anime.id current_episode.number %}?mode={{ mode }}&provider=zoro
-                {% else %}
-                    {% url "watch:watch_via_zid_mal_id" anime.id anime.z_anime_id %}?ep={{ current_episode.episode.identifier }}&mode={{ mode }}&provider=zoro
-                {% endif %}" class="{% if provider == "zoro" %}bg-{{ user.preferences.accent_colour }}-600{% else %}bg-white bg-opacity-10{% endif %} text-white text-sm font-bold px-4 py-2 rounded">Zoro</a>
-
-                <a href="{% if not viaMal %}
-                    {% url "watch:watch_episode" anime.id current_episode.number %}?mode={{ mode }}&provider=gogo
-                {% else %}
-                    {% url "watch:watch_via_zid_mal_id" anime.id anime.z_anime_id %}?ep={{ current_episode.episode.identifier }}&mode={{ mode }}&provider=gogo
-                {% endif %}" class="{% if provider == "gogo" %}bg-{{ user.preferences.accent_colour }}-600{% else %}bg-white bg-opacity-10{% endif %} text-white text-sm font-bold px-4 py-2 rounded">Gogo</a>
+                <a href="{% url "watch:watch_episode" anime.id current_episode.number %}?mode={{ mode }}&provider=zoro" 
+                   class="{% if provider == "zoro" %}bg-{{ user.preferences.accent_colour }}-600{% else %}bg-white bg-opacity-10{% endif %} text-white text-sm font-bold px-4 py-2 rounded">Zoro</a>
+            
+                <a href="{% url "watch:watch_episode" anime.id current_episode.number %}?mode={{ mode }}&provider=gogo" 
+                   class="{% if provider == "gogo" %}bg-{{ user.preferences.accent_colour }}-600{% else %}bg-white bg-opacity-10{% endif %} text-white text-sm font-bold px-4 py-2 rounded">Gogo</a>
+                
                 <span class="ml-8 font-bold">Mode: </span>
                 {% if current_episode.number %}
-                <a href="{% if not viaMal %}{% url "watch:watch_episode" anime.id current_episode.number %}?mode=sub&provider={{ provider }}{% else %}{% url "watch:watch_via_zid_mal_id" anime.id anime.z_anime_id %}?ep={{ current_episode.episode.identifier }}&mode=sub&provider={{ provider }}{% endif %}" class="{% if mode == "sub" %}bg-{{ user.preferences.accent_colour }}-600{% else %}bg-white bg-opacity-10{% endif %} text-white text-sm font-bold px-4 py-2 rounded">Sub</a>
-                <a href="{% if not viaMal %}{% url "watch:watch_episode" anime.id current_episode.number %}?mode=dub&provider={{ provider }}{% else %}{% url "watch:watch_via_zid_mal_id" anime.id anime.z_anime_id %}?ep={{ current_episode.episode.identifier }}&mode=dub&provider={{ provider }}{% endif %}" class="{% if mode == "dub" %}bg-{{ user.preferences.accent_colour }}-600{% else %}bg-white bg-opacity-10{% endif %} text-white text-sm font-bold px-4 py-2 rounded">Dub</a>
+                <a href="{% url "watch:watch_episode" anime.id current_episode.number %}?mode=sub&provider={{ provider }}" 
+                   class="{% if mode == "sub" %}bg-{{ user.preferences.accent_colour }}-600{% else %}bg-white bg-opacity-10{% endif %} text-white text-sm font-bold px-4 py-2 rounded">Sub</a>
+                <a href="{% url "watch:watch_episode" anime.id current_episode.number %}?mode=dub&provider={{ provider }}" 
+                   class="{% if mode == "dub" %}bg-{{ user.preferences.accent_colour }}-600{% else %}bg-white bg-opacity-10{% endif %} text-white text-sm font-bold px-4 py-2 rounded">Dub</a>
                 {% endif %}
             </div>
         </div>
@@ -642,7 +668,7 @@
             </div>
             {% endif %}
             {% if related.type == "TV" or related.type == "MOVIE" or related.type == "OVA" or related.type == "ONA" or related.type == "SPECIAL" or related.type == "TV_SHORT" %}
-            <a href="{% if not viaMal %}{% url 'watch:watch' related.id %}{% else %}{% url "watch:watch_via_zid" related.zid %}{% endif %}" class="flex flex-row w-full gap-4 bg-white bg-opacity-10 p-2 rounded hover:bg-{{ user.preferences.accent_colour }}-600 hover:bg-opacity-30">
+            <a href="{% url 'watch:watch' related.id %}" class="flex flex-row w-full gap-4 bg-white bg-opacity-10 p-2 rounded hover:bg-{{ user.preferences.accent_colour }}-600 hover:bg-opacity-30">
                 <img loading="lazy" src="{{ related.image }}" alt="{{ related.title.english }}" class="rounded-lg w-12 h-16 object-cover"/>
                 <div class="flex flex-col gap-2">
                     <span class="font-bold flex gap-2 flex-row items-center">
@@ -723,7 +749,7 @@
         <div class="flex flex-col gap-2">
             {% for recommendation in recommendations|slice:":10" %}
             {% if recommendation.id or recommendation.zid %}
-            <a href="{% if not viaMal %}{% url 'watch:watch' recommendation.id %}{% else %}{% url "watch:watch_via_zid" recommendation.zid %}{% endif %}" class="flex flex-row w-full gap-4 bg-white bg-opacity-10 p-2 rounded hover:bg-{{ user.preferences.accent_colour }}-600 hover:bg-opacity-30">
+            <a href="{% url 'watch:watch' recommendation.id %}" class="flex flex-row w-full gap-4 bg-white bg-opacity-10 p-2 rounded hover:bg-{{ user.preferences.accent_colour }}-600 hover:bg-opacity-30">
                 <img loading="lazy" src="{{ recommendation.image }}" alt="{{ recommendation.title.english }}" class="rounded-lg w-12 h-16 object-cover"/>
                 <div class="flex flex-col gap-2 max-w-[calc(100%-4rem)]">
                     <span class="font-bold flex gap-2 flex-row items-center">
@@ -795,12 +821,77 @@
 {% endblock content %}
 {% block scripts %}
 <script>
+    const episodeContainer = document.getElementById('episodeContainer');
+    let scrollTimer;
+
+    // Function to get RGB values from Tailwind color class
+    function getRgbFromTailwindColor(colorClass) {
+        const tempElement = document.createElement('div');
+        tempElement.className = colorClass;
+        document.body.appendChild(tempElement);
+        const rgbColor = window.getComputedStyle(tempElement).backgroundColor;
+        document.body.removeChild(tempElement);
+        return rgbColor;
+    }
+
+    // Set CSS variables for scrollbar colors
+    const accentColor = getRgbFromTailwindColor('bg-{{ user.preferences.accent_colour }}-600');
+    document.documentElement.style.setProperty('--scrollbar-color', accentColor);
+
+    function showScrollbar() {
+        episodeContainer.classList.add('show-scrollbar');
+        episodeContainer.classList.remove('inactive-scrollbar');
+    }
+
+    function hideScrollbar() {
+        episodeContainer.classList.remove('show-scrollbar');
+        episodeContainer.classList.add('inactive-scrollbar');
+    }
+
+    episodeContainer.addEventListener('scroll', () => {
+        showScrollbar();
+        clearTimeout(scrollTimer);
+        scrollTimer = setTimeout(hideScrollbar, 1000);
+    });
+
+    // Show scrollbar on mouse enter
+    episodeContainer.addEventListener('mouseenter', showScrollbar);
+
+    // Hide scrollbar on mouse leave, but only if not scrolling
+    episodeContainer.addEventListener('mouseleave', () => {
+        if (!scrollTimer) {
+            hideScrollbar();
+        }
+    });
+
+    // Make scrollbar visible when entering episodes list
+    episodeContainer.addEventListener('focus', showScrollbar, true);
+
+    // Show scrollbar when hovering over any child element
+    episodeContainer.addEventListener('mouseover', (event) => {
+        if (event.target !== episodeContainer) {
+            showScrollbar();
+        }
+    });
+
     const listViewSwitch = document.getElementById('listViewSwitch');
     const gridViewSwitch = document.getElementById('gridViewSwitch');
     const listView = document.getElementById('listView');
     const gridView = document.getElementById('gridView');
 
+    let listScrollPosition = 0;
+    let gridScrollPosition = 0;
+    let listViewInitialized = false;
+    let gridViewInitialized = false;
+
     function setActiveView(view) {
+        // Store current scroll position before switching view
+        if (view === 'list') {
+            gridScrollPosition = episodeContainer.scrollTop;
+        } else {
+            listScrollPosition = episodeContainer.scrollTop;
+        }
+
         if (view === 'list') {
             listView.classList.remove('hidden');
             gridView.classList.add('hidden');
@@ -808,6 +899,13 @@
             listViewSwitch.classList.remove('bg-white', 'bg-opacity-10');
             gridViewSwitch.classList.remove('bg-{{ user.preferences.accent_colour }}-600');
             gridViewSwitch.classList.add('bg-white', 'bg-opacity-10');
+            
+            if (!listViewInitialized) {
+                scrollToActiveEpisode('list');
+                listViewInitialized = true;
+            } else {
+                episodeContainer.scrollTop = listScrollPosition;
+            }
         } else {
             gridView.classList.remove('hidden');
             listView.classList.add('hidden');
@@ -815,27 +913,24 @@
             gridViewSwitch.classList.remove('bg-white', 'bg-opacity-10');
             listViewSwitch.classList.remove('bg-{{ user.preferences.accent_colour }}-600');
             listViewSwitch.classList.add('bg-white', 'bg-opacity-10');
+            
+            if (!gridViewInitialized) {
+                scrollToActiveEpisode('grid');
+                gridViewInitialized = true;
+            } else {
+                episodeContainer.scrollTop = gridScrollPosition;
+            }
         }
+
         localStorage.setItem('episodeViewPreference', view);
     }
 
-    // Load the saved view preference from localStorage
-    const savedView = localStorage.getItem('episodeViewPreference') || 'list';
-    setActiveView(savedView);
-
-    listViewSwitch.addEventListener('click', () => setActiveView('list'));
-    gridViewSwitch.addEventListener('click', () => setActiveView('grid'));
-
-    function scrollToActiveEpisode() {
-        const activeEpisodeList = document.getElementById('active-episode-list');
-        const activeEpisodeGrid = document.getElementById('active-episode-grid');
-        const episodeContainer = document.querySelector('.flex.flex-col.gap-2.h-full.max-h-96.lg\\:h-\\[39vw\\].lg\\:max-h-\\[761px\\].overflow-y-auto');
+    function scrollToActiveEpisode(view) {
+        const activeEpisode = view === 'list' ? document.getElementById('active-episode-list') : document.getElementById('active-episode-grid');
     
-        let activeElement = listView.classList.contains('hidden') ? activeEpisodeGrid : activeEpisodeList;
-    
-        if (activeElement && episodeContainer) {
+        if (activeEpisode && episodeContainer) {
             const containerRect = episodeContainer.getBoundingClientRect();
-            const elementRect = activeElement.getBoundingClientRect();
+            const elementRect = activeEpisode.getBoundingClientRect();
     
             const isFullyVisible = (
                 elementRect.top >= containerRect.top &&
@@ -849,23 +944,37 @@
                     top: scrollOffset,
                     behavior: 'instant'
                 });
+
+                // Update the appropriate scroll position
+                if (view === 'grid') {
+                    gridScrollPosition = scrollOffset;
+                } else {
+                    listScrollPosition = scrollOffset;
+                }
             }
         }
     }
     
-    // Call the function when the page loads
-    window.addEventListener('load', scrollToActiveEpisode);
+    // Load the saved view preference from localStorage and set initial view
+    const savedView = localStorage.getItem('episodeViewPreference') || 'list';
+    setActiveView(savedView);
+
+    // Scroll to active episode when the page loads and store the position
+    window.addEventListener('load', () => {
+        const initialView = listView.classList.contains('hidden') ? 'grid' : 'list';
+        scrollToActiveEpisode(initialView);
+        if (initialView === 'grid') {
+            gridViewInitialized = true;
+            gridScrollPosition = episodeContainer.scrollTop;
+        } else {
+            listViewInitialized = true;
+            listScrollPosition = episodeContainer.scrollTop;
+        }
+    }, { once: true });
     
-    // Call the function when switching views
-    listViewSwitch.addEventListener('click', () => {
-        setActiveView('list');
-        setTimeout(scrollToActiveEpisode, 100); // Small delay to ensure DOM is updated
-    });
-    
-    gridViewSwitch.addEventListener('click', () => {
-        setActiveView('grid');
-        setTimeout(scrollToActiveEpisode, 100); // Small delay to ensure DOM is updated
-    });
+    // Set up view switching
+    listViewSwitch.addEventListener('click', () => setActiveView('list'));
+    gridViewSwitch.addEventListener('click', () => setActiveView('grid'));
 </script>
 <script>
     function showToast(message, isSuccess) {
