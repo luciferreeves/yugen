@@ -43,7 +43,7 @@
             <div id="listView" class="hidden">
                 {% for episode in all_episodes %}
                 <a href="{% url "watch:watch_episode" anime.id episode.number %}{% if request.GET.mode %}?mode={{ request.GET.mode }}{% endif %}{% if request.GET.mode and request.GET.provider %}&provider={{ request.GET.provider }}{% elif request.GET.provider %}?provider={{ request.GET.provider }}{% endif %}" 
-                   class="flex flex-row gap-4 justify-between items-center w-full {% if episode.number == current_episode_number %}bg-{{ user.preferences.accent_colour }}-600{% elif episode.number in watched_episodes %}bg-{{ user.preferences.accent_colour }}-600 bg-opacity-20{% else %}bg-white bg-opacity-10{% endif %} p-2 rounded hover:bg-{{ user.preferences.accent_colour }}-600 hover:bg-opacity-30 mb-2">
+                   class="flex flex-row gap-4 justify-between items-center w-full {% if episode.number == current_episode_number %}bg-{{ user.preferences.accent_colour }}-600{% elif episode.number in watched_episodes %}bg-{{ user.preferences.accent_colour }}-600 bg-opacity-20{% else %}bg-white bg-opacity-10{% endif %} p-2 rounded hover:bg-{{ user.preferences.accent_colour }}-600 hover:bg-opacity-30 mb-2" id="{% if episode.number == current_episode_number %}active-episode-list{% endif %}">
                     <span class="truncate max-w-full overflow-hidden text-ellipsis whitespace-nowrap">{{ episode.number }}. {% if episode.title %}{{ episode.title }}{% elif episode.metadata.title %}{{ episode.metadata.title }}{% else %}Episode {{ episode.number }}{% endif %}</span>
                     
                     <span class="flex flex-row item-center gap-2">
@@ -80,7 +80,7 @@
             <div id="gridView" class="hidden">
             {% for episode in all_episodes %}
                 <a href="{% url "watch:watch_episode" anime.id episode.number %}{% if request.GET.mode %}?mode={{ request.GET.mode }}{% endif %}{% if request.GET.mode and request.GET.provider %}&provider={{ request.GET.provider }}{% elif request.GET.provider %}?provider={{ request.GET.provider }}{% endif %}" 
-                   class="flex flex-row w-full gap-4 {% if episode.number == current_episode_number %}bg-{{ user.preferences.accent_colour }}-600{% elif episode.number in watched_episodes %}bg-{{ user.preferences.accent_colour }}-600 bg-opacity-20{% else %}bg-white bg-opacity-10{% endif %} p-2 rounded hover:bg-{{ user.preferences.accent_colour }}-600 hover:bg-opacity-30 mb-4">
+                   class="flex flex-row w-full gap-4 {% if episode.number == current_episode_number %}bg-{{ user.preferences.accent_colour }}-600{% elif episode.number in watched_episodes %}bg-{{ user.preferences.accent_colour }}-600 bg-opacity-20{% else %}bg-white bg-opacity-10{% endif %} p-2 rounded hover:bg-{{ user.preferences.accent_colour }}-600 hover:bg-opacity-30 mb-4" id="{% if episode.number == current_episode_number %}active-episode-grid{% endif %}">
                     <div class="w-32 h-18 flex-shrink-0">
                         <img src="{{ episode.metadata.image }}" alt="Episode {{ episode.number }}" class="w-full h-full object-cover rounded" style="aspect-ratio: 16/9;">
                     </div>
@@ -825,6 +825,47 @@
 
     listViewSwitch.addEventListener('click', () => setActiveView('list'));
     gridViewSwitch.addEventListener('click', () => setActiveView('grid'));
+
+    function scrollToActiveEpisode() {
+        const activeEpisodeList = document.getElementById('active-episode-list');
+        const activeEpisodeGrid = document.getElementById('active-episode-grid');
+        const episodeContainer = document.querySelector('.flex.flex-col.gap-2.h-full.max-h-96.lg\\:h-\\[39vw\\].lg\\:max-h-\\[761px\\].overflow-y-auto');
+    
+        let activeElement = listView.classList.contains('hidden') ? activeEpisodeGrid : activeEpisodeList;
+    
+        if (activeElement && episodeContainer) {
+            const containerRect = episodeContainer.getBoundingClientRect();
+            const elementRect = activeElement.getBoundingClientRect();
+    
+            const isFullyVisible = (
+                elementRect.top >= containerRect.top &&
+                elementRect.bottom <= containerRect.bottom
+            );
+    
+            if (!isFullyVisible) {
+                const scrollOffset = elementRect.top + episodeContainer.scrollTop - containerRect.top - (containerRect.height / 2) + (elementRect.height / 2);
+                
+                episodeContainer.scrollTo({
+                    top: scrollOffset,
+                    behavior: 'instant'
+                });
+            }
+        }
+    }
+    
+    // Call the function when the page loads
+    window.addEventListener('load', scrollToActiveEpisode);
+    
+    // Call the function when switching views
+    listViewSwitch.addEventListener('click', () => {
+        setActiveView('list');
+        setTimeout(scrollToActiveEpisode, 100); // Small delay to ensure DOM is updated
+    });
+    
+    gridViewSwitch.addEventListener('click', () => {
+        setActiveView('grid');
+        setTimeout(scrollToActiveEpisode, 100); // Small delay to ensure DOM is updated
+    });
 </script>
 <script>
     function showToast(message, isSuccess) {
