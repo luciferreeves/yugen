@@ -1,6 +1,8 @@
 import datetime
+from difflib import SequenceMatcher
 from functools import lru_cache
 import json
+import re
 import redis
 import os
 import dotenv
@@ -52,11 +54,14 @@ def get_anime_data(anime_id, provider="gogo", dub=False):
         response = requests.get(base_url, timeout=10)
         sub_data = response.json()
 
+        if "message" in sub_data:
+            return get_anime_data(anime_id)
+
         if "status" in sub_data and sub_data["status"] == "Completed":
             store_in_redis_cache(sub_cache_key, json.dumps(sub_data), 3600 * 24 * 30)
         else:
             store_in_redis_cache(sub_cache_key, json.dumps(sub_data), 3600 * 12)
-        sub_dub_count["sub"] = len(sub_data["episodes"])
+        sub_dub_count["sub"] = len(sub_data["episodes"]) if "episodes" in sub_data else 0
 
         base_url = f"{os.getenv('CONSUMET_URL')}/meta/anilist/info/{anime_id}?provider={provider}&dub=true"
         print(f"Trying URL: {base_url}")
@@ -66,14 +71,14 @@ def get_anime_data(anime_id, provider="gogo", dub=False):
             store_in_redis_cache(dub_cache_key, json.dumps(dub_data), 3600 * 24 * 30)
         else:
             store_in_redis_cache(dub_cache_key, json.dumps(dub_data), 3600 * 12)
-        sub_dub_count["dub"] = len(dub_data["episodes"])
+        sub_dub_count["dub"] = len(dub_data["episodes"]) if "episodes" in dub_data else 0
 
         if not dub:
             anime_data = sub_data
         else:
             anime_data = dub_data
 
-        if anime_data["status"] == "Completed":
+        if "status" in anime_data and anime_data["status"] == "Completed":
             store_in_redis_cache(sub_dub_cache_key, json.dumps(sub_dub_count), 3600 * 24 * 30)
         else:
             store_in_redis_cache(sub_dub_cache_key, json.dumps(sub_dub_count), 3600 * 12)
@@ -83,8 +88,10 @@ def get_anime_data(anime_id, provider="gogo", dub=False):
         anime_data = json.loads(anime_data)
         anime_data["subDubCount"] = json.loads(get_from_redis_cache(sub_dub_cache_key))
 
-    for i, episode in enumerate(anime_data["episodes"], start=1):
+    episodes = anime_data["episodes"] if "episodes" in anime_data else []
+    for i, episode in enumerate(episodes, start=1):
         episode["number"] = i
+    anime_data["episodes"] = episodes
 
     return anime_data
 
@@ -250,42 +257,55 @@ def fetch_anime_seasons(anime_id):
 
 def extract_seasons(data):
     seasons = {}
-    main_title = data['data']['Media']['title']['english'] or data['data']['Media']['title']['romaji']
-    main_title_words = set(main_title.lower().split())
-
-    def is_related_content(title):
-        title_words = set(title.lower().split())
-        return len(main_title_words.intersection(title_words)) >= 2 or 'season' in title.lower()
-
-    def add_content(media):
-        if media['format'] in ['TV', 'SPECIAL', 'MOVIE', 'OVA', 'ONA']:
-            english_title = media['title']['english'] or ''
-            romaji_title = media['title']['romaji'] or ''
-            
-            if is_related_content(english_title) or is_related_content(romaji_title):
-                seasons[media['id']] = {
-                    'id': media['id'],
-                    'title': media['title'],
-                    'format': media['format'],
-                    'episodes': media['episodes'],
-                    'startYear': media['startDate']['year'] if media['startDate']['year'] else 9999,
-                    'coverImage': media['coverImage']['large'] if media['coverImage'] else None,
-                    'bannerImage': media['bannerImage']
-                }
-
-    def process_relations(relations):
-        for edge in relations['edges']:
-            if edge['relationType'] in ['SEQUEL', 'PREQUEL', 'ALTERNATIVE', 'SPIN_OFF', 'SIDE_STORY', 'PARENT', 'SUMMARY']:
-                node = edge['node']
-                add_content(node)
-                if 'relations' in node:
-                    process_relations(node['relations'])
-
     main_media = data['data']['Media']
-    add_content(main_media)
-    process_relations(main_media['relations'])
+    main_title = main_media['title']['english'] or main_media['title']['romaji']
 
-    return sorted(seasons.values(), key=lambda x: (x['startYear'], x['id']))
+    def similarity(a, b):
+        return SequenceMatcher(None, a, b).ratio()
+
+    def clean_title(title):
+        return re.sub(r'[^\w\s]', '', title.lower())
+
+    def is_related_content(title, main_title):
+        clean_main = clean_title(main_title)
+        clean_title_check = clean_title(title)
+        return (similarity(clean_main, clean_title_check) > 0.6 or
+                clean_main in clean_title_check or
+                'season' in clean_title_check)
+
+    def add_content(media, depth=0):
+        if media['id'] in seasons:
+            return
+
+        english_title = media['title']['english'] or ''
+        romaji_title = media['title']['romaji'] or ''
+        
+        if depth == 0 or is_related_content(english_title, main_title) or is_related_content(romaji_title, main_title):
+            seasons[media['id']] = {
+                'id': media['id'],
+                'title': media['title'],
+                'format': media['format'],
+                'episodes': media['episodes'],
+                'startYear': media['startDate']['year'] if media['startDate']['year'] else 9999,
+                'coverImage': media['coverImage']['large'] if media['coverImage'] else None,
+                'bannerImage': media['bannerImage']
+            }
+
+            if 'relations' in media:
+                process_relations(media['relations'], depth + 1)
+
+    def process_relations(relations, depth):
+        for edge in relations['edges']:
+            if edge['relationType'] in ['SEQUEL', 'PREQUEL', 'ALTERNATIVE', 'PARENT', 'SIDE_STORY']:
+                add_content(edge['node'], depth)
+
+    # Start with the main media
+    add_content(main_media)
+
+    # Sort the seasons
+    sorted_seasons = sorted(seasons.values(), key=lambda x: (x['startYear'], x['id']))
+
+    return sorted_seasons
 
 def get_anime_seasons(anime_id):
     cache_key = f"anime_{anime_id}_seasons"
@@ -298,165 +318,6 @@ def get_anime_seasons(anime_id):
         seasons = json.loads(fetched_data)
 
     return seasons
-
-
-
-
-
-    # if not anime_data:
-    #     subDubCount = {
-    #         "sub": 0,
-    #         "dub": 0
-    #     }
-        
-    #     base_url = f"{os.getenv('CONSUMET_URL')}/meta/zoro/anime/info/{anime_id}?provider={provider}?dub=false"
-
-    #     print(f"Trying URL: {base_url}")
-    #     response = requests.get(base_url, timeout=10)
-    #     data = response.json()
-
-    #     store_in_redis_cache(f"{cache_key}_sub", json.dumps(data), 3600 * 24 * 30)
-    #     subDubCount["sub"] = len(data["episodes"])
-
-    #     base_url = f"{os.getenv('CONSUMET_URL')}/meta/zoro/anime/info/{anime_id}?provider={provider}?dub=true"
-
-    #     print(f"Trying URL: {base_url}")
-    #     response = requests.get(base_url, timeout=10)
-    #     data = response.json()
-
-    #     store_in_redis_cache(f"{cache_key}_dub", json.dumps(data), 3600 * 24 * 30)
-    #     subDubCount["dub"] = len(data["episodes"])
-
-    #     anime_data = {
-    #         "subDubCount": subDubCount
-    #     }
-
-        
-
-
-
-
-# @lru_cache(maxsize=100)
-# def get_anime_data(anime_id, provider="zoro", gogodub=False):
-#     cache_key = f"anime_{anime_id}_anime_data_{provider}"
-#     anime_data = get_from_redis_cache(cache_key)
-#     original_provider = provider
-
-#     if provider == "gogo":
-#         provider = "gogoanime"
-    
-#     print(f"Fetching anime data: ID={anime_id}, provider={provider}, initial gogodub={gogodub}")
-    
-#     if not anime_data:
-#         base_url = f"{os.getenv('CONSUMET_URL')}/meta/anilist/info/{anime_id}?provider={provider}"
-        
-#         def fetch_data(dub):
-#             url = base_url + ("&dub=true" if dub else "")
-#             print(f"Trying URL: {url}")
-#             response = requests.get(url, timeout=10)
-#             data = response.json()
-#             return data if "message" not in data and response.status_code == 200 else None
-
-#         # Try to fetch the requested version (dub or sub)
-#         anime_data = fetch_data(gogodub)
-        
-#         # If dub was requested but not found, try sub
-#         if gogodub and not anime_data:
-#             print(f"No dub episodes found for ID {anime_id}, trying sub")
-#             anime_data = fetch_data(False)
-#             if anime_data:
-#                 gogodub = False  # We found sub episodes, so set gogodub to False
-
-#         # If we still don't have data, try switching providers
-#         if not anime_data:
-#             if original_provider != "gogo":
-#                 print(f"No episodes found for ID {anime_id} with {provider}, switching to gogo")
-#                 return get_anime_data(anime_id, "gogo", gogodub)
-#             else:
-#                 print(f"No episodes found for ID {anime_id} with any provider or mode")
-#                 return anime_data, provider, gogodub
-
-#         # We have valid data at this point
-#         episode_count = len(anime_data["episodes"])
-#         print(f"Found {episode_count} episodes for ID {anime_id}, gogodub={gogodub}")
-
-#         # Cache the data
-#         cache_key = f"anime_{anime_id}_anime_data_{provider}_{'dub' if gogodub else 'sub'}"
-#         if anime_data["status"] == "Completed":
-#             store_in_redis_cache(cache_key, json.dumps(anime_data), 3600 * 24 * 30)
-#         else:
-#             store_in_redis_cache(cache_key, json.dumps(anime_data), 3600 * 12)
-        
-#         print(f"Anime data found: ID={anime_id}, provider={provider}, final gogodub={gogodub}, episodes={episode_count}")
-#     else:
-#         anime_data = json.loads(anime_data)
-#         episode_count = len(anime_data.get("episodes", []))
-#         print(f"Loaded cached anime data: ID={anime_id}, provider={provider}, gogodub={gogodub}, episodes={episode_count}")
-
-#     if provider == "gogoanime":
-#         provider = "gogo"
-
-#     print(f"Returning: provider={provider}, gogodub={gogodub}")
-#     return anime_data, provider, gogodub
-
-
-# @lru_cache(maxsize=100)
-# def get_anime_episodes(anime_id): #only returns episodes from zoro
-#     cache_key = f"anime_{anime_id}_anime_episodes_zoro"
-#     anime_episodes = get_from_redis_cache(cache_key)
-    
-#     if not anime_episodes:
-#         anime_data, provider, gd = get_anime_data(anime_id, "zoro")
-#         if not anime_data or not anime_data.get("episodes"):
-#             return []
-
-#         z_anime_id = anime_data["episodes"][0]["id"].split("$")[0]
-
-#         print(f"Fetching episodes for ID {anime_id} with Zoro ID {z_anime_id}")
-
-#         base_url = f"{os.getenv('CONSUMET_URL')}/meta/zoro/anime/episodes/{z_anime_id}"
-#         try:
-#             response = requests.get(base_url, timeout=10)
-#             anime_episodes = response.json()
-#             store_in_redis_cache(cache_key, json.dumps(anime_episodes), 86400)  # Cache for 24 hours
-#         except requests.RequestException as e:
-#             print(f"Error fetching anime episodes for ID {anime_id}: {e}")
-#             return []
-#     else:
-#         anime_episodes = json.loads(anime_episodes)
-
-#     return anime_episodes
-
-# @lru_cache(maxsize=100)
-# def get_anime_episodes_gogo(anime_id, mode="sub"):
-#     cache_key = f"anime_{anime_id}_anime_episodes_gogo_{mode}"
-#     anime_episodes = get_from_redis_cache(cache_key)
-    
-#     if not anime_episodes:
-#         gogodub = True if mode == "dub" else False
-#         print(f"Fetching episodes for ID {anime_id} with mode {mode} and dub=>{gogodub}")
-#         anime_data, provider, gd = get_anime_data(anime_id, "gogo", gogodub)
-#         if anime_data and "episodes" in anime_data:
-#             anime_episodes = anime_data["episodes"]
-#             store_in_redis_cache(cache_key, json.dumps(anime_episodes), 86400)
-#         else:
-#             anime_episodes = []
-#     else:
-#         anime_episodes = json.loads(anime_episodes)
-
-#     # Convert everything to 1-based index
-#     for i, episode in enumerate(anime_episodes, start=1):
-#         episode["number"] = i
-
-#     anime_episode_data = {
-#         "episodes": anime_episodes,
-#         "totalEpisodes": len(anime_episodes)
-#     }
-
-#     print(f"Returning {len(anime_episodes)} episodes for ID {anime_id} with mode {mode}")
-
-#     return anime_episode_data, mode
-
 
 def attach_episode_metadata(anime_data, anime_episodes):
     anime_episodes_metadata = get_all_episode_metadata(anime_data)
