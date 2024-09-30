@@ -478,16 +478,24 @@
             <div class="flex flex-row gap-2 mt-4 overflow-x-auto no-scrollbar  swiper seasonSwiper">
                 <div class="swiper-wrapper">
                     {% for season in seasons %}
-                    <a href="{% url "watch:watch_via_zid" season.id %}" class="group rounded-lg aspect-video h-48 relative flex-shrink-0 overflow-hidden swiper-slide
-                                    {% if season.isCurrent %}border-4 border-{{ user.preferences.accent_colour }}-600{% endif %}">
-                        <div class="absolute inset-0 bg-center bg-cover transition-transform group-hover:scale-110" style="background-image: url('{{ season.poster }}')"></div>
+                    <a href="{% url "watch:watch" season.id %}" class="group rounded-lg aspect-video h-48 relative flex-shrink-0 overflow-hidden swiper-slide
+                                    {% if season.title.romaji == anime.title.romaji %}border-4 border-{{ user.preferences.accent_colour }}-600{% endif %}">
+                        <div class="absolute inset-0 bg-center bg-cover transition-transform group-hover:scale-110" style="background-image: url('{% if season.bannerImage %}{{ season.bannerImage }}{% else %}{{ season.coverImage }}{% endif %}')"></div>
                         <div class="absolute inset-0 bg-{{ user.preferences.accent_colour }}-600 opacity-0 group-hover:opacity-30 transition-opacity"></div>
                         <div class="absolute inset-0" style="background: linear-gradient(45deg, rgb(8, 8, 8) 15%, transparent 60%), linear-gradient(0deg, rgb(8, 8, 8) 0%, transparent 60%);"></div>
                         <div class="flex flex-col justify-end h-full p-2 relative z-10">
                             <h1 class="text-xl font-bold truncate max-w-full overflow-hidden text-ellipsis whitespace-nowrap">
-                                {{ season.name }}
+                                {{ season.format }} {% if season.startYear != 9999 %}({{ season.startYear }}){% endif %}
                             </h1>
-                            <h2 class="font-bold truncate max-w-full overflow-hidden text-ellipsis whitespace-nowrap">{{ season.title }}</h2>
+                            <h2 class="font-bold truncate max-w-full overflow-hidden text-ellipsis whitespace-nowrap">
+                                {% if user.preferences.title_language == "english" and season.title.english %}
+                                {{ season.title.english }}
+                                {% elif user.preferences.title_language == "native" and season.title.native %}
+                                {{ season.title.native }}
+                                {% else %}
+                                {{ season.title.romaji }}
+                                {% endif %}
+                            </h2>
                         </div>
                     </a>
                     {% endfor %}
@@ -980,14 +988,19 @@
             kind: "chapters",
             default: true,
         });
-    
+
         for (const chapter of chapters) {
             if (chapter.startTime === chapter.endTime || chapter.endTime === 0) {
                 continue;
             }
+            
             chaptersTrack.addCue(new VTTCue(chapter.startTime, chapter.endTime, chapter.title));
         }
         
+        if (introStart === 0 && introEnd === 0 && outroStart === 0 && outroEnd === 0) {
+            chaptersTrack.addCue(new VTTCue(0, duration, decodeHTMLEntities('{% if user.preferences.title_language == "english" and anime.title.english %}{{ anime.title.english }}{% elif user.preferences.title_language == "native" and anime.title.native %}{{ anime.title.native }}{% else %}{{ anime.title.romaji }}{% endif %} — {{ current_episode.title }}')));    
+        }
+
         player.textTracks.add(chaptersTrack);
         chaptersLoaded = true;
 
@@ -1128,7 +1141,6 @@
     });
     {% endif %}
 
-    {% if not viaMal and provider == "zoro" %}
     let lastTime = 0;
     setInterval(() => {
         const {
@@ -1158,7 +1170,6 @@
 
         lastTime = currentTime;
     }, 30000);
-    {% endif %}
 {% endif %}
 </script>
 <script>

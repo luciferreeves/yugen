@@ -27,13 +27,11 @@ class UserPreferences(models.Model):
 
 class UserHistory(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    # anime = models.ForeignKey(Anime, on_delete=models.CASCADE)
-    # episode = models.ForeignKey(AnimeEpisode, on_delete=models.CASCADE)
     anime = models.IntegerField()
-    anime_title_english = models.CharField(max_length=256)
-    anime_title_romaji = models.CharField(max_length=256)
-    anime_title_native = models.CharField(max_length=256)
-    anime_cover_image = models.CharField(max_length=256)
+    anime_title_english = models.CharField(max_length=256, blank=True, null=True)
+    anime_title_romaji = models.CharField(max_length=256, blank=True, null=True)
+    anime_title_native = models.CharField(max_length=256, blank=True, null=True)
+    anime_cover_image = models.CharField(max_length=256, blank=True, null=True)
     episode = models.IntegerField()
     episode_title = models.CharField(max_length=256)
     time_watched = models.IntegerField(default=0)

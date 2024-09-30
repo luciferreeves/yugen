@@ -164,8 +164,126 @@ def convert_gogo_stream_data(input_data):
     
     return new_data
 
+def fetch_anime_seasons(anime_id):
+    url = 'https://graphql.anilist.co'
+    query = '''
+    query ($id: Int) {
+        Media(id: $id, type: ANIME) {
+            id
+            title {
+                romaji
+                english
+                native
+                userPreferred
+            }
+            format
+            episodes
+            startDate {
+                year
+            }
+            coverImage {
+                large
+                medium
+            }
+            bannerImage
+            relations {
+                edges {
+                    relationType(version: 2)
+                    node {
+                        ... on Media {
+                            id
+                            title {
+                                romaji
+                                english
+                                native
+                                userPreferred
+                            }
+                            format
+                            episodes
+                            startDate {
+                                year
+                            }
+                            coverImage {
+                                large
+                                medium
+                            }
+                            bannerImage
+                            relations {
+                                edges {
+                                    relationType(version: 2)
+                                    node {
+                                        ... on Media {
+                                            id
+                                            title {
+                                                romaji
+                                                english
+                                                native
+                                                userPreferred
+                                            }
+                                            format
+                                            episodes
+                                            startDate {
+                                                year
+                                            }
+                                            coverImage {
+                                                large
+                                                medium
+                            }
+                                            bannerImage
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    '''
+    variables = {'id': anime_id}
+    response = requests.post(url, json={'query': query, 'variables': variables})
+    return response.json()
 
+def extract_seasons(data):
+    seasons = {}
 
+    def add_season(media):
+        if media['format'] in ['TV', 'SPECIAL', 'MOVIE', 'OVA', 'ONA']:
+            seasons[media['id']] = {
+                'id': media['id'],
+                'title': media['title'],
+                'format': media['format'],
+                'episodes': media['episodes'],
+                'startYear': media['startDate']['year'] if media['startDate']['year'] else 9999,  # Use 9999 for unknown years
+                'coverImage': media['coverImage']['large'] if media['coverImage'] else None,
+                'bannerImage': media['bannerImage']
+            }
+
+    def process_relations(relations):
+        for edge in relations['edges']:
+            node = edge['node']
+            add_season(node)
+            if 'relations' in node:
+                process_relations(node['relations'])
+
+    main_media = data['data']['Media']
+    add_season(main_media)
+    process_relations(main_media['relations'])
+
+    return sorted(seasons.values(), key=lambda x: (x['startYear'], x['id']))
+
+def get_anime_seasons(anime_id):
+    cache_key = f"anime_{anime_id}_seasons"
+    fetched_data = get_from_redis_cache(cache_key)
+    if not fetched_data:
+        fetched_data = fetch_anime_seasons(anime_id)
+        seasons = extract_seasons(fetched_data)
+        store_in_redis_cache(cache_key, json.dumps(seasons), 3600 * 12)
+    else:
+        seasons = json.loads(fetched_data)
+
+    return seasons
 
 
 
@@ -426,14 +544,24 @@ def update_anime_user_history(user, anime, episode, time_watched, additional_dat
     if additional_data:
         if "anime_title_english" in additional_data:
             history.anime_title_english = additional_data["anime_title_english"]
+        else:
+            history.anime_title_english = ""
         if "anime_title_romaji" in additional_data:
             history.anime_title_romaji = additional_data["anime_title_romaji"]
+        else:
+            history.anime_title_romaji = ""
         if "anime_title_native" in additional_data:
             history.anime_title_native = additional_data["anime_title_native"]
+        else:
+            history.anime_title_native = ""
         if "anime_cover_image" in additional_data:
             history.anime_cover_image = additional_data["anime_cover_image"]
+        else:
+            history.anime_cover_image = ""
         if "episode_title" in additional_data:
             history.episode_title = additional_data["episode_title"]
+        else:
+            history.episode_title = ""
 
     history.save()
 

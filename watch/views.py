@@ -4,7 +4,7 @@ import dotenv
 from django.shortcuts import render, redirect
 from authentication.utils import get_single_anime_mal
 from user_profile.models import UserHistory
-from watch.utils import attach_episode_metadata, get_anime_data, get_anime_user_history, get_gogo_episode_streaming_data, get_zoro_episode_streaming_data, update_anime_user_history
+from watch.utils import attach_episode_metadata, get_anime_seasons, get_anime_data, get_anime_user_history, get_gogo_episode_streaming_data, get_zoro_episode_streaming_data, update_anime_user_history
 import json
 
 dotenv.load_dotenv()
@@ -78,6 +78,8 @@ def watch(request, anime_id, episode=None):
         streaming_data = None
         stream_url = ""
 
+    seasons = get_anime_seasons(anime_id)
+
     context = {
         "anime": anime_data,
         "animeID": anime_id,
@@ -93,6 +95,7 @@ def watch(request, anime_id, episode=None):
         "watched_episodes": [h.episode for h in history],
         "current_watched_time": current_watched_time,
         "provider": provider,
+        "seasons": seasons,
         "should_preload": episode < len(episodes),
     }
 
