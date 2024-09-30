@@ -7,8 +7,12 @@ def index(request):
 
 def detail(request, anime_id):
     anime_data = get_anime_data(anime_id)
-    anime_episodes = anime_data["episodes"]
-    anime_episodes = attach_episode_metadata(anime_data, anime_episodes)
+
+    if "status" in anime_data and anime_data["status"] != "Not yet aired":
+        anime_episodes = anime_data["episodes"]
+        anime_episodes = attach_episode_metadata(anime_data, anime_episodes)
+    else:
+        anime_episodes = []
 
     if request.user.mal_access_token and "malId" in anime_data:
         mal_data = get_single_anime_mal(request.user.mal_access_token, anime_data["malId"])
