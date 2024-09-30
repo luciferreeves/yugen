@@ -52,7 +52,7 @@ def get_anime_data(anime_id, provider="gogo", dub=False):
         response = requests.get(base_url, timeout=10)
         sub_data = response.json()
 
-        if sub_data["status"] == "Completed":
+        if "status" in sub_data and sub_data["status"] == "Completed":
             store_in_redis_cache(sub_cache_key, json.dumps(sub_data), 3600 * 24 * 30)
         else:
             store_in_redis_cache(sub_cache_key, json.dumps(sub_data), 3600 * 12)
@@ -62,7 +62,7 @@ def get_anime_data(anime_id, provider="gogo", dub=False):
         print(f"Trying URL: {base_url}")
         response = requests.get(base_url, timeout=10)
         dub_data = response.json()
-        if dub_data["status"] == "Completed":
+        if "status" in dub_data and dub_data["status"] == "Completed":
             store_in_redis_cache(dub_cache_key, json.dumps(dub_data), 3600 * 24 * 30)
         else:
             store_in_redis_cache(dub_cache_key, json.dumps(dub_data), 3600 * 12)
