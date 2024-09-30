@@ -83,6 +83,9 @@ def get_anime_data(anime_id, provider="gogo", dub=False):
         anime_data = json.loads(anime_data)
         anime_data["subDubCount"] = json.loads(get_from_redis_cache(sub_dub_cache_key))
 
+    for i, episode in enumerate(anime_data["episodes"], start=1):
+        episode["number"] = i
+
     return anime_data
 
 
@@ -247,28 +250,39 @@ def fetch_anime_seasons(anime_id):
 
 def extract_seasons(data):
     seasons = {}
+    main_title = data['data']['Media']['title']['english'] or data['data']['Media']['title']['romaji']
+    main_title_words = set(main_title.lower().split())
 
-    def add_season(media):
+    def is_related_content(title):
+        title_words = set(title.lower().split())
+        return len(main_title_words.intersection(title_words)) >= 2 or 'season' in title.lower()
+
+    def add_content(media):
         if media['format'] in ['TV', 'SPECIAL', 'MOVIE', 'OVA', 'ONA']:
-            seasons[media['id']] = {
-                'id': media['id'],
-                'title': media['title'],
-                'format': media['format'],
-                'episodes': media['episodes'],
-                'startYear': media['startDate']['year'] if media['startDate']['year'] else 9999,  # Use 9999 for unknown years
-                'coverImage': media['coverImage']['large'] if media['coverImage'] else None,
-                'bannerImage': media['bannerImage']
-            }
+            english_title = media['title']['english'] or ''
+            romaji_title = media['title']['romaji'] or ''
+            
+            if is_related_content(english_title) or is_related_content(romaji_title):
+                seasons[media['id']] = {
+                    'id': media['id'],
+                    'title': media['title'],
+                    'format': media['format'],
+                    'episodes': media['episodes'],
+                    'startYear': media['startDate']['year'] if media['startDate']['year'] else 9999,
+                    'coverImage': media['coverImage']['large'] if media['coverImage'] else None,
+                    'bannerImage': media['bannerImage']
+                }
 
     def process_relations(relations):
         for edge in relations['edges']:
-            node = edge['node']
-            add_season(node)
-            if 'relations' in node:
-                process_relations(node['relations'])
+            if edge['relationType'] in ['SEQUEL', 'PREQUEL', 'ALTERNATIVE', 'SPIN_OFF', 'SIDE_STORY', 'PARENT', 'SUMMARY']:
+                node = edge['node']
+                add_content(node)
+                if 'relations' in node:
+                    process_relations(node['relations'])
 
     main_media = data['data']['Media']
-    add_season(main_media)
+    add_content(main_media)
     process_relations(main_media['relations'])
 
     return sorted(seasons.values(), key=lambda x: (x['startYear'], x['id']))

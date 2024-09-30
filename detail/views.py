@@ -6,7 +6,7 @@ def index(request):
     return redirect("home:index")
 
 def detail(request, anime_id):
-    anime_data = get_anime_data(anime_id)
+    anime_data = get_anime_data(anime_id, provider="zoro")
 
     if "status" in anime_data and anime_data["status"] != "Not yet aired":
         anime_episodes = anime_data["episodes"]
