@@ -296,7 +296,7 @@ def extract_seasons(data):
 
     def process_relations(relations, depth):
         for edge in relations['edges']:
-            if edge['relationType'] in ['SEQUEL', 'PREQUEL', 'ALTERNATIVE', 'PARENT', 'SIDE_STORY']:
+            if edge['relationType'] in ['SEQUEL', 'PREQUEL', 'ALTERNATIVE', 'PARENT', 'SIDE_STORY'] and edge['node']['format'] in ['TV', 'TV_SHORT', 'MOVIE', 'SPECIAL', 'OVA']:
                 add_content(edge['node'], depth)
 
     # Start with the main media
