@@ -86,18 +86,43 @@ def get_anime_data(anime_id, provider="gogo", dub=False):
     return anime_data
 
 
+def find_zoro_server (episode_id, mode):
+    base_url = f"{os.getenv('ZORO_URL')}/anime/servers?episodeId={episode_id}"
+    print(base_url)
+    response = requests.get(base_url)
+    response = response.json()
+
+    if "message" in response:
+        return None, mode
+
+    if mode == "dub" and "dub" in response and len(response["dub"]) > 0:
+        server_id = response["dub"][0]["serverName"]
+        mode = "dub"
+    elif len(response["sub"]) > 0 and "sub" in response:
+        server_id = response["sub"][0]["serverName"]
+        mode = "sub"
+    elif len(response["raw"]) > 0:
+        server_id = response["raw"][0]["serverName"]
+        mode = "raw"
+
+    return server_id, mode
+
+
 @lru_cache(maxsize=100)
 def get_zoro_episode_streaming_data(episode_url, dub=False):
     episode_url = episode_url.split("watch/")[1]
     cache_key = f"zoro_episode_streaming_data_{episode_url}_{'dub' if dub else 'sub'}"
     episode_data = get_from_redis_cache(cache_key)
     category = "dub" if dub else "sub"
+    server, category = find_zoro_server(episode_url, category)
     if not episode_data:
-        base_url = f"{os.getenv('ZORO_URL')}/anime/episode-srcs?id={episode_url}&category={category}"
+        base_url = f"{os.getenv('ZORO_URL')}/anime/episode-srcs?id={episode_url}&category={category}&server={server}"
         print(f"Trying URL: {base_url}")
         response = requests.get(base_url, timeout=10)
         episode_data = response.json()
-        store_in_redis_cache(cache_key, json.dumps(episode_data), 3600 * 12)
+
+        if "message" not in episode_data:
+            store_in_redis_cache(cache_key, json.dumps(episode_data), 3600 * 12)
     else:
         episode_data = json.loads(episode_data)
 

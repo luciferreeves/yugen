@@ -50,7 +50,7 @@ def watch(request, anime_id, episode=None):
 
     episodes = attach_episode_metadata(anime_data, episodes)
     episode_data = next((ep for ep in episodes if ep['number'] == int(episode)), None)
-    if not preload_request:
+    if not preload_request and episode_data:
         additional_data = {
             "anime_title_english": anime_data["title"]["english"] if "title" in anime_data and "english" in anime_data["title"] else "",
             "anime_title_romaji": anime_data["title"]["romaji"] if "title" in anime_data and "romaji" in anime_data["title"] else "",
@@ -61,19 +61,27 @@ def watch(request, anime_id, episode=None):
 
         update_anime_user_history(request.user, anime_id, episode, current_watched_time, additional_data)
 
-    if provider == "zoro":
-        streaming_data = get_zoro_episode_streaming_data(episode_data["url"], mode)
+    if episode_data:
+        if provider == "zoro":
+            streaming_data = get_zoro_episode_streaming_data(episode_data["url"], mode)
+        else:
+            streaming_data = get_gogo_episode_streaming_data(episode_data["id"])
+
+        if preload_request:
+            return JsonResponse({"status": f"Preloaded episode {episode}"})
+
+        stream_url = streaming_data["sources"][0]["url"] if streaming_data and "sources" in streaming_data else None
     else:
-        streaming_data = get_gogo_episode_streaming_data(episode_data["id"])
+        episode_data = {
+            "number": 0,
+        }
+        streaming_data = None
+        stream_url = ""
 
-    if preload_request:
-        return JsonResponse({"status": f"Preloaded episode {episode}"})
-
-    stream_url = streaming_data["sources"][0]["url"] if streaming_data and "sources" in streaming_data else None
     context = {
         "anime": anime_data,
         "animeID": anime_id,
-        "current_episode_number": episode,
+        "current_episode_number": episode if episode_data else 0,
         "current_episode": episode_data,
         "all_episodes": episodes,
         "characters": anime_data.get("characters", []),
