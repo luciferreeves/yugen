@@ -23,7 +23,7 @@
 <div style="background-image: url('{{ anime.cover }}')" class="relative bg-center bg-cover h-32 lg:h-96 my-4 rounded-lg" >
     <div class="absolute inset-0" style="background: linear-gradient(45deg, rgb(8, 8, 8) 15%, transparent 60%), linear-gradient(0deg, rgb(8, 8, 8) 0%, transparent 60%);"></div>
     <div class="w-4/12 lg:w-2/12 absolute px-2 lg:px-8 top-16 lg:top-48">
-        <img src="{{ anime.image }}" alt="{{ anime.title.english }}" class="rounded-lg" class="w-full h-full rounded-lg object-cover"/>
+        <img loading="lazy" src="{{ anime.image }}" alt="{{ anime.title.english }}" class="rounded-lg" class="w-full h-full rounded-lg object-cover"/>
         <a href="{% if anime.id %}{% url "watch:watch" anime.id %}?forward=detail{% endif %}" class="bg-{{ user.preferences.accent_colour }}-600 hover:bg-{{ user.preferences.accent_colour }}-700 text-white text-xs sm:text-sm font-bold py-1 px-2 sm:py-2 sm:px-4 rounded-lg my-2 flex flex-row items-center justify-center gap-1">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-4">
                 <path fill-rule="evenodd" d="M4.5 5.653c0-1.427 1.529-2.33 2.779-1.643l11.54 6.347c1.295.712 1.295 2.573 0 3.286L7.28 19.99c-1.25.687-2.779-.217-2.779-1.643V5.653Z" clip-rule="evenodd" />
@@ -330,7 +330,7 @@
                     {% for character in anime.characters %}
                     <div class="w-full lg:w-1/2 px-4 py-2 flex justify-between">
                         <div class="flex flex-row gap-2 items-center">
-                            <img src="{{ character.image }}" alt="{{ character.name }}" class="rounded-full w-16 h-16 object-cover"/>
+                            <img loading="lazy"loading="lazy"src="{{ character.image }}" alt="{{ character.name }}" class="rounded-full w-16 h-16 object-cover"/>
                             <div class="flex flex-col gap-2">
                                 <span class="font-bold">
                                     {% if user.preferences.character_name_language == "romaji" %}
@@ -355,7 +355,7 @@
                                     </span>
                                     <span class="capitalize">{{ voice_actor.language }}</span>
                                 </div>
-                                <img src="{{ voice_actor.image }}" alt="{{ voice_actor.name }}" class="rounded-full w-16 h-16 object-cover"/>
+                                <img loading="lazy" src="{{ voice_actor.image }}" alt="{{ voice_actor.name }}" class="rounded-full w-16 h-16 object-cover"/>
                             </div>
                             {% endfor %}
                         </div>
@@ -368,7 +368,7 @@
                 <a href="{% url "watch:watch_episode" anime.id episode.number %}" class="w-full lg:w-1/2 px-2 mb-2 episode-item">
                     <div class="flex flex-col lg:flex-row w-full bg-neutral-950 rounded hover:bg-{{ user.preferences.accent_colour }}-600 hover:bg-opacity-30 p-2 gap-4">
                         <div class="w-full lg:w-auto lg:flex-shrink-0">
-                            <img src="{% if episode.metadata.image %}{{ episode.metadata.image }}{% else %}{{ anime.cover}}{% endif %}" alt="{{ episode.title }}" class="w-full lg:w-48 lg:h-28 object-cover rounded-lg"/>
+                            <img loading="lazy" src="{% if episode.metadata.image %}{{ episode.metadata.image }}{% else %}{{ anime.cover}}{% endif %}" alt="{{ episode.title }}" class="w-full lg:w-48 lg:h-28 object-cover rounded-lg"/>
                         </div>
                         <div class="flex flex-col gap-2">
                             <h2 class="font-bold">{{episode.number}}. {% if episode.metadata.title %}{{ episode.metadata.title }}{% else %}{{ episode.title }}{% endif %}</h2>
@@ -462,7 +462,7 @@
                 {% for related in related|slice:":5" %}
                 {% if related.type == "MANGA" or related.type == "NOVEL" %}
                 <div onClick="showToast('{% if related.type == "MANGA" %}Manga{% else %}Novel{% endif %} reading is not supported yet!', false)" class="cursor-pointer flex flex-row w-full gap-4 bg-white bg-opacity-10 p-2 rounded hover:bg-{{ user.preferences.accent_colour }}-600 hover:bg-opacity-30">        
-                    <img src="{{ related.image }}" alt="{{ related.title.english }}" class="rounded-lg w-12 h-16 object-cover"/>
+                    <img loading="lazy" src="{{ related.image }}" alt="{{ related.title.english }}" class="rounded-lg w-12 h-16 object-cover"/>
                     <div class="flex flex-col gap-2">
                         <span class="font-bold flex gap-2 flex-row items-center">
                             {% if related.status == "Ongoing" %}
@@ -523,7 +523,7 @@
                 {% endif %}
                 {% if related.type == "TV" or related.type == "MOVIE" or related.type == "OVA" or related.type == "ONA" or related.type == "SPECIAL" or related.type == "TV_SHORT" %}
                 <a href="{% if not viaMal %}{% url 'watch:watch' related.id %}{% else %}{% url "watch:watch_via_zid" related.zid %}{% endif %}" class="flex flex-row w-full gap-4 bg-white bg-opacity-10 p-2 rounded hover:bg-{{ user.preferences.accent_colour }}-600 hover:bg-opacity-30">        
-                    <img src="{{ related.image }}" alt="{{ related.title.english }}" class="rounded-lg w-12 h-16 object-cover"/>
+                    <img loading="lazy" src="{{ related.image }}" alt="{{ related.title.english }}" class="rounded-lg w-12 h-16 object-cover"/>
                     <div class="flex flex-col gap-2">
                         <span class="font-bold flex gap-2 flex-row items-center">
                             {% if related.status == "Ongoing" %}
@@ -604,7 +604,7 @@
                 {% for recommendation in recommendations|slice:":10" %}
                 {% if recommendation.id or recommendation.zid %}
                 <a href="{% if not viaMal %}{% url 'watch:watch' recommendation.id %}{% else %}{% url "watch:watch_via_zid" recommendation.zid %}{% endif %}" class="flex flex-row w-full gap-4 bg-white bg-opacity-10 p-2 rounded hover:bg-{{ user.preferences.accent_colour }}-600 hover:bg-opacity-30">        
-                    <img src="{{ recommendation.image }}" alt="{{ recommendation.title.english }}" class="rounded-lg w-12 h-16 object-cover"/>
+                    <img loading="lazy" src="{{ recommendation.image }}" alt="{{ recommendation.title.english }}" class="rounded-lg w-12 h-16 object-cover"/>
                     <div class="flex flex-col gap-2 max-w-[calc(100%-4rem)]">
                         <span class="font-bold flex gap-2 flex-row items-center">
                             {% if recommendation.status == "Ongoing" %}

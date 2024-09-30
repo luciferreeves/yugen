@@ -85,7 +85,7 @@
                     </span>
                 </div>
             </div>
-            <img src="{{ anime.media.coverImage.medium }}" alt="{{ anime.media.title.romaji }}" class="rounded w-16 h-24" />
+            <img loading="lazy" src="{{ anime.media.coverImage.medium }}" alt="{{ anime.media.title.romaji }}" class="rounded w-16 h-24" />
         </div>
     </a>
     {% endfor %}
@@ -126,7 +126,7 @@
                     </span>
                 </div>
             </div>
-            <img src="{{ next_airing.media.coverImage.medium }}" alt="{{ next_airing.media.title.romaji }}" class="rounded w-16 h-24" />
+            <img loading="lazy" src="{{ next_airing.media.coverImage.medium }}" alt="{{ next_airing.media.title.romaji }}" class="rounded w-16 h-24" />
         </div>
     </a>
     {% endif %}
@@ -147,7 +147,7 @@
     <div class="flex flex-col lg:flex-row gap-2">
         {% for anime in items %}
         <a href="{% url "watch:watch_episode" anime.mediaId anime.episode %}" class="flex flex-none bg-neutral-950 rounded p-2 gap-4 items-center max-w-96 w-full {% if anime.timeUntilAiring < 0 %}border-2 border-{{ user.preferences.accent_colour }}-600{% endif %}">
-            <img src="{{ anime.media.coverImage.medium }}" alt="{{ anime.media.title.romaji }}" class="rounded w-16 h-24" />
+            <img loading="lazy" src="{{ anime.media.coverImage.medium }}" alt="{{ anime.media.title.romaji }}" class="rounded w-16 h-24" />
             <div class="flex flex-col gap-1 max-w-[calc(100%-8rem)]">
                 <span class="truncate max-w-full overflow-hidden text-ellipsis whitespace-nowrap font-bold text-xl text-white">
                     {% if user.preferences.title_language == "english" and anime.media.title.english %}

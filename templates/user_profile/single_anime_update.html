@@ -3,7 +3,7 @@
 {% endblock css %}
 <section class="flex flex-col lg:flex-row mt-8 gap-4">
     <section class="lg:w-1/4">
-        <img class="w-full h-auto object-cover object-center rounded-lg" src="{{ mal_data.main_picture.large }}" alt="{{ mal_data.title }}">
+        <img loading="lazy" class="w-full h-auto object-cover object-center rounded-lg" src="{{ mal_data.main_picture.large }}" alt="{{ mal_data.title }}">
         <h1 class="font-bold mt-4 border-b border-white border-opacity-10">Alternative Titles</h1>
         <ul class="list-inside text-sm">
             <li class="mt-2 ml-2"><span class="font-bold">Synonyms: </span>{{ mal_data.alternative_titles.synonyms|join:", " }}</li>
@@ -246,7 +246,7 @@
             {% for related_anime in mal_data.related_anime %}
             <div class="w-full md:w-1/3 px-4 mb-4">
                 <div class="flex gap-4 items-start">
-                    <img class="w-24 object-cover object-center rounded-lg" src="{{ related_anime.node.main_picture.medium }}" alt="{{ related_anime.node.title }}">
+                    <img loading="lazy" loading="lazy"class="w-24 object-cover object-center rounded-lg" src="{{ related_anime.node.main_picture.medium }}" alt="{{ related_anime.node.title }}">
                     <div class="flex flex-col w-full">
                         <h3 class="font-bold uppercase">{{ related_anime.relation_type_formatted }}</h3>
                         <a class="hover:text-purple-600 break-words" href="{% url 'user_profile:user_profile' %}?category=update&mal_id={{ related_anime.node.id }}">{{ related_anime.node.title }}</a>

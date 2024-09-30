@@ -4,7 +4,7 @@
 <div class="w-full lg:w-1/2 px-2 mb-2 anime-item">
     <div class="flex flex-row w-full bg-neutral-950 rounded hover:bg-{{ user.preferences.accent_colour }}-600 hover:bg-opacity-30 p-2 gap-4">
         <div class="flex flex-col gap-2 min-w-32">
-            <a href="{% url 'watch:watch' anime.id %}"><img src="{{ anime.image }}" alt="{{ anime.title.english }}" class="rounded-lg w-32 h-48 object-cover"/></a>
+            <a href="{% url 'watch:watch' anime.id %}"><img loading="lazy" src="{{ anime.image }}" alt="{{ anime.title.english }}" class="rounded-lg w-32 h-48 object-cover"/></a>
             <div class="flex flex-row gap-2">
                 <a href="https://anilist.co/anime/{{ anime.id }}" target="_blank" class="text-xs font-bold bg-white bg-opacity-10 hover:bg-{{ user.preferences.accent_colour }}-600 hover:bg-opacity-30 rounded px-2 py-1">
                     <svg stroke="currentColor" fill="currentColor" stroke-width="0" role="img" viewBox="0 0 24 24" height="1.5rem" width="1.5rem" xmlns="http://www.w3.org/2000/svg"><path d="M24 17.53v2.421c0 .71-.391 1.101-1.1 1.101h-5l-.057-.165L11.84 3.736c.106-.502.46-.788 1.053-.788h2.422c.71 0 1.1.391 1.1 1.1v12.38H22.9c.71 0 1.1.392 1.1 1.101zM11.034 2.947l6.337 18.104h-4.918l-1.052-3.131H6.019l-1.077 3.131H0L6.361 2.948h4.673zm-.66 10.96-1.69-5.014-1.541 5.015h3.23z"></path></svg>
