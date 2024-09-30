@@ -89,6 +89,7 @@
         </div>
     </a>
     {% endfor %}
+    {% if next_airing %}
     <style>
         .anime-card-next-airing::after {
             background-image: url('{{ next_airing.media.bannerImage }}');
@@ -128,6 +129,7 @@
             <img src="{{ next_airing.media.coverImage.medium }}" alt="{{ next_airing.media.title.romaji }}" class="rounded w-16 h-24" />
         </div>
     </a>
+    {% endif %}
 </section>
 <section class="mt-8 mx-auto flex justify-center px-4">
     <section class="inline-flex w-full lg:max-w-fit sm:max-w-96 flex-row gap-4 rounded-full bg-white bg-opacity-10 overflow-x-auto">

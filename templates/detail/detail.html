@@ -356,7 +356,7 @@
                 </div>
             </section>
             <section id="episodes" class="w-full flex-wrap flex justify-start">
-                {% for episode in episodes.episodes %}
+                {% for episode in episodes %}
                 <a href="{% url "watch:watch_episode" anime.id episode.number %}" class="w-full lg:w-1/2 px-2 mb-2 episode-item">
                     <div class="flex flex-col lg:flex-row w-full bg-neutral-950 rounded hover:bg-{{ user.preferences.accent_colour }}-600 hover:bg-opacity-30 p-2 gap-4">
                         <div class="w-full lg:w-auto lg:flex-shrink-0">

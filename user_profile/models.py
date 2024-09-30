@@ -1,5 +1,4 @@
 from django.db import models
-from watch.models import Anime, AnimeEpisode
 from django.conf import settings
 
 # Create your models here.
@@ -28,30 +27,37 @@ class UserPreferences(models.Model):
 
 class UserHistory(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    anime = models.ForeignKey(Anime, on_delete=models.CASCADE)
-    episode = models.ForeignKey(AnimeEpisode, on_delete=models.CASCADE)
+    # anime = models.ForeignKey(Anime, on_delete=models.CASCADE)
+    # episode = models.ForeignKey(AnimeEpisode, on_delete=models.CASCADE)
+    anime = models.IntegerField()
+    anime_title_english = models.CharField(max_length=256)
+    anime_title_romaji = models.CharField(max_length=256)
+    anime_title_native = models.CharField(max_length=256)
+    anime_cover_image = models.CharField(max_length=256)
+    episode = models.IntegerField()
+    episode_title = models.CharField(max_length=256)
     time_watched = models.IntegerField(default=0)
     last_watched = models.BooleanField(default=False)
     last_updated = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return f"{self.user.username} - {self.anime.title.english} - {self.episode.episode_id}"
+        return f"{self.user.username} watched {self.anime} episode {self.episode}"
     
     class Meta:
         verbose_name_plural = "User Histories"
 
-# MAL Like Anime List for MAL Sync Compatibility
-class UserAnimeList(models.Model):
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    anime_id = models.IntegerField()
-    anime_mal_id = models.IntegerField()
-    status = models.CharField(max_length=16) # watching, completed, on-hold, dropped, plan-to-watch
-    score = models.IntegerField()
-    episodes_watched = models.IntegerField()
-    last_updated = models.DateTimeField(auto_now=True)
+# # MAL Like Anime List for MAL Sync Compatibility
+# class UserAnimeList(models.Model):
+#     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+#     anime_id = models.IntegerField()
+#     anime_mal_id = models.IntegerField()
+#     status = models.CharField(max_length=16) # watching, completed, on-hold, dropped, plan-to-watch
+#     score = models.IntegerField()
+#     episodes_watched = models.IntegerField()
+#     last_updated = models.DateTimeField(auto_now=True)
 
-    def __str__(self):
-        return f"{self.user.username} {self.status} {self.anime_id}"
+#     def __str__(self):
+#         return f"{self.user.username} {self.status} {self.anime_id}"
     
-    class Meta:
-        verbose_name_plural = "User Anime Lists"
+#     class Meta:
+#         verbose_name_plural = "User Anime Lists"

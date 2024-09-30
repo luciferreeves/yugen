@@ -24,167 +24,293 @@ def get_episode_metadata(anime_data, episode):
     current_episode_metadata = episode_metadata[episode - 1] if len(episode_metadata) >= episode else None
     return current_episode_metadata
 
-@lru_cache(maxsize=100)
-def get_anime_data(anime_id, provider="zoro", gogodub=False):
-    cache_key = f"anime_{anime_id}_anime_data_{provider}"
-    anime_data = get_from_redis_cache(cache_key)
-    original_provider = provider
 
+@lru_cache(maxsize=100)
+def get_anime_data(anime_id, provider="gogo", dub=False):
     if provider == "gogo":
         provider = "gogoanime"
-    
-    print(f"Fetching anime data: ID={anime_id}, provider={provider}, initial gogodub={gogodub}")
-    
+
+    print(f"Fetching anime data: ID={anime_id}, provider={provider}, initial dub={dub}")
+
+    sub_cache_key = f"anime_{anime_id}_anime_data_{provider}_sub"
+    dub_cache_key = f"anime_{anime_id}_anime_data_{provider}_dub"
+    sub_dub_cache_key = f"anime_{anime_id}_anime_data_{provider}_sub_dub_count"
+
+    if not dub:
+        anime_data = get_from_redis_cache(sub_cache_key)
+    else:
+        anime_data = get_from_redis_cache(dub_cache_key)
+
     if not anime_data:
+        sub_dub_count = {
+            "sub": 0,
+            "dub": 0
+        }
+
         base_url = f"{os.getenv('CONSUMET_URL')}/meta/anilist/info/{anime_id}?provider={provider}"
-        
-        def fetch_data(dub):
-            url = base_url + ("&dub=true" if dub else "")
-            print(f"Trying URL: {url}")
-            response = requests.get(url, timeout=10)
-            data = response.json()
-            return data if "message" not in data and response.status_code == 200 else None
+        print(f"Trying URL: {base_url}")
+        response = requests.get(base_url, timeout=10)
+        sub_data = response.json()
 
-        # Try to fetch the requested version (dub or sub)
-        anime_data = fetch_data(gogodub)
-        
-        # If dub was requested but not found, try sub
-        if gogodub and not anime_data:
-            print(f"No dub episodes found for ID {anime_id}, trying sub")
-            anime_data = fetch_data(False)
-            if anime_data:
-                gogodub = False  # We found sub episodes, so set gogodub to False
+        if sub_data["status"] == "Completed":
+            store_in_redis_cache(sub_cache_key, json.dumps(sub_data), 3600 * 24 * 30)
+        else:
+            store_in_redis_cache(sub_cache_key, json.dumps(sub_data), 3600 * 12)
+        sub_dub_count["sub"] = len(sub_data["episodes"])
 
-        # If we still don't have data, try switching providers
-        if not anime_data:
-            if original_provider != "gogo":
-                print(f"No episodes found for ID {anime_id} with {provider}, switching to gogo")
-                return get_anime_data(anime_id, "gogo", gogodub)
-            else:
-                print(f"No episodes found for ID {anime_id} with any provider or mode")
-                return anime_data, provider, gogodub
+        base_url = f"{os.getenv('CONSUMET_URL')}/meta/anilist/info/{anime_id}?provider={provider}&dub=true"
+        print(f"Trying URL: {base_url}")
+        response = requests.get(base_url, timeout=10)
+        dub_data = response.json()
+        if dub_data["status"] == "Completed":
+            store_in_redis_cache(dub_cache_key, json.dumps(dub_data), 3600 * 24 * 30)
+        else:
+            store_in_redis_cache(dub_cache_key, json.dumps(dub_data), 3600 * 12)
+        sub_dub_count["dub"] = len(dub_data["episodes"])
 
-        # We have valid data at this point
-        episode_count = len(anime_data["episodes"])
-        print(f"Found {episode_count} episodes for ID {anime_id}, gogodub={gogodub}")
+        if not dub:
+            anime_data = sub_data
+        else:
+            anime_data = dub_data
 
-        # Cache the data
-        cache_key = f"anime_{anime_id}_anime_data_{provider}_{'dub' if gogodub else 'sub'}"
         if anime_data["status"] == "Completed":
-            store_in_redis_cache(cache_key, json.dumps(anime_data), 3600 * 24 * 30)
+            store_in_redis_cache(sub_dub_cache_key, json.dumps(sub_dub_count), 3600 * 24 * 30)
         else:
-            store_in_redis_cache(cache_key, json.dumps(anime_data), 3600 * 12)
-        
-        print(f"Anime data found: ID={anime_id}, provider={provider}, final gogodub={gogodub}, episodes={episode_count}")
-    else:
+            store_in_redis_cache(sub_dub_cache_key, json.dumps(sub_dub_count), 3600 * 12)
+
+        anime_data["subDubCount"] = sub_dub_count
+    else:   
         anime_data = json.loads(anime_data)
-        episode_count = len(anime_data.get("episodes", []))
-        print(f"Loaded cached anime data: ID={anime_id}, provider={provider}, gogodub={gogodub}, episodes={episode_count}")
+        anime_data["subDubCount"] = json.loads(get_from_redis_cache(sub_dub_cache_key))
 
-    if provider == "gogoanime":
-        provider = "gogo"
+    return anime_data
 
-    print(f"Returning: provider={provider}, gogodub={gogodub}")
-    return anime_data, provider, gogodub
 
 @lru_cache(maxsize=100)
-def get_anime_episodes(anime_id): #only returns episodes from zoro
-    cache_key = f"anime_{anime_id}_anime_episodes_zoro"
-    anime_episodes = get_from_redis_cache(cache_key)
-    
-    if not anime_episodes:
-        anime_data, provider, gd = get_anime_data(anime_id, "zoro")
-        if not anime_data or not anime_data.get("episodes"):
-            return []
-
-        z_anime_id = anime_data["episodes"][0]["id"].split("$")[0]
-
-        print(f"Fetching episodes for ID {anime_id} with Zoro ID {z_anime_id}")
-
-        base_url = f"{os.getenv('CONSUMET_URL')}/meta/zoro/anime/episodes/{z_anime_id}"
-        try:
-            response = requests.get(base_url, timeout=10)
-            anime_episodes = response.json()
-            store_in_redis_cache(cache_key, json.dumps(anime_episodes), 86400)  # Cache for 24 hours
-        except requests.RequestException as e:
-            print(f"Error fetching anime episodes for ID {anime_id}: {e}")
-            return []
+def get_zoro_episode_streaming_data(episode_url, dub=False):
+    episode_url = episode_url.split("watch/")[1]
+    cache_key = f"zoro_episode_streaming_data_{episode_url}_{'dub' if dub else 'sub'}"
+    episode_data = get_from_redis_cache(cache_key)
+    category = "dub" if dub else "sub"
+    if not episode_data:
+        base_url = f"{os.getenv('ZORO_URL')}/anime/episode-srcs?id={episode_url}&category={category}"
+        print(f"Trying URL: {base_url}")
+        response = requests.get(base_url, timeout=10)
+        episode_data = response.json()
+        store_in_redis_cache(cache_key, json.dumps(episode_data), 3600 * 12)
     else:
-        anime_episodes = json.loads(anime_episodes)
+        episode_data = json.loads(episode_data)
 
-    return anime_episodes
+    return episode_data
 
 @lru_cache(maxsize=100)
-def get_anime_episodes_gogo(anime_id, mode="sub"):
-    cache_key = f"anime_{anime_id}_anime_episodes_gogo_{mode}"
-    anime_episodes = get_from_redis_cache(cache_key)
-    
-    if not anime_episodes:
-        gogodub = True if mode == "dub" else False
-        print(f"Fetching episodes for ID {anime_id} with mode {mode} and dub=>{gogodub}")
-        anime_data, provider, gd = get_anime_data(anime_id, "gogo", gogodub)
-        if anime_data and "episodes" in anime_data:
-            anime_episodes = anime_data["episodes"]
-            store_in_redis_cache(cache_key, json.dumps(anime_episodes), 86400)
-        else:
-            anime_episodes = []
+def get_gogo_episode_streaming_data(episode_id):
+    cache_key = f"gogo_episode_streaming_data_{episode_id}"
+    episode_data = get_from_redis_cache(cache_key)
+    if not episode_data:
+        base_url = f"{os.getenv('CONSUMET_URL')}/meta/anilist/watch/{episode_id}"
+        print(f"Trying URL: {base_url}")
+        response = requests.get(base_url, timeout=10)
+        episode_data = response.json()
+        store_in_redis_cache(cache_key, json.dumps(episode_data), 3600 * 12)
     else:
-        anime_episodes = json.loads(anime_episodes)
+        episode_data = json.loads(episode_data)
 
-    # Convert everything to 1-based index
-    for i, episode in enumerate(anime_episodes, start=1):
-        episode["number"] = i
+    return convert_gogo_stream_data(episode_data)
 
-    anime_episode_data = {
-        "episodes": anime_episodes,
-        "totalEpisodes": len(anime_episodes)
+def convert_gogo_stream_data(input_data):
+    # Create the new structure
+    new_data = {
+        'tracks': [],
+        'intro': {'start': 0, 'end': 0},
+        'outro': {'start': 0, 'end': 0},
+        'sources': [],
+        'anilistID': 0,
+        'malID': 0
     }
+    
+    # Add the default stream to sources
+    default_source = next((s for s in input_data['sources'] if s['quality'] == 'default'), None)
+    if default_source:
+        new_data['sources'].append({
+            'url': default_source['url'],
+            'type': 'hls'
+        })
+    
+    return new_data
 
-    print(f"Returning {len(anime_episodes)} episodes for ID {anime_id} with mode {mode}")
 
-    return anime_episode_data, mode
+
+
+
+
+
+
+    # if not anime_data:
+    #     subDubCount = {
+    #         "sub": 0,
+    #         "dub": 0
+    #     }
+        
+    #     base_url = f"{os.getenv('CONSUMET_URL')}/meta/zoro/anime/info/{anime_id}?provider={provider}?dub=false"
+
+    #     print(f"Trying URL: {base_url}")
+    #     response = requests.get(base_url, timeout=10)
+    #     data = response.json()
+
+    #     store_in_redis_cache(f"{cache_key}_sub", json.dumps(data), 3600 * 24 * 30)
+    #     subDubCount["sub"] = len(data["episodes"])
+
+    #     base_url = f"{os.getenv('CONSUMET_URL')}/meta/zoro/anime/info/{anime_id}?provider={provider}?dub=true"
+
+    #     print(f"Trying URL: {base_url}")
+    #     response = requests.get(base_url, timeout=10)
+    #     data = response.json()
+
+    #     store_in_redis_cache(f"{cache_key}_dub", json.dumps(data), 3600 * 24 * 30)
+    #     subDubCount["dub"] = len(data["episodes"])
+
+    #     anime_data = {
+    #         "subDubCount": subDubCount
+    #     }
+
+        
+
+
 
 
 # @lru_cache(maxsize=100)
-# def get_anime_episodes(anime_id, provider="zoro"):
-#     cache_key = f"anime_{anime_id}_anime_episodes_{provider}"
-#     anime_episodes = get_from_redis_cache(cache_key)
+# def get_anime_data(anime_id, provider="zoro", gogodub=False):
+#     cache_key = f"anime_{anime_id}_anime_data_{provider}"
+#     anime_data = get_from_redis_cache(cache_key)
+#     original_provider = provider
 
-#     if not anime_episodes:
-#         anime_data, provider = get_anime_data(anime_id, provider)
-#         if not anime_data or not anime_data.get("episodes"):
-#             return None
+#     if provider == "gogo":
+#         provider = "gogoanime"
+    
+#     print(f"Fetching anime data: ID={anime_id}, provider={provider}, initial gogodub={gogodub}")
+    
+#     if not anime_data:
+#         base_url = f"{os.getenv('CONSUMET_URL')}/meta/anilist/info/{anime_id}?provider={provider}"
         
-#         if provider == "zoro":
-#             if "mappings" in anime_data:
-#                 z_anime_id = next((m["id"] for m in anime_data["mappings"] if m["providerId"] == "zoro"), None)
-#                 z_anime_id = z_anime_id.split("/")[-1] if z_anime_id else None
+#         def fetch_data(dub):
+#             url = base_url + ("&dub=true" if dub else "")
+#             print(f"Trying URL: {url}")
+#             response = requests.get(url, timeout=10)
+#             data = response.json()
+#             return data if "message" not in data and response.status_code == 200 else None
+
+#         # Try to fetch the requested version (dub or sub)
+#         anime_data = fetch_data(gogodub)
+        
+#         # If dub was requested but not found, try sub
+#         if gogodub and not anime_data:
+#             print(f"No dub episodes found for ID {anime_id}, trying sub")
+#             anime_data = fetch_data(False)
+#             if anime_data:
+#                 gogodub = False  # We found sub episodes, so set gogodub to False
+
+#         # If we still don't have data, try switching providers
+#         if not anime_data:
+#             if original_provider != "gogo":
+#                 print(f"No episodes found for ID {anime_id} with {provider}, switching to gogo")
+#                 return get_anime_data(anime_id, "gogo", gogodub)
 #             else:
-#                 z_anime_id = anime_data["episodes"][0]["id"].split("$")[0]
+#                 print(f"No episodes found for ID {anime_id} with any provider or mode")
+#                 return anime_data, provider, gogodub
 
-#             print(f"Fetching episodes for ID {anime_id} with Zoro ID {z_anime_id}")
+#         # We have valid data at this point
+#         episode_count = len(anime_data["episodes"])
+#         print(f"Found {episode_count} episodes for ID {anime_id}, gogodub={gogodub}")
 
-#             base_url = f"{os.getenv('ZORO_URL')}/anime/episodes/{z_anime_id}"
-#             try:
-#                 response = requests.get(base_url, timeout=10)
-#                 anime_episodes = response.json()
-#                 store_in_redis_cache(cache_key, json.dumps(anime_episodes), 86400)  # Cache for 24 hours
-#             except requests.RequestException as e:
-#                 print(f"Error fetching anime episodes for ID {anime_id}: {e}")
-#                 return None
+#         # Cache the data
+#         cache_key = f"anime_{anime_id}_anime_data_{provider}_{'dub' if gogodub else 'sub'}"
+#         if anime_data["status"] == "Completed":
+#             store_in_redis_cache(cache_key, json.dumps(anime_data), 3600 * 24 * 30)
 #         else:
-#             return {"episodes": anime_data["episodes"], "totalEpisodes": len(anime_data["episodes"])}
+#             store_in_redis_cache(cache_key, json.dumps(anime_data), 3600 * 12)
+        
+#         print(f"Anime data found: ID={anime_id}, provider={provider}, final gogodub={gogodub}, episodes={episode_count}")
+#     else:
+#         anime_data = json.loads(anime_data)
+#         episode_count = len(anime_data.get("episodes", []))
+#         print(f"Loaded cached anime data: ID={anime_id}, provider={provider}, gogodub={gogodub}, episodes={episode_count}")
+
+#     if provider == "gogoanime":
+#         provider = "gogo"
+
+#     print(f"Returning: provider={provider}, gogodub={gogodub}")
+#     return anime_data, provider, gogodub
+
+
+# @lru_cache(maxsize=100)
+# def get_anime_episodes(anime_id): #only returns episodes from zoro
+#     cache_key = f"anime_{anime_id}_anime_episodes_zoro"
+#     anime_episodes = get_from_redis_cache(cache_key)
+    
+#     if not anime_episodes:
+#         anime_data, provider, gd = get_anime_data(anime_id, "zoro")
+#         if not anime_data or not anime_data.get("episodes"):
+#             return []
+
+#         z_anime_id = anime_data["episodes"][0]["id"].split("$")[0]
+
+#         print(f"Fetching episodes for ID {anime_id} with Zoro ID {z_anime_id}")
+
+#         base_url = f"{os.getenv('CONSUMET_URL')}/meta/zoro/anime/episodes/{z_anime_id}"
+#         try:
+#             response = requests.get(base_url, timeout=10)
+#             anime_episodes = response.json()
+#             store_in_redis_cache(cache_key, json.dumps(anime_episodes), 86400)  # Cache for 24 hours
+#         except requests.RequestException as e:
+#             print(f"Error fetching anime episodes for ID {anime_id}: {e}")
+#             return []
 #     else:
 #         anime_episodes = json.loads(anime_episodes)
-    
+
 #     return anime_episodes
+
+# @lru_cache(maxsize=100)
+# def get_anime_episodes_gogo(anime_id, mode="sub"):
+#     cache_key = f"anime_{anime_id}_anime_episodes_gogo_{mode}"
+#     anime_episodes = get_from_redis_cache(cache_key)
+    
+#     if not anime_episodes:
+#         gogodub = True if mode == "dub" else False
+#         print(f"Fetching episodes for ID {anime_id} with mode {mode} and dub=>{gogodub}")
+#         anime_data, provider, gd = get_anime_data(anime_id, "gogo", gogodub)
+#         if anime_data and "episodes" in anime_data:
+#             anime_episodes = anime_data["episodes"]
+#             store_in_redis_cache(cache_key, json.dumps(anime_episodes), 86400)
+#         else:
+#             anime_episodes = []
+#     else:
+#         anime_episodes = json.loads(anime_episodes)
+
+#     # Convert everything to 1-based index
+#     for i, episode in enumerate(anime_episodes, start=1):
+#         episode["number"] = i
+
+#     anime_episode_data = {
+#         "episodes": anime_episodes,
+#         "totalEpisodes": len(anime_episodes)
+#     }
+
+#     print(f"Returning {len(anime_episodes)} episodes for ID {anime_id} with mode {mode}")
+
+#     return anime_episode_data, mode
+
 
 def attach_episode_metadata(anime_data, anime_episodes):
     anime_episodes_metadata = get_all_episode_metadata(anime_data)
     if anime_episodes_metadata:
-        for i, episode in enumerate(anime_episodes.get("episodes", [])):
+        for i, episode in enumerate(anime_episodes):
             if i < len(anime_episodes_metadata):
                 episode["metadata"] = anime_episodes_metadata[i]
+            else:
+                episode["metadata"] = None
+
+    return anime_episodes
 
 def get_info_by_zid(zid):
     cache_key = f"anime_{zid}_anime_selected"
@@ -257,7 +383,7 @@ def get_all_episode_metadata(anime_data):
     return episode_metadata
 
 
-def update_anime_user_history(user, anime, episode, time_watched):
+def update_anime_user_history(user, anime, episode, time_watched, additional_data=None):
     # per episode history
     history, created = UserHistory.objects.get_or_create(user=user, anime=anime, episode=episode)
     history.time_watched = time_watched
@@ -271,6 +397,19 @@ def update_anime_user_history(user, anime, episode, time_watched):
 
     history.last_watched = True
     history.last_updated = datetime.datetime.now()
+
+    if additional_data:
+        if "anime_title_english" in additional_data:
+            history.anime_title_english = additional_data["anime_title_english"]
+        if "anime_title_romaji" in additional_data:
+            history.anime_title_romaji = additional_data["anime_title_romaji"]
+        if "anime_title_native" in additional_data:
+            history.anime_title_native = additional_data["anime_title_native"]
+        if "anime_cover_image" in additional_data:
+            history.anime_cover_image = additional_data["anime_cover_image"]
+        if "episode_title" in additional_data:
+            history.episode_title = additional_data["episode_title"]
+
     history.save()
 
 def get_anime_user_history(user, anime):
