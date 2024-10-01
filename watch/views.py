@@ -59,6 +59,9 @@ def watch(request, anime_id, episode=None):
             "episode_title": episode_data["metadata"]["title"] if episode_data and "metadata" in episode_data else episode_data["title"],
         }
 
+        if not additional_data["episode_title"]:
+            additional_data["episode_title"] = f"Episode {episode}"
+
         update_anime_user_history(request.user, anime_id, episode, current_watched_time, additional_data)
 
     if "malId" in anime_data and request.user.mal_access_token:
