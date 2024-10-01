@@ -4,7 +4,7 @@ import dotenv
 from django.shortcuts import render, redirect
 from authentication.utils import get_single_anime_mal
 from user_profile.models import UserHistory
-from watch.utils import attach_episode_metadata, get_anime_seasons, get_anime_data, get_anime_user_history, get_gogo_episode_streaming_data, get_zoro_episode_streaming_data, update_anime_user_history
+from watch.utils import attach_episode_metadata, get_anime_seasons, get_anime_data, get_anime_user_history, get_gogo_episode_streaming_data, get_zoro_episode_streaming_data, update_anime_user_history, get_mal_episode_comments
 import json
 
 dotenv.load_dotenv()
@@ -61,6 +61,11 @@ def watch(request, anime_id, episode=None):
 
         update_anime_user_history(request.user, anime_id, episode, current_watched_time, additional_data)
 
+    if "malId" in anime_data and request.user.mal_access_token:
+        comments = get_mal_episode_comments(anime_data['malId'], episode, request.user.mal_access_token)
+    else:
+        comments = []
+
     if episode_data:
         if provider == "zoro":
             streaming_data = get_zoro_episode_streaming_data(episode_data["url"], mode)
@@ -97,6 +102,7 @@ def watch(request, anime_id, episode=None):
         "provider": provider,
         "seasons": seasons,
         "should_preload": episode < len(episodes),
+        "discussions": comments,
     }
 
     if request.user.mal_access_token and "malId" in anime_data:
@@ -105,6 +111,7 @@ def watch(request, anime_id, episode=None):
             mal_data["average_episode_duration"] = mal_data["average_episode_duration"] // 60 + 1
             context["mal_data"] = mal_data
             context["mal_episode_range"] = range(1, mal_data["num_episodes"] + 1)
+            
 
     if "nextAiringEpisode" in anime_data:
         context["nextAiringEpisode"] = anime_data["nextAiringEpisode"]

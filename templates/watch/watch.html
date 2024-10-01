@@ -34,6 +34,21 @@
     .custom-scrollbar.show-scrollbar:hover::-webkit-scrollbar-thumb {
         opacity: 1;
     }
+
+    .spoiler {
+        margin: 10px 0;
+    }
+    
+    .spoiler button {
+        background-color: var(--scrollbar-color) rgba(0, 0, 0, 0.8);
+        border: 1px solid var(--scrollbar-color);
+        padding: 0.5rem 1rem;
+        cursor: pointer;
+    }
+    
+    .spoiler-content {
+        margin-top: 5px;
+    }
 </style>
 {% endblock css %}
 {% block content %}
@@ -109,7 +124,7 @@
             <div id="gridView" class="hidden">
             {% for episode in all_episodes %}
                 <a href="{% url "watch:watch_episode" anime.id episode.number %}{% if request.GET.mode %}?mode={{ request.GET.mode }}{% endif %}{% if request.GET.mode and request.GET.provider %}&provider={{ request.GET.provider }}{% elif request.GET.provider %}?provider={{ request.GET.provider }}{% endif %}" 
-                   class="flex flex-row w-full gap-2 {% if episode.number == current_episode_number %}bg-{{ user.preferences.accent_colour }}-600{% elif episode.number in watched_episodes %}bg-{{ user.preferences.accent_colour }}-600 bg-opacity-20{% else %}bg-white bg-opacity-10{% endif %} p-2 rounded my-1 hover:bg-{{ user.preferences.accent_colour }}-600 hover:bg-opacity-30" id="{% if episode.number == current_episode_number %}active-episode-grid{% endif %}">
+                   class="flex flex-row w-full gap-2 {% if episode.number == current_episode_number %}bg-{{ user.preferences.accent_colour }}-600{% elif episode.number in watched_episodes %}bg-{{ user.preferences.accent_colour }}-600 bg-opacity-20{% else %}bg-white bg-opacity-10{% endif %} p-2 rounded my-2 hover:bg-{{ user.preferences.accent_colour }}-600 hover:bg-opacity-30" id="{% if episode.number == current_episode_number %}active-episode-grid{% endif %}">
                     <div class="w-32 h-18 flex-shrink-0">
                         <img loading="lazy" src="{{ episode.metadata.image }}" alt="Episode {{ episode.number }}" class="w-full h-full object-cover rounded" style="aspect-ratio: 16/9;">
                     </div>
@@ -551,6 +566,44 @@
             </div>
         </div>
         {% endif %}
+        {% load custom_filters %}
+
+        {% if discussions %}
+            <div class="my-8">
+                <div class="flex justify-between items-start mb-4">
+                    <div>
+                        <h2 class="text-xl font-bold text-white uppercase">
+                            {{ discussions.metadata.total }} Discussions
+                        </h2>
+                        <p class="text-sm text-gray-100 mt-2">
+                            <span class="font-bold">Mean Score: </span>{{ discussions.metadata.score }} / 5
+                            <span class="font-bold ml-4">Aired: </span>{{ discussions.metadata.aired|parse_iso_date|date:"F j, Y" }}
+                        </p>
+                    </div>
+                    <a href="{{ discussions.metadata.forum_url }}" target="_blank" class="bg-{{ user.preferences.accent_colour }}-600 hover:bg-{{ user.preferences.accent_colour }}-700 text-white text-sm font-bold rounded-lg flex flex-row items-center justify-center gap-1 px-4 py-2 transition duration-300">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M8.625 12a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0H8.25m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0H12m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 0 1-2.555-.337A5.972 5.972 0 0 1 5.41 20.97a5.969 5.969 0 0 1-.474-.065 4.48 4.48 0 0 0 .978-2.025c.09-.457-.133-.901-.467-1.226C3.93 16.178 3 14.189 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25Z" />
+                        </svg>
+                        <span>Post Reply</span>
+                    </a>
+                </div>
+
+                {% for comment in discussions.comments %}
+                <div class="w-full p-2 flex flex-row gap-4">
+                    <img loading="lazy" src="{{ comment.created_by.forum_avator }}" alt="{{ comment.created_by.name }}" class="rounded-full w-16 h-16 object-cover aspect-square"/>
+                    <div class="flex flex-col gap-2 flex-grow max-w-fit">
+                        <div class="flex flex-row gap-2 items-center ">
+                            <span class="font-bold">{{ comment.created_by.name }}</span>
+                            <span class="text-xs text-gray-400">
+                                {{ comment.created_at|parse_iso_datetime|date:"F j, Y" }} at {{ comment.created_at|parse_iso_datetime|time:"g:i A" }}
+                            </span>
+                        </div>
+                        <div class="text-sm text-gray-100">{{ comment.body_html|remove_br|safe }}</div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        {% endif %}
 
         {% if characters %}
         <div class="my-8">
@@ -821,6 +874,15 @@
 {% endblock content %}
 {% block scripts %}
 <script>
+    function toggleSpoiler(id) {
+        var content = document.getElementById(id);
+        if (content.style.display === "none") {
+            content.style.display = "block";
+        } else {
+            content.style.display = "none";
+        }
+    }
+
     const episodeContainer = document.getElementById('episodeContainer');
     let scrollTimer;
 

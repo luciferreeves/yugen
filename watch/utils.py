@@ -1,9 +1,14 @@
 import datetime
 from difflib import SequenceMatcher
 from functools import lru_cache
+import html
 import json
+import math
+import random
 import re
 import redis
+import bbcode
+from bs4 import BeautifulSoup
 import os
 import dotenv
 import requests
@@ -97,6 +102,12 @@ def get_anime_data(anime_id, provider="gogo", dub=False):
 
 
 def find_zoro_server (episode_id, mode):
+    cache_key = f"zoro_server_{episode_id}_{mode}"
+    server_id = get_from_redis_cache(cache_key)
+
+    if server_id:
+        return server_id, mode
+
     base_url = f"{os.getenv('ZORO_URL')}/anime/servers?episodeId={episode_id}"
     print(base_url)
     response = requests.get(base_url)
@@ -114,6 +125,8 @@ def find_zoro_server (episode_id, mode):
     elif len(response["raw"]) > 0:
         server_id = response["raw"][0]["serverName"]
         mode = "raw"
+
+    store_in_redis_cache(cache_key, server_id)
 
     return server_id, mode
 
@@ -456,3 +469,167 @@ def store_in_redis_cache(anime_id, data, cache_time=60*60*12):
 def get_from_redis_cache(anime_id):
     data = r.get(anime_id)
     return data if data else None
+
+def get_mal_episode_discussion_data(mal_id, episode_number):
+    base_url = f"https://api.jikan.moe/v4/anime/{mal_id}/episodes"
+    
+    # Calculate the page number and offset
+    page = math.ceil(episode_number / 100)
+    offset = (episode_number - 1) % 100
+    
+    params = {
+        'page': page
+    }
+
+    cache_key = f"anime:{mal_id}:episodes:{page}"
+    cached_data = get_from_redis_cache(cache_key)
+
+    if cached_data:
+        data = json.loads(cached_data)
+    else:
+        response = requests.get(base_url, params=params)
+        
+        if response.status_code == 200:
+            data = response.json()
+            # Cache the entire page of episode data
+            store_in_redis_cache(cache_key, json.dumps(data), cache_time=86400)  # Cache for 24 hours
+        elif response.status_code == 429:
+            # Handle rate limiting
+            print("Rate limit reached. Waiting before retrying...")
+            return get_mal_episode_discussion_data(mal_id, episode_number)  # Retry the request
+        else:
+            print(f"Error fetching data: {response.status_code}")
+            return None
+
+    if 'data' in data and offset < len(data['data']):
+        episode_data = data['data'][offset]
+        return episode_data
+    else:
+        print(f"Episode {episode_number} not found for anime {mal_id}")
+        return None
+
+def get_mal_episode_comments(mal_id, episode_number, mal_access_token):
+    cache_key = f"anime:{mal_id}:episode:{episode_number}:comments"
+    cached_data = get_from_redis_cache(cache_key)
+
+    if cached_data:
+        return json.loads(cached_data)
+
+    discussion_data = get_mal_episode_discussion_data(mal_id, episode_number)
+
+    if not discussion_data:
+        return None
+    
+    topic_id_match = re.search(r'topicid=(\d+)', discussion_data['forum_url'])
+    if not topic_id_match:
+        print(f"Could not extract topic ID from forum URL: {discussion_data['forum_url']}")
+        return None
+    
+    topic_id = topic_id_match.group(1)
+    
+    api_url = f"https://api.myanimelist.net/v2/forum/topic/{topic_id}"
+    
+    headers = {
+        "Authorization": f"Bearer {mal_access_token}"
+    }
+    
+    all_comments = []
+    next_url = api_url
+
+    while next_url:
+        response = requests.get(next_url, headers=headers)
+        if response.status_code != 200:
+            print(f"Error fetching posts: {response.status_code}")
+            return None
+        
+        data = response.json()
+        all_comments.extend(data["data"]["posts"])
+        next_url = data.get("paging", {}).get("next")
+
+    all_comments = sorted(
+        all_comments,
+        key=lambda x: datetime.datetime.fromisoformat(x["created_at"].replace("Z", "+00:00")),
+        reverse=True
+    )
+
+    for post in all_comments:
+        decoded_text = html.unescape(post['body'])
+        post['body_html'] = parse_mixed_content(decoded_text)
+
+    discussion_data["total"] = len(all_comments)
+
+    data = {
+        "metadata": discussion_data,
+        "comments": all_comments
+    }
+
+    store_in_redis_cache(cache_key, json.dumps(data))
+
+    return data
+
+def parse_mixed_content(content):
+    # Remove HTML comments
+    content = re.sub(r'<!--.*?-->', '', content, flags=re.DOTALL)
+    
+    # Parse quotes
+    content = parse_quotes(content)
+    
+    # Parse BBCode
+    content = parse_bbcode(content)
+    
+    # Clean up remaining HTML
+    soup = BeautifulSoup(content, 'html.parser')
+    for br in soup.find_all("br"):
+        br.replace_with("\n")
+    content = soup.get_text()
+    
+    # Convert newlines to <p> tags
+    paragraphs = content.split('\n')
+    paragraphs = [f'<p>{p.strip()}</p>' for p in paragraphs if p.strip()]
+    
+    return ''.join(paragraphs)
+
+def parse_quotes(content):
+    quote_pattern = r'<!–quote–><div class="quotetext"><strong>(.*?)said:</strong><!–quotesaid–><br>(.*?)<!–quote–></div>'
+    
+    def replace_quote(match):
+        author = match.group(1)
+        text = match.group(2)
+        return f'<blockquote><p><strong>{author} said:</strong></p>{parse_mixed_content(text)}</blockquote>'
+    
+    return re.sub(quote_pattern, replace_quote, content, flags=re.DOTALL)
+
+def parse_bbcode(content):
+    # Handle [b], [i], [u] tags
+    content = re.sub(r'\[b\](.*?)\[/b\]', r'<strong>\1</strong>', content)
+    content = re.sub(r'\[i\](.*?)\[/i\]', r'<em>\1</em>', content)
+    content = re.sub(r'\[u\](.*?)\[/u\]', r'<u>\1</u>', content)
+    
+    # Handle [img] tags
+    def img_replacer(match):
+        align = match.group(1)
+        src = match.group(2).strip()
+        style = f' style="float: {align};"' if align else ''
+        return f'<img src="{src}"{style} alt="User posted image" class="max-w-96">'
+    
+    content = re.sub(r'\[img(?:\s+align=(left|right))?\](.*?)\[/img\]', img_replacer, content, flags=re.DOTALL)
+    content = re.sub(r'\[IMG(?:\s+ALIGN=(left|right))?\](.*?)\[/IMG\]', img_replacer, content, flags=re.DOTALL)
+
+    spoiler_count = 0
+    def spoiler_replacer(match):
+        nonlocal spoiler_count
+        random_string = ''.join(random.SystemRandom().choice('abcdefghijklmnopqrstuvwxyz') for _ in range(10))
+        spoiler_count += 1
+        title = match.group(1) or "Spoiler"
+        spoiler_content = match.group(2)
+        return f'<div class="spoiler"><button onclick="toggleSpoiler(\'spoiler-{random_string}-{spoiler_count}\')">Spoiler: {title}</button><div id="spoiler-{random_string}-{spoiler_count}" class="spoiler-content max-w-96" style="display:none;">{spoiler_content}</div></div>'
+
+    content = re.sub(r'\[spoiler(?:=([^\]]+))?\](.*?)\[/spoiler\]', spoiler_replacer, content, flags=re.DOTALL)
+    
+    # Handle [size] tags
+    content = re.sub(r'\[size=(\d+)\](.*?)\[/size\]', r'<span style="font-size:\1%">\2</span>', content)
+
+    parser = bbcode.Parser()
+    content = parser.format(content)
+    
+    return content

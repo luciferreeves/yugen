@@ -6,3 +6,5 @@ django-cors-headers
 redis
 gunicorn
 pytz
+bbcode
+bs4

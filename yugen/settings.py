@@ -71,6 +71,7 @@ MIDDLEWARE = [
     "middleware.remove_slash.RemoveSlashMiddleware",
     "middleware.authentication.AuthMiddleware",
     "middleware.preferences.PreferencesMiddleware",
+    "middleware.mal_token_refresh.MALTokenRefreshMiddleware",
 ]
 
 CORS_ORIGIN_ALLOW_ALL = True   
