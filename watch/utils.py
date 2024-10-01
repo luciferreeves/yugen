@@ -450,7 +450,7 @@ def update_anime_user_history(user, anime, episode, time_watched, additional_dat
         if "episode_title" in additional_data:
             history.episode_title = additional_data["episode_title"]
         else:
-            history.episode_title = ""
+            history.episode_title = f"Episode {episode}"
 
     history.save()
 
