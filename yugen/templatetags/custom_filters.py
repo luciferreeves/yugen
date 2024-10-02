@@ -17,6 +17,8 @@ def parse_iso_datetime(value):
 
 @register.filter(name='parse_iso_date')
 def parse_iso_date(value):
+    if value is None:
+        return value
     return datetime.strptime(value, '%Y-%m-%dT%H:%M:%S%z').date()
 
 @register.filter(name='remove_br')
