@@ -24,8 +24,8 @@ r = redis.Redis(
     password=os.getenv("REDIS_PASSWORD"),
 )
 
-# r.flushall()
-# print("Redis cache flushed")
+r.flushall()
+print("Redis cache flushed")
 
 def get_episode_metadata(anime_data, episode):
     episode_metadata = get_all_episode_metadata(anime_data)
@@ -578,66 +578,6 @@ def get_mal_episode_comments(mal_id, episode_number, mal_access_token):
     store_in_redis_cache(cache_key, json.dumps(result), cache_time=3600)  # Cache for 1 hour
 
     return result
-
-
-# def get_mal_episode_comments(mal_id, episode_number, mal_access_token):
-#     cache_key = f"anime:{mal_id}:episode:{episode_number}:comments"
-#     cached_data = get_from_redis_cache(cache_key)
-
-#     if cached_data:
-#         return json.loads(cached_data)
-
-#     discussion_data = get_mal_episode_discussion_data(mal_id, episode_number)
-
-#     if not discussion_data:
-#         return None
-    
-#     topic_id_match = re.search(r'topicid=(\d+)', discussion_data['forum_url'])
-#     if not topic_id_match:
-#         print(f"Could not extract topic ID from forum URL: {discussion_data['forum_url']}")
-#         return None
-    
-#     topic_id = topic_id_match.group(1)
-    
-#     api_url = f"https://api.myanimelist.net/v2/forum/topic/{topic_id}"
-    
-#     headers = {
-#         "Authorization": f"Bearer {mal_access_token}"
-#     }
-    
-#     all_comments = []
-#     next_url = api_url
-
-#     while next_url:
-#         response = requests.get(next_url, headers=headers)
-#         if response.status_code != 200:
-#             print(f"Error fetching posts: {response.status_code}")
-#             return None
-        
-#         data = response.json()
-#         all_comments.extend(data["data"]["posts"])
-#         next_url = data.get("paging", {}).get("next")
-
-#     all_comments = sorted(
-#         all_comments,
-#         key=lambda x: datetime.datetime.fromisoformat(x["created_at"].replace("Z", "+00:00")),
-#         reverse=True
-#     )
-
-#     for post in all_comments:
-#         decoded_text = html.unescape(post['body'])
-#         post['body_html'] = parse_mixed_content(decoded_text)
-
-#     discussion_data["total"] = len(all_comments)
-
-#     data = {
-#         "metadata": discussion_data,
-#         "comments": all_comments
-#     }
-
-#     store_in_redis_cache(cache_key, json.dumps(data))
-
-#     return data
 
 def parse_mixed_content(content):
     # Remove HTML comments

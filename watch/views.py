@@ -71,6 +71,10 @@ def watch(request, anime_id, episode=None):
 
     if episode_data:
         if provider == "zoro":
+            if not "url" in episode_data:
+                episode_data["url"] = "https://hianime.to/watch/" + episode_data["id"].replace("$episode$", "?ep=")
+                episode_data["url"] = episode_data["url"].replace("$dub", "").replace("$sub", "")
+
             streaming_data = get_zoro_episode_streaming_data(episode_data["url"], mode)
         else:
             streaming_data = get_gogo_episode_streaming_data(episode_data["id"])
