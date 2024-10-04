@@ -56,7 +56,7 @@ class GlobalMetaMiddleware:
             anime_info = get_anime_data(requested_id)
 
             if request.user.is_authenticated:
-                title, description = self.get_anime_title_description(anime_info, request.user.preferences.title_language)
+                title, description = self.get_anime_title_description(anime_info)
             else:
                 title, description = self.get_anime_title_description(anime_info)
 
@@ -77,7 +77,7 @@ class GlobalMetaMiddleware:
                 episode = 1
 
             if request.user.is_authenticated:
-                title, description = self.get_anime_title_description(anime_info, request.user.preferences.title_language)
+                title, description = self.get_anime_title_description(anime_info)
             else:
                 title, description = self.get_anime_title_description(anime_info)
 
