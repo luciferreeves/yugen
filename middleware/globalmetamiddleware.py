@@ -54,11 +54,7 @@ class GlobalMetaMiddleware:
         if '/detail/' in full_path:
             requested_id = request.path.split("/")[2]
             anime_info = get_anime_data(requested_id)
-
-            if request.user.is_authenticated:
-                title, description = self.get_anime_title_description(anime_info)
-            else:
-                title, description = self.get_anime_title_description(anime_info)
+            title, description = self.get_anime_title_description(anime_info)
 
             request.meta["title"] = f"{title} | Yugen"
             request.meta["description"] = description
@@ -75,11 +71,7 @@ class GlobalMetaMiddleware:
             
             if episode <= 0:
                 episode = 1
-
-            if request.user.is_authenticated:
-                title, description = self.get_anime_title_description(anime_info)
-            else:
-                title, description = self.get_anime_title_description(anime_info)
+            title, description = self.get_anime_title_description(anime_info)
 
             request.meta["title"] = f"Watch {title} Episode {episode} | Yugen"
             request.meta["description"] = description
