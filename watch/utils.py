@@ -134,7 +134,7 @@ def find_zoro_server (episode_id, mode):
 
 @lru_cache(maxsize=100)
 def get_zoro_episode_streaming_data(episode_url, dub=False):
-    episode_url = episode_url.split("watch/")[1]
+    episode_url = episode_url.replace("$episode$", "?ep=").replace("$dub", "").replace("$sub", "")
     cache_key = f"zoro_episode_streaming_data_{episode_url}_{'dub' if dub else 'sub'}"
     episode_data = get_from_redis_cache(cache_key)
     category = "dub" if dub else "sub"
