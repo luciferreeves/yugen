@@ -47,31 +47,89 @@ def get_next_season():
 def get_next_season_year():
     current_season = get_current_season()
     current_year = get_current_year()
-    if current_season == "WINTER":
+    if current_season == "FALL":
         return current_year + 1
     else:
         return current_year
 
 
-def get_trending_anime(page=1, per_page=34):
+def get_trending_anime(page=1, per_page=12):
     request_url = f"{CONSUMET_URL}/meta/anilist/trending?page={page}&perPage={per_page}"
     response = requests.get(request_url)
     return response.json()
 
+def fetch_manga_data(query, variables):
+    url = 'https://graphql.anilist.co'
+    response = requests.post(url, json={'query': query, 'variables': variables})
+    response = response.json()
+    return response['data']['Page']['media']
 
-def get_popular_anime(page=1, per_page=34):
+def get_manga_list(sort_type, page=1, per_page=12):
+    query = '''
+    query ($page: Int, $perPage: Int, $sort: [MediaSort]) {
+        Page(page: $page, perPage: $perPage) {
+            media(type: MANGA, sort: $sort) {
+                id
+                idMal
+                title {
+                    romaji
+                    english
+                    native
+                    userPreferred
+                }
+                coverImage {
+                    large
+                    medium
+                }
+                description
+                status
+                bannerImage
+                averageScore
+                startDate {
+                    year
+                }
+                genres
+                chapters
+                volumes
+                format
+                averageScore
+                trending
+                popularity
+                favourites
+                isAdult
+            }
+        }
+    }
+    '''
+    variables = {
+        'page': page,
+        'perPage': per_page,
+        'sort': [sort_type]
+    }
+    return fetch_manga_data(query, variables)
+
+def get_trending_manga():
+    return get_manga_list('TRENDING_DESC')
+
+def get_popular_manga():
+    return get_manga_list('POPULARITY_DESC')
+
+def get_top_manga():
+    return get_manga_list('SCORE_DESC')
+
+def get_popular_anime(page=1, per_page=12):
     request_url = f"{CONSUMET_URL}/meta/anilist/advanced-search?type=ANIME&sort=[%22POPULARITY_DESC%22]&?page={page}&perPage={per_page}"
     response = requests.get(request_url)
     return response.json()
 
 
-def get_top_anime(page=1, per_page=34):
+def get_top_anime(page=1, per_page=12):
     request_url = f"{CONSUMET_URL}/meta/anilist/advanced-search?type=ANIME&sort=[%22SCORE_DESC%22]&?page={page}&perPage={per_page}"
     response = requests.get(request_url)
     return response.json()
 
 
-def get_top_airing_anime(page=1, per_page=6):
+def get_top_airing_anime(page=1, per_page=10):
     season = get_current_season()
     year = get_current_year()
     request_url = f"{CONSUMET_URL}/meta/anilist/advanced-search?type=ANIME&status=RELEASING&sort=[%22POPULARITY_DESC%22]&season={season}&year={year}&?page={page}&perPage={per_page}"
@@ -79,7 +137,7 @@ def get_top_airing_anime(page=1, per_page=6):
     return response.json()
 
 
-def get_upcoming_anime(page=1, per_page=6):
+def get_upcoming_anime(page=1, per_page=10):
     season = get_next_season()
     year = get_next_season_year()
     request_url = f"{CONSUMET_URL}/meta/anilist/advanced-search?type=ANIME&status=NOT_YET_RELEASED&sort=[%22POPULARITY_DESC%22]&season={season}&year={year}&?page={page}&perPage={per_page}"

@@ -16,6 +16,7 @@
   <body class="bg-black text-white">
     {% include "partials/navbar.html" %}
     <main class="mx-auto">{% block content %} {% endblock %}</main>
+    <footer class="text-center text-sm py-4">&copy; <script>document.write(new Date().getFullYear())</script> Yugen • Yugen is a private streaming service meant to be used by certain allowed users only. Users must be members of a specific Discord server to be able to access the site. All rights reserved.</footer>
   </body>
   {% block scripts %} {% endblock %}
 </html>

@@ -1,33 +1,33 @@
 {% load custom_filters %}
-{% for anime in data %}
+{% for manga in data %}
 <div class="w-full lg:w-1/2 px-2 mb-2">
     <div class="flex flex-row w-full bg-neutral-950 rounded hover:bg-{{ user.preferences.accent_colour }}-600 hover:bg-opacity-30 p-2 gap-4">
         <div class="flex flex-col gap-2 min-w-32">
-            <a href="{% url 'watch:watch' anime.id %}"><img loading="lazy" src="{{ anime.image }}" alt="{{ anime.title.english }}" class="rounded-lg w-32 h-48 object-cover"/></a>
+            <a href="#"><img loading="lazy" src="{{ manga.coverImage.large }}" alt="{{ manga.title.english }}" class="rounded-lg w-32 h-48 object-cover"/></a>
             <div class="flex flex-row gap-2">
-                <a href="https://anilist.co/anime/{{ anime.id }}" target="_blank" class="text-xs font-bold bg-white bg-opacity-10 hover:bg-{{ user.preferences.accent_colour }}-600 hover:bg-opacity-30 rounded px-2 py-1">
+                <a href="https://anilist.co/manga/{{ manga.id }}" target="_blank" class="text-xs font-bold bg-white bg-opacity-10 hover:bg-{{ user.preferences.accent_colour }}-600 hover:bg-opacity-30 rounded px-2 py-1">
                     <svg stroke="currentColor" fill="currentColor" stroke-width="0" role="img" viewBox="0 0 24 24" height="1.5rem" width="1.5rem" xmlns="http://www.w3.org/2000/svg"><path d="M24 17.53v2.421c0 .71-.391 1.101-1.1 1.101h-5l-.057-.165L11.84 3.736c.106-.502.46-.788 1.053-.788h2.422c.71 0 1.1.391 1.1 1.1v12.38H22.9c.71 0 1.1.392 1.1 1.101zM11.034 2.947l6.337 18.104h-4.918l-1.052-3.131H6.019l-1.077 3.131H0L6.361 2.948h4.673zm-.66 10.96-1.69-5.014-1.541 5.015h3.23z"></path></svg>
                 </a>
-                <a href="https://myanimelist.net/anime/{{ anime.malId }}" target="_blank" class="ext-xs font-bold bg-white bg-opacity-10 hover:bg-{{ user.preferences.accent_colour }}-600 hover:bg-opacity-30 rounded px-2 py-1">
+                <a href="https://myanimelist.net/manga/{{ manga.idMal }}" target="_blank" class="ext-xs font-bold bg-white bg-opacity-10 hover:bg-{{ user.preferences.accent_colour }}-600 hover:bg-opacity-30 rounded px-2 py-1">
                     <svg stroke="currentColor" fill="currentColor" stroke-width="0" role="img" viewBox="0 0 24 24" height="1.5rem" width="1.5rem" xmlns="http://www.w3.org/2000/svg"><path d="M8.273 7.247v8.423l-2.103-.003v-5.216l-2.03 2.404-1.989-2.458-.02 5.285H.001L0 7.247h2.203l1.865 2.545 2.015-2.546 2.19.001zm8.628 2.069l.025 6.335h-2.365l-.008-2.871h-2.8c.07.499.21 1.266.417 1.779.155.381.298.751.583 1.128l-1.705 1.125c-.349-.636-.622-1.337-.878-2.082a9.296 9.296 0 0 1-.507-2.179c-.085-.75-.097-1.471.107-2.212a3.908 3.908 0 0 1 1.161-1.866c.313-.293.749-.5 1.1-.687.351-.187.743-.264 1.107-.359a7.405 7.405 0 0 1 1.191-.183c.398-.034 1.107-.066 2.39-.028l.545 1.749H14.51c-.593.008-.878.001-1.341.209a2.236 2.236 0 0 0-1.278 1.92l2.663.033.038-1.81h2.309zm3.992-2.099v6.627l3.107.032-.43 1.775h-4.807V7.187l2.13.03z"></path></svg>
                 </a>
             </div>
         </div>
-        <a href="{% url 'watch:watch' anime.id %}" class="flex flex-col gap-2 w-full justify-around max-w-[calc(100%-10rem)]">
-            <h2 class="text-xl font-bold text-transparent bg-clip-text block w-full truncate overflow-hidden text-ellipsis whitespace-nowrap" style="background: linear-gradient(-45deg, {% if anime.color %}{{ anime.color }}{% else %}white{% endif %}, white); -webkit-background-clip: text; background-clip: text;">
-                {% if user.preferences.title_language == "english" and anime.title.english %}
-                {{ anime.title.english }}
-                {% elif user.preferences.title_language == "native" and anime.title.native %}
-                {{ anime.title.native }}
+        <a href="#" class="flex flex-col gap-2 w-full justify-around max-w-[calc(100%-10rem)]">
+            <h2 class="text-xl font-bold text-transparent bg-clip-text block w-full truncate overflow-hidden text-ellipsis whitespace-nowrap" style="background: linear-gradient(-45deg, {% if manga.color %}{{ manga.color }}{% else %}white{% endif %}, white); -webkit-background-clip: text; background-clip: text;">
+                {% if user.preferences.title_language == "english" and manga.title.english %}
+                {{ manga.title.english }}
+                {% elif user.preferences.title_language == "native" and manga.title.native %}
+                {{ manga.title.native }}
                 {% else %}
-                {{ anime.title.romaji }}
+                {{ manga.title.romaji }}
                 {% endif %}
             </h2>
             <p class="max-h-24 overflow-auto text-sm text-white mb-4 no-scrollbar">
-                {{ anime.description|strip_html }}
+                {{ manga.description|strip_html }}
             </p>
             <span class="text-xs sm:text-sm font-bold flex gap-2 flex-row flex-wrap items-center">
-                {% if anime.status == "Ongoing" %}
+                {% if manga.status == "Ongoing" %}
                 <span class="text-xs font-bold bg-white bg-opacity-10 p-1 rounded flex items-center gap-1">
                     <span class="text-green-500 pt-1">
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-2 sm:size-3">
@@ -36,7 +36,7 @@
                     </span>
                     Ongoing
                 </span>
-                {% elif anime.status == "Not yet aired" %}
+                {% elif manga.status == "Not yet aired" %}
                 <span class="text-xs font-bold bg-white bg-opacity-10 p-1 rounded flex items-center gap-1">
                     <span class="text-yellow-500 pt-1">
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-2 sm:size-3">
@@ -61,33 +61,31 @@
                         <path d="M15 4h1a1 1 0 0 1 1 1v3.5"></path>
                         <path d="M20 6c.264 .112 .52 .217 .768 .315a1 1 0 0 1 .53 1.311l-2.298 5.374"></path>
                     </svg>
-                    {{ anime.type }}
+                    {% if manga.chapters %}
+                    {{ manga.chapters }}
+                    {% elif manga.volumes %}
+                    {{ manga.volumes }}
+                    {% else %}
+                    {{ manga.format }}
+                    {% endif %}
                 </span>
                 <span class="text-xs font-bold bg-white bg-opacity-10 p-1 rounded flex items-center gap-1">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-4">
                         <path fill-rule="evenodd" d="M6.75 2.25A.75.75 0 0 1 7.5 3v1.5h9V3A.75.75 0 0 1 18 3v1.5h.75a3 3 0 0 1 3 3v11.25a3 3 0 0 1-3 3H5.25a3 3 0 0 1-3-3V7.5a3 3 0 0 1 3-3H6V3a.75.75 0 0 1 .75-.75Zm13.5 9a1.5 1.5 0 0 0-1.5-1.5H5.25a1.5 1.5 0 0 0-1.5 1.5v7.5a1.5 1.5 0 0 0 1.5 1.5h13.5a1.5 1.5 0 0 0 1.5-1.5v-7.5Z" clip-rule="evenodd" />
                     </svg>              
-                    {{ anime.releaseDate }}
+                    {{ manga.startDate.year }}
                 </span>
-                {% if anime.rating %}
+                {% if manga.averageScore %}
                 <span class="text-xs font-bold bg-white bg-opacity-10 p-1 rounded flex items-center gap-1">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M11.48 3.499a.562.562 0 0 1 1.04 0l2.125 5.111a.563.563 0 0 0 .475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 0 0-.182.557l1.285 5.385a.562.562 0 0 1-.84.61l-4.725-2.885a.562.562 0 0 0-.586 0L6.982 20.54a.562.562 0 0 1-.84-.61l1.285-5.386a.562.562 0 0 0-.182-.557l-4.204-3.602a.562.562 0 0 1 .321-.988l5.518-.442a.563.563 0 0 0 .475-.345L11.48 3.5Z"/>
                     </svg>
-                    {{ anime.rating }}
+                    {{ manga.averageScore }}
                     </span>
-                {% endif %}
-                {% if anime.totalEpisodes %}
-                <span class="text-xs font-bold bg-white bg-opacity-10 p-1 rounded flex items-center gap-1">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M5.25 8.25h15m-16.5 7.5h15m-1.8-13.5-3.9 19.5m-2.1-19.5-3.9 19.5"/>
-                      </svg>
-                      {{ anime.totalEpisodes }}
-                </span>
                 {% endif %}
             </span>
             <span class="text-xs sm:text-sm font-bold flex gap-2 flex-row flex-wrap items-center">
-                {% for genre in anime.genres %}
+                {% for genre in manga.genres %}
                 {% if genre == "Action" %}
                 <span class="text-xs font-bold bg-green-100 bg-opacity-10 text-green-300 py-1 px-2 rounded-full">
                 {% elif genre == "Adventure" %}

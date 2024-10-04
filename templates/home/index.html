@@ -105,7 +105,10 @@
 </section>
 
 {% if request.user.preferences.show_history_on_home and user_history_data %}
-<h1 class="text-2xl font-bold text-white mt-4">Continue Watching</h1>
+<div class="flex flex-row justify-between items-center mt-4">
+  <h1 class="text-2xl font-bold text-white">Continue Watching</h1>
+  <a href="{% url "home:watchlist" %}" class="text-sm font-bold text-{{ user.preferences.accent_colour }}-600">View All &rarr;</a>
+</div>
 <div class="flex flex-row gap-2 mt-4 overflow-x-auto no-scrollbar swiper historySwiper">
   <div class="swiper-wrapper">
     {% for history in user_history_data %}
@@ -132,80 +135,89 @@
 </div>
 {% endif %}
 
-
-<!-- Split: Anime List: Sidebar -->
 <section class="flex flex-col xl:flex-row mt-4 gap-4">
-  <section class="w-full xl:w-3/4 flex flex-col items-center p-2">
-    <!-- Top Bar: Trending, Popular, Top Rated: Purple Text: Active Tab -->
-    <section class="inline-flex w-max flex-row gap-4 rounded-full bg-white bg-opacity-10 mx-auto">
-      <button class="flex flex-row items-center focus:outline-none gap-2 text-sm font-bold py-2 px-4 rounded-full bg-{{ user.preferences.accent_colour }}-600 category-switch active-category" data-target="trending">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-4">
-          <path fill-rule="evenodd" d="M12.963 2.286a.75.75 0 0 0-1.071-.136 9.742 9.742 0 0 0-3.539 6.176 7.547 7.547 0 0 1-1.705-1.715.75.75 0 0 0-1.152-.082A9 9 0 1 0 15.68 4.534a7.46 7.46 0 0 1-2.717-2.248ZM15.75 14.25a3.75 3.75 0 1 1-7.313-1.172c.628.465 1.35.81 2.133 1a5.99 5.99 0 0 1 1.925-3.546 3.75 3.75 0 0 1 3.255 3.718Z" clip-rule="evenodd" />
-        </svg>
-        <span>Trending</span>
-      </button>
-      <button class="flex flex-row items-center focus:outline-none gap-2 text-sm font-bold py-2 px-4 rounded-full category-switch" data-target="popular">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-4">
-          <path fill-rule="evenodd" d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.006 5.404.434c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.434 2.082-5.005Z" clip-rule="evenodd" />
-        </svg>        
-        <span>Popular</span>
-      </button>      
-      <button class="flex flex-row items-center focus:outline-none gap-2 text-sm font-bold py-2 px-4 rounded-full category-switch" data-target="top_rated">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-4">
-          <path d="M18.375 2.25c-1.035 0-1.875.84-1.875 1.875v15.75c0 1.035.84 1.875 1.875 1.875h.75c1.035 0 1.875-.84 1.875-1.875V4.125c0-1.036-.84-1.875-1.875-1.875h-.75ZM9.75 8.625c0-1.036.84-1.875 1.875-1.875h.75c1.036 0 1.875.84 1.875 1.875v11.25c0 1.035-.84 1.875-1.875 1.875h-.75a1.875 1.875 0 0 1-1.875-1.875V8.625ZM3 13.125c0-1.036.84-1.875 1.875-1.875h.75c1.036 0 1.875.84 1.875 1.875v6.75c0 1.035-.84 1.875-1.875 1.875h-.75A1.875 1.875 0 0 1 3 19.875v-6.75Z" />
-        </svg>
-        <span>Top Rated</span>
-      </button>      
+  <section class="w-full xl:w-3/4">
+    <div class="flex flex-row justify-between items-center mt-4">
+      <h1 class="text-2xl font-bold text-white">Trending Anime</h1>
+      <a href="{% url "home:search" %}?sort=%5B%22TRENDING_DESC%22%5D" class="text-sm font-bold text-{{ user.preferences.accent_colour }}-600">View All &rarr;</a>
+    </div>
+    <section id="trending" class="flex flex-wrap justify-center mt-4 max-w-full">
+      {% if user.preferences.card_layout == 'classic' %}
+      {% include "partials/datacard_render.html" with data=trending_anime %}
+      {% elif user.preferences.card_layout == 'wide' %}
+      {% include "partials/datacardwide_render.html" with data=trending_anime %}
+      {% elif user.preferences.card_layout == 'compact' %}
+      {% include "partials/datacardcompact_render.html" with data=trending_anime %}
+      {% endif %}
     </section>
-    <!-- Data Cards: Trending Anime -->
-    <section id="trending" class="flex flex-col mt-4 max-w-full">
-      <div class="flex flex-wrap justify-center">
-        {% if user.preferences.card_layout == 'classic' %}
-        {% include "partials/datacard_render.html" with data=trending_anime %}
-        {% elif user.preferences.card_layout == 'wide' %}
-        {% include "partials/datacardwide_render.html" with data=trending_anime %}
-        {% elif user.preferences.card_layout == 'compact' %}
-        {% include "partials/datacardcompact_render.html" with data=trending_anime %}
-        {% endif %}
-      </div>
-      <div class="text-right mt-4">
-        <a href="{% url "home:search" %}?sort=%5B%22TRENDING_DESC%22%5D" class="bg-{{ user.preferences.accent_colour }}-600 font-bold text-white text-sm px-4 py-2 rounded">View All Trending</a>
-      </div>
+    <div class="flex flex-row justify-between items-center mt-4">
+      <h1 class="text-2xl font-bold text-white">Trending Manga</h1>
+      <a href="#" class="text-sm font-bold text-{{ user.preferences.accent_colour }}-600">View All &rarr;</a>
+    </div>
+    <section id="trending_manga" class="flex flex-wrap justify-center mt-4 max-w-full">
+      {% if user.preferences.card_layout == 'classic' %}
+      {% include "partials/mangacard_render.html" with data=trending_manga %}
+      {% elif user.preferences.card_layout == 'wide' %}
+      {% include "partials/mangacardwide_render.html" with data=trending_manga %}
+      {% elif user.preferences.card_layout == 'compact' %}
+      {% include "partials/mangacardcompact_render.html" with data=trending_manga %}
+      {% endif %}
     </section>
-    
-    <!-- Data Cards: Popular Anime -->
-    <section id="popular" class="flex-wrap flex flex-col mt-4 max-w-full">
-      <div class="flex flex-wrap justify-center">
-        {% if user.preferences.card_layout == 'classic' %}
-        {% include "partials/datacard_render.html" with data=popular_anime %}
-        {% elif user.preferences.card_layout == 'wide' %}
-        {% include "partials/datacardwide_render.html" with data=popular_anime %}
-        {% elif user.preferences.card_layout == 'compact' %}
-        {% include "partials/datacardcompact_render.html" with data=popular_anime %}
-        {% endif %}
-      </div>
-      <div class="text-right mt-4">
-        <a href="{% url "home:search" %}?sort=%5B%22POPULARITY_DESC%22%5D" class="bg-{{ user.preferences.accent_colour }}-600 font-bold text-white text-sm px-4 py-2 rounded">View All Popular</a>
-      </div>
+    <div class="flex flex-row justify-between items-center mt-4">
+      <h1 class="text-2xl font-bold text-white">Popular Anime</h1>
+      <a href="{% url "home:search" %}?sort=%5B%22POPULARITY_DESC%22%5D" class="text-sm font-bold text-{{ user.preferences.accent_colour }}-600">View All &rarr;</a>
+    </div>
+    <section id="popular" class="flex flex-wrap justify-center mt-4 max-w-full">
+      {% if user.preferences.card_layout == 'classic' %}
+      {% include "partials/datacard_render.html" with data=popular_anime %}
+      {% elif user.preferences.card_layout == 'wide' %}
+      {% include "partials/datacardwide_render.html" with data=popular_anime %}
+      {% elif user.preferences.card_layout == 'compact' %}
+      {% include "partials/datacardcompact_render.html" with data=popular_anime %}
+      {% endif %}
     </section>
-    <!-- Data Cards: Top Rated Anime -->
-    <section id="top_rated" class="flex-wrap flex flex-col mt-4 max-w-full">
-      <div class="flex flex-wrap justify-center">
-        {% if user.preferences.card_layout == 'classic' %}
-        {% include "partials/datacard_render.html" with data=top_anime %}
-        {% elif user.preferences.card_layout == 'wide' %}
-        {% include "partials/datacardwide_render.html" with data=top_anime %}
-        {% elif user.preferences.card_layout == 'compact' %}
-        {% include "partials/datacardcompact_render.html" with data=top_anime %}
-        {% endif %}
-      </div>
-      <div class="text-right mt-4">
-        <a href="{% url "home:search" %}?sort=%5B%22SCORE_DESC%22%5D" class="bg-{{ user.preferences.accent_colour }}-600 font-bold text-white text-sm px-4 py-2 rounded">View All Top Rated</a>
-      </div>
+    <div class="flex flex-row justify-between items-center mt-4">
+      <h1 class="text-2xl font-bold text-white">Popular Manga</h1>
+      <a href="#" class="text-sm font-bold text-{{ user.preferences.accent_colour }}-600">View All &rarr;</a>
+    </div>
+    <section id="popular_manga" class="flex flex-wrap justify-center mt-4 max-w-full">
+      {% if user.preferences.card_layout == 'classic' %}
+      {% include "partials/mangacard_render.html" with data=popular_manga %}
+      {% elif user.preferences.card_layout == 'wide' %}
+      {% include "partials/mangacardwide_render.html" with data=popular_manga %}
+      {% elif user.preferences.card_layout == 'compact' %}
+      {% include "partials/mangacardcompact_render.html" with data=popular_manga %}
+      {% endif %}
+    </section>
+    <div class="flex flex-row justify-between items-center mt-4">
+      <h1 class="text-2xl font-bold text-white">Top Rated Anime</h1>
+      <a href="{% url "home:search" %}?sort=%5B%22SCORE_DESC%22%5D" class="text-sm font-bold text-{{ user.preferences.accent_colour }}-600">View All &rarr;</a>
+    </div>
+    <section id="top_rated" class="flex flex-wrap justify-center mt-4 max-w-full">
+      {% if user.preferences.card_layout == 'classic' %}
+      {% include "partials/datacard_render.html" with data=top_anime %}
+      {% elif user.preferences.card_layout == 'wide' %}
+      {% include "partials/datacardwide_render.html" with data=top_anime %}
+      {% elif user.preferences.card_layout == 'compact' %}
+      {% include "partials/datacardcompact_render.html" with data=top_anime %}
+      {% endif %}
+    </section>
+    <div class="flex flex-row justify-between items-center mt-4">
+      <h1 class="text-2xl font-bold text-white">Top Rated Manga</h1>
+      <a href="#" class="text-sm font-bold text-{{ user.preferences.accent_colour }}-600">View All &rarr;</a>
+    </div>
+    <section id="top_rated_manga" class="flex flex-wrap justify-center mt-4 max-w-full">
+      {% if user.preferences.card_layout == 'classic' %}
+      {% include "partials/mangacard_render.html" with data=top_manga %}
+      {% elif user.preferences.card_layout == 'wide' %}
+      {% include "partials/mangacardwide_render.html" with data=top_manga %}
+      {% elif user.preferences.card_layout == 'compact' %}
+      {% include "partials/mangacardcompact_render.html" with data=top_manga %}
+      {% endif %}
     </section>
   </section>
-  <section class="w-full xl:w-1/4 px-4 py-2">
-    <h2 class="text-2xl font-bold text-white uppercase">Top Airing</h2>
+  <section class="w-full xl:w-1/4">
+    <h2 class="text-2xl font-bold text-white uppercase mt-4">Top Airing</h2>
     <!-- Wide Cards: Upcoming -->
     <section class="flex flex-col gap-4 mt-4">
       {% include "partials/sidebarwidecard_render.html" with data=top_airing_anime %}
@@ -217,9 +229,6 @@
     </section>
   </section>
 </section>
-
-
-
 
 {% endblock content %} {% block scripts %}
 <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
@@ -251,7 +260,7 @@
   });
 </script>
 <script>
-  document.addEventListener('DOMContentLoaded', function() {
+  /*document.addEventListener('DOMContentLoaded', function() {
     const categorySwitch = document.querySelectorAll(".category-switch");
     const sections = ["trending", "popular", "top_rated"];
     
@@ -300,6 +309,6 @@
             switchCategory(target);
         });
     });
-  });
+  }); */
 </script>
 {% endblock scripts %}

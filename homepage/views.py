@@ -8,11 +8,14 @@ import json
 from homepage.utils import (
     find_target_anime,
     get_anime_schedule,
+    get_popular_manga,
     get_start_end_times,
+    get_top_manga,
     get_trending_anime,
     get_popular_anime,
     get_top_anime,
     get_top_airing_anime,
+    get_trending_manga,
     get_upcoming_anime,
     get_next_season,
     group_anime_schedules,
@@ -31,12 +34,15 @@ def get_homepage_data():
             "top_anime": get_top_anime(),
             "top_airing_anime": get_top_airing_anime(),
             "upcoming_anime": get_upcoming_anime(),
-            "next_season": get_next_season()
+            "next_season": get_next_season(),
+            "trending_manga": get_trending_manga(),
+            "popular_manga": get_popular_manga(),
+            "top_manga": get_top_manga(),
         }
         store_in_redis_cache("homepage_data", json.dumps(homepage_data), 3600)  # Cache for 1 hour
     else:
         homepage_data = json.loads(homepage_data)
-    
+
     return homepage_data
 
 def index(request):
@@ -49,6 +55,9 @@ def index(request):
         "top_airing_anime": homepage_data["top_airing_anime"]["results"],
         "upcoming_anime": homepage_data["upcoming_anime"]["results"],
         "next_season": homepage_data["next_season"],
+        "trending_manga": homepage_data["trending_manga"],
+        "popular_manga": homepage_data["popular_manga"],
+        "top_manga": homepage_data["top_manga"],
     }
 
     if request.user.preferences.show_history_on_home:
