@@ -61,6 +61,15 @@ class GlobalMetaMiddleware:
             request.meta["image"] = anime_info["image"]
 
         if '/watch/' in full_path:
+            paths_to_ignore = [
+                '/watch/update_watch_history',
+                '/watch/remove_anime_from_watchlist',
+            ]
+
+            if any(path in full_path for path in paths_to_ignore):
+                response = self.get_response(request)
+                return response
+
             requested_id = request.path.split("/")[2]
             episode = request.path.split("/")[3] if len(request.path.split("/")) > 3 else 1
             episode = int(episode)
