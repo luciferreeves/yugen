@@ -25,7 +25,7 @@ class GlobalMetaMiddleware:
         request.meta = {
             "title": "Yugen — Stream Anime | Read Manga | Anime Schedule | Anime List",
             "description": "Welcome to Yugen! Stream anime and read manga. Get the latest anime schedule and browse and add anime to your watchlist.",
-            "image": "https://anime.rize.moe/static/icons/yugen.png",
+            "image": "https://anime.rize.moe/static/icons/Yugen.png",
             "url": "{}://{}{}".format(request.scheme, request.get_host(), request.path),
             "robots": "index, follow",
         }
