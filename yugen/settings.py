@@ -69,6 +69,7 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "django.middleware.gzip.GZipMiddleware",
     "middleware.remove_slash.RemoveSlashMiddleware",
+    "middleware.globalmetamiddleware.GlobalMetaMiddleware",
     "middleware.authentication.AuthMiddleware",
     "middleware.preferences.PreferencesMiddleware",
     "middleware.mal_token_refresh.MALTokenRefreshMiddleware",

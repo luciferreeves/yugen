@@ -8,6 +8,7 @@ from django.http import HttpResponse
 from authentication.utils import (
     get_redirect_uri,
     get_discord_user,
+    update_user_discord_info,
 )
 
 class AuthMiddleware:
@@ -44,13 +45,11 @@ class AuthMiddleware:
                     cookie_data["verified_at"]
                 )
                 if timezone.now() > verified_at + timedelta(hours=24):
-                    # Verification expired, need to re-check
-                    pass
+                    verification_cookie = None
             except (json.JSONDecodeError, ValueError):
-                # Cookie is invalid or expired, need to re-check
-                pass
+                verification_cookie = None
         else:
-            # No verification cookie, need to check guild membership
+            verification_cookie = None
             pass
 
         if not verification_cookie or not self._is_authorized(request):
@@ -65,7 +64,7 @@ class AuthMiddleware:
                 response = render(request, "messages/unauthorized.html", {"redirect_uri": get_redirect_uri()})
                 response.delete_cookie("guild_verified")  # Ensure cookie is removed
                 return response
-
+            update_user_discord_info(user)
             # Set the verification cookie
             response = self.get_response(request)
             response.set_cookie(

@@ -165,8 +165,18 @@ def get_discord_user(access_token, token_type):
             user["is_authorized"] = False
             user["rate_limited"] = False
 
+    user["banner"] = user["banner"] if "banner" in user else ""
     return user
 
+def update_user_discord_info(user_data):
+    user = User.objects.get(discord_id=user_data["id"])
+    print("Updating User Info for", user.username)
+    user.discord_username = user_data["username"]
+    user.discord_avatar = user_data["avatar"]
+    user.discord_banner = user_data["banner"]
+    user.discord_global_name = user_data["global_name"]
+    user.discord_guild_name = user_data["guild_name"]
+    user.save()
 
 def authenticate_user(exchange_response):
     access_token = exchange_response.get("access_token")
