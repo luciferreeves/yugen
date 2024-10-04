@@ -88,7 +88,16 @@
                 {% for episode in all_episodes %}
                 <a href="{% url "watch:watch_episode" anime.id episode.number %}{% if request.GET.mode %}?mode={{ request.GET.mode }}{% endif %}{% if request.GET.mode and request.GET.provider %}&provider={{ request.GET.provider }}{% elif request.GET.provider %}?provider={{ request.GET.provider }}{% endif %}" 
                    class="flex flex-row gap-4 justify-between items-center w-full {% if episode.number == current_episode_number %}bg-{{ user.preferences.accent_colour }}-600{% elif episode.number in watched_episodes %}bg-{{ user.preferences.accent_colour }}-600 bg-opacity-20{% else %}bg-white bg-opacity-10{% endif %} p-2 rounded hover:bg-{{ user.preferences.accent_colour }}-600 hover:bg-opacity-30 mb-2" id="{% if episode.number == current_episode_number %}active-episode-list{% endif %}">
-                    <span class="truncate max-w-full overflow-hidden text-ellipsis whitespace-nowrap">{{ episode.number }}. {% if episode.title %}{{ episode.title }}{% elif episode.metadata.title %}{{ episode.metadata.title }}{% else %}Episode {{ episode.number }}{% endif %}</span>
+                   <span class="truncate max-w-full overflow-hidden text-ellipsis whitespace-nowrap">
+                        {{ episode.number }}. 
+                        {% if episode.metadata.title %}
+                            {{ episode.metadata.title }}
+                        {% elif episode.title %}
+                            {{ episode.title }}
+                        {% else %}
+                            Episode {{ episode.number }}
+                        {% endif %}
+                    </span>
                     
                     <span class="flex flex-row item-center gap-2">
                     {% if episode.metadata.filler %}
@@ -126,12 +135,21 @@
                 <a href="{% url "watch:watch_episode" anime.id episode.number %}{% if request.GET.mode %}?mode={{ request.GET.mode }}{% endif %}{% if request.GET.mode and request.GET.provider %}&provider={{ request.GET.provider }}{% elif request.GET.provider %}?provider={{ request.GET.provider }}{% endif %}" 
                    class="flex flex-row w-full gap-2 {% if episode.number == current_episode_number %}bg-{{ user.preferences.accent_colour }}-600{% elif episode.number in watched_episodes %}bg-{{ user.preferences.accent_colour }}-600 bg-opacity-20{% else %}bg-white bg-opacity-10{% endif %} p-2 rounded my-2 hover:bg-{{ user.preferences.accent_colour }}-600 hover:bg-opacity-30" id="{% if episode.number == current_episode_number %}active-episode-grid{% endif %}">
                     <div class="w-32 h-18 flex-shrink-0">
-                        <img loading="lazy" src="{{ episode.metadata.image }}" alt="Episode {{ episode.number }}" class="w-full h-full object-cover rounded" style="aspect-ratio: 16/9;">
+                        <img loading="lazy" src="{% if episode.metadata.image %}{{ episode.metadata.image }}{% else %}{{ anime.cover}}{% endif %}" alt="Episode {{ episode.number }}" class="w-full h-full object-cover rounded" style="aspect-ratio: 16/9;">
                     </div>
                     <div class="flex flex-col justify-between flex-grow overflow-hidden">
                         <div>
-                            <h3 class="font-bold truncate">{{ episode.number }}. {% if episode.title %}{{ episode.title }}{% elif episode.metadata.title %}{{ episode.metadata.title }}{% else %}Episode {{ episode.number }}{% endif %}</h3>
-                            <p class="text-sm text-gray-300 line-clamp-2 overflow-hidden" style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;">{{ episode.metadata.description }}</p>
+                            <h3 class="font-bold truncate">
+                                {{ episode.number }}. 
+                                {% if episode.metadata.title %}
+                                    {{ episode.metadata.title }}
+                                {% elif episode.title %}
+                                    {{ episode.title }}
+                                {% else %}
+                                    Episode {{ episode.number }}
+                                {% endif %}    
+                            </h3>
+                            <p class="text-sm text-gray-300 line-clamp-2 overflow-hidden" style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;">{% if episode.metadata.description %}{{ episode.metadata.description }}{% else %}No description available{% endif %}</p>
                         </div>
                         <div class="flex flex-row items-center gap-2">
                             {% if episode.metadata.filler %}
@@ -170,7 +188,14 @@
 <div class="flex flex-col lg:flex-row my-4 gap-2">
     <div class="w-full lg:w-3/4">
         <div class="flex flex-row gap-2 items-center justify-between">
-            {% if current_episode %}<h2 class="text-xl font-bold truncate max-w-full overflow-hidden text-ellipsis whitespace-nowrap">Episode {{ current_episode.number }} — {% if current_episode.title %}{{ current_episode.title }}{% elif current_episode.metadata.title %}{{ current_episode.metadata.title }}{% else %}Episode {{ current_episode.number }}{% endif %}</h2>{% endif %}
+            {% if current_episode %}<h2 class="text-xl font-bold truncate max-w-full overflow-hidden text-ellipsis whitespace-nowrap">Episode {{ current_episode.number }} — {{ episode.number }}
+                {% if episode.metadata.title %}
+                    {{ episode.metadata.title }}
+                {% elif episode.title %}
+                    {{ episode.title }}
+                {% else %}
+                    Episode {{ current_episode.number }}
+            {% endif %}</h2>{% endif %}
             <div class="flex flex-row gap-1 items-center">
                 <span class="font-bold">Episode Provider: </span>
                 <a href="{% url "watch:watch_episode" anime.id current_episode.number %}?mode={{ mode }}&provider=zoro" 

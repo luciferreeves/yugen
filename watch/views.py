@@ -55,8 +55,8 @@ def watch(request, anime_id, episode=None):
             "anime_title_english": anime_data["title"]["english"] if "title" in anime_data and "english" in anime_data["title"] else "",
             "anime_title_romaji": anime_data["title"]["romaji"] if "title" in anime_data and "romaji" in anime_data["title"] else "",
             "anime_title_native": anime_data["title"]["native"] if "title" in anime_data and "native" in anime_data["title"] else "",
-            "anime_cover_image": episode_data["metadata"]["image"] if episode_data and "metadata" in episode_data else episode_data["image"],
-            "episode_title": episode_data["metadata"]["title"] if episode_data and "metadata" in episode_data else episode_data["title"],
+            "anime_cover_image": episode_data.get("metadata", {}).get("image") if episode_data and episode_data.get("metadata") else anime_data.get("cover", ""),
+            "episode_title": episode_data.get("metadata", {}).get("title") if episode_data and episode_data.get("metadata") else episode_data.get("title", ""),
         }
 
         if not additional_data["episode_title"]:
