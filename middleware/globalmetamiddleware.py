@@ -6,6 +6,9 @@ class GlobalMetaMiddleware:
         self.get_response = get_response
 
     def get_anime_title_description(self, anime_info, title_lang="english"):
+        if not anime_info:
+            return "Yugen — Stream Anime | Read Manga | Anime Schedule | Anime List", "Welcome to Yugen! Stream anime and read manga. Get the latest anime schedule and browse and add anime to your watchlist."
+
         if "description" in anime_info:
             description = anime_info["description"]
             description = re.sub('<[^<]+?>', '', description)
@@ -58,7 +61,8 @@ class GlobalMetaMiddleware:
 
             request.meta["title"] = f"{title} | Yugen"
             request.meta["description"] = description
-            request.meta["image"] = anime_info["image"]
+            if anime_info and "image" in anime_info:
+                request.meta["image"] = anime_info["image"]
 
         if '/watch/' in full_path:
             paths_to_ignore = [
@@ -75,7 +79,7 @@ class GlobalMetaMiddleware:
             episode = int(episode)
             anime_info = get_anime_data(requested_id)
 
-            if len(anime_info["episodes"] or []) < episode:
+            if anime_info and len(anime_info["episodes"] or []) < episode:
                 episode = len(anime_info["episodes"])
             
             if episode <= 0:
@@ -84,7 +88,8 @@ class GlobalMetaMiddleware:
 
             request.meta["title"] = f"Watch {title} Episode {episode} | Yugen"
             request.meta["description"] = description
-            request.meta["image"] = anime_info["image"]
+            if anime_info and "image" in anime_info:
+                request.meta["image"] = anime_info["image"]
 
         response = self.get_response(request)
 

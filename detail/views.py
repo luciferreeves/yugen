@@ -8,6 +8,9 @@ def index(request):
 def anime(request, anime_id):
     anime_data = get_anime_data(anime_id, provider="zoro")
 
+    if not anime_data:
+        return redirect("home:index")
+
     if "status" in anime_data and anime_data["status"] != "Not yet aired":
         anime_episodes = anime_data["episodes"]
         anime_episodes = attach_episode_metadata(anime_data, anime_episodes)

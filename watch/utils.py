@@ -61,7 +61,7 @@ def get_anime_data(anime_id, provider="gogo", dub=False):
         sub_data = response.json()
 
         if "message" in sub_data:
-            return get_anime_data(anime_id)
+            return None
 
         if "status" in sub_data and sub_data["status"] == "Completed":
             store_in_redis_cache(sub_cache_key, json.dumps(sub_data), 3600 * 24 * 30)
