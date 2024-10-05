@@ -617,15 +617,23 @@ def parse_bbcode(content):
     content = re.sub(r'\[i\](.*?)\[/i\]', r'<em>\1</em>', content)
     content = re.sub(r'\[u\](.*?)\[/u\]', r'<u>\1</u>', content)
     
-    # Handle [img] tags
+    # Handle [img] tags with or without dimensions
     def img_replacer(match):
         align = match.group(1)
-        src = match.group(2).strip()
+        width_height = match.group(2)
+        src = match.group(3).strip()
         style = f' style="float: {align};"' if align else ''
-        return f'<img src="{src}"{style} alt="User posted image" class="max-w-96">'
+        return f'<img src="{src}" alt="User posted image" class="max-w-72 lg:max-w-96">'
     
-    content = re.sub(r'\[img(?:\s+align=(left|right))?\](.*?)\[/img\]', img_replacer, content, flags=re.DOTALL)
-    content = re.sub(r'\[IMG(?:\s+ALIGN=(left|right))?\](.*?)\[/IMG\]', img_replacer, content, flags=re.DOTALL)
+    content = re.sub(r'\[img(?:\s+align=(left|right))?(?:=(\d+x\d+))?\](.*?)\[/img\]', img_replacer, content, flags=re.DOTALL)
+    content = re.sub(r'\[IMG(?:\s+ALIGN=(left|right))?(?:=(\d+x\d+))?\](.*?)\[/IMG\]', img_replacer, content, flags=re.DOTALL)
+
+    # Handle [yt] tags for YouTube videos
+    def yt_replacer(match):
+        video_id = match.group(1)
+        return f'<iframe class="max-w-fit aspect-video" src="https://www.youtube.com/embed/{video_id}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>'
+
+    content = re.sub(r'\[yt\](.*?)\[/yt\]', yt_replacer, content)
 
     spoiler_count = 0
     def spoiler_replacer(match):

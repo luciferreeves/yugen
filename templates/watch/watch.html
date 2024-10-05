@@ -613,20 +613,12 @@
                     </a>
                 </div>
 
-                {% for comment in discussions.comments %}
-                <div class="w-full p-2 flex flex-row gap-4">
-                    <img loading="lazy" src="{{ comment.created_by.forum_avator }}" alt="{{ comment.created_by.name }}" class="rounded-full w-16 h-16 object-cover aspect-square"/>
-                    <div class="flex flex-col gap-2 flex-grow max-w-fit">
-                        <div class="flex flex-row gap-2 items-center ">
-                            <span class="font-bold">{{ comment.created_by.name }}</span>
-                            <span class="text-xs text-gray-400">
-                                {{ comment.created_at|parse_iso_datetime|date:"F j, Y" }} at {{ comment.created_at|parse_iso_datetime|time:"g:i A" }}
-                            </span>
-                        </div>
-                        <div class="text-sm text-gray-100">{{ comment.body_html|remove_br|safe }}</div>
-                    </div>
+                <div id="comments-container">
                 </div>
-                {% endfor %}
+
+                <button id="load-more" class="mt-4 bg-{{ user.preferences.accent_colour }}-600 hover:bg-{{ user.preferences.accent_colour }}-700 text-white text-sm font-bold rounded-lg px-4 py-2 transition duration-300" style="display: none;">
+                    Load More
+                </button>
             </div>
         {% endif %}
 
@@ -898,6 +890,68 @@
 <div id="toastContainer" class="fixed bottom-4 left-1/2 transform -translate-x-1/2 z-50 flex flex-col space-y-2"></div>
 {% endblock content %}
 {% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const commentsContainer = document.getElementById('comments-container');
+        const loadMoreButton = document.getElementById('load-more');
+        const commentsPerPage = 10;
+        let currentPage = 0;
+    
+        const comments = [
+            {% for comment in discussions.comments %}
+                {
+                    avatar: "{{ comment.created_by.forum_avator }}",
+                    name: "{{ comment.created_by.name }}",
+                    date: "{{ comment.created_at|parse_iso_datetime|date:"F j, Y" }}",
+                    time: "{{ comment.created_at|parse_iso_datetime|time:"g:i A" }}",
+                    body: `{{ comment.body_html|remove_br|safe|escapejs }}`
+                },
+            {% endfor %}
+        ];
+    
+        function renderComments(start, end) {
+            const fragment = document.createDocumentFragment();
+            for (let i = start; i < end && i < comments.length; i++) {
+                const comment = comments[i];
+                const commentDiv = document.createElement('div');
+                commentDiv.className = 'w-full p-2 flex flex-row gap-4';
+                commentDiv.innerHTML = `
+                    <img loading="lazy" src="${comment.avatar}" alt="${comment.name}" class="rounded-full w-16 h-16 object-cover aspect-square"/>
+                    <div class="flex flex-col gap-1 flex-grow max-w-fit">
+                        <div class="flex flex-row gap-2 items-center">
+                            <span class="font-bold">${comment.name}</span>
+                            <span class="text-xs text-gray-400">
+                                ${comment.date} at ${comment.time}
+                            </span>
+                        </div>
+                        <div class="text-sm text-gray-100">${comment.body}</div>
+                    </div>
+                `;
+                fragment.appendChild(commentDiv);
+            }
+            commentsContainer.appendChild(fragment);
+        }
+    
+        function loadMoreComments() {
+            const start = currentPage * commentsPerPage;
+            const end = start + commentsPerPage;
+            renderComments(start, end);
+            currentPage++;
+    
+            if (end >= comments.length) {
+                loadMoreButton.style.display = 'none';
+            }
+        }
+    
+        loadMoreButton.addEventListener('click', loadMoreComments);
+    
+        // Initial load
+        loadMoreComments();
+        if (comments.length > commentsPerPage) {
+            loadMoreButton.style.display = 'block';
+        }
+    });
+</script>
 <script>
     function toggleSpoiler(id) {
         var content = document.getElementById(id);
