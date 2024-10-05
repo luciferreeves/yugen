@@ -17,7 +17,7 @@ def watch(request, anime_id, episode=None):
     preload_request = request.GET.get("preload") == "true" 
 
     if not episode and request.user.preferences.default_watch_page == "detail" and not forward_detail:
-        return redirect("detail:detail", anime_id=anime_id)
+        return redirect("detail:anime", anime_id=anime_id)
     
     provider = "gogo" if request.user.preferences.default_provider == "gogoanime" else "zoro"
     provider = request.GET.get("provider", provider)
@@ -37,7 +37,7 @@ def watch(request, anime_id, episode=None):
     anime_data = get_anime_data(anime_id, provider=provider, dub=dub)
 
     if anime_data and "status" in anime_data and anime_data["status"] == "Not yet aired":
-        return redirect("detail:detail", anime_id=anime_id)
+        return redirect("detail:anime", anime_id=anime_id)
     
     episodes = anime_data["episodes"]
     if len(episodes) == 0:
@@ -132,7 +132,7 @@ def watch(request, anime_id, episode=None):
     # forward_detail = request.GET.get("forward") == "detail"
     # preload_request = request.GET.get("preload") == "true"
     # if not episode and request.user.preferences.default_watch_page == "detail" and not forward_detail:
-    #     return redirect("detail:detail", anime_id=anime_id)
+    #     return redirect("detail:anime", anime_id=anime_id)
     
     # anime_fetched, provider, gogodub = get_anime_data(anime_id)
     # provider = provider.decode() if isinstance(provider, bytes) else provider
@@ -141,7 +141,7 @@ def watch(request, anime_id, episode=None):
     # if not anime_fetched:
     #     provider = "gogo"
     # if anime_fetched and "status" in anime_fetched and anime_fetched["status"] == "Not yet aired":
-    #     return redirect("detail:detail", anime_id=anime_id)
+    #     return redirect("detail:anime", anime_id=anime_id)
     
     # forced_update = request.GET.get("refresh") == "true"
 
@@ -216,7 +216,7 @@ def watch(request, anime_id, episode=None):
     #     gogodub = True if mode == "dub" else False
     #     anime_fetched, provider, gogodub = get_anime_data(anime_id, provider="gogo", gogodub=gogodub)
     #     if anime_fetched and "status" in anime_fetched and anime_fetched["status"] == "Not yet aired":
-    #         return redirect("detail:detail", anime_id=anime_id)
+    #         return redirect("detail:anime", anime_id=anime_id)
     #     episodes, m = get_anime_episodes_gogo(anime_id, mode)
     #     if episodes:
     #         attach_episode_metadata(anime_fetched, episodes)

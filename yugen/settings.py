@@ -52,10 +52,12 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "corsheaders",
-    "homepage",
     "authentication",
-    "watch",
+    "detail",
+    "homepage",
+    "read",
     "user_profile",
+    "watch",
 ]
 
 MIDDLEWARE = [
