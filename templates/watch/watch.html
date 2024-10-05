@@ -189,10 +189,10 @@
     <div class="w-full lg:w-3/4">
         <div class="flex flex-row gap-2 items-center justify-between">
             {% if current_episode %}<h2 class="text-xl font-bold truncate max-w-full overflow-hidden text-ellipsis whitespace-nowrap">Episode {{ current_episode.number }} — {{ episode.number }}
-                {% if episode.metadata.title %}
-                    {{ episode.metadata.title }}
-                {% elif episode.title %}
-                    {{ episode.title }}
+                {% if current_episode.metadata.title %}
+                    {{ current_episode.metadata.title }}
+                {% elif current_episode.title %}
+                    {{ current_episode.title }}
                 {% else %}
                     Episode {{ current_episode.number }}
             {% endif %}</h2>{% endif %}
@@ -350,8 +350,8 @@
                         </div>
                         <div class="flex-1">
                             <span class="font-bold">Studios: </span>
-                            {% for studio in anime.studios.all %}
-                                <span>{{ studio.name }}</span>{% if not forloop.last %}, {% endif %}
+                            {% for studio in anime.studios %}
+                                <span>{{ studio }}</span>{% if not forloop.last %}, {% endif %}
                             {% endfor %}
                         </div>
                     </div>
@@ -417,47 +417,47 @@
                     {% endif %}
                 </span>
                 <span class="text-xs sm:text-sm font-bold flex gap-2 flex-row flex-wrap items-center">
-                    {% for genre in anime.genres.all %}
-                    {% if genre.name == "Action" %}
+                    {% for genre in anime.genres %}
+                    {% if genre == "Action" %}
                     <span class="text-xs font-bold bg-green-100 bg-opacity-10 text-green-300 py-1 px-2 rounded-full">
-                    {% elif genre.name == "Adventure" %}
+                    {% elif genre == "Adventure" %}
                     <span class="text-xs font-bold bg-pink-100 bg-opacity-10 text-pink-300 py-1 px-2 rounded-full">
-                    {% elif genre.name == "Cars" %}
+                    {% elif genre == "Cars" %}
                     <span class="text-xs font-bold bg-orange-100 bg-opacity-10 text-orange-300 py-1 px-2 rounded-full">
-                    {% elif genre.name == "Comedy" %}
+                    {% elif genre == "Comedy" %}
                     <span class="text-xs font-bold bg-purple-100 bg-opacity-10 text-purple-300 py-1 px-2 rounded-full">
-                    {% elif genre.name == "Drama" %}
+                    {% elif genre == "Drama" %}
                     <span class="text-xs font-bold bg-blue-100 bg-opacity-10 text-blue-300 py-1 px-2 rounded-full">
-                    {% elif genre.name == "Fantasy" %}
+                    {% elif genre == "Fantasy" %}
                     <span class="text-xs font-bold bg-yellow-100 bg-opacity-10 text-yellow-300 py-1 px-2 rounded-full">
-                    {% elif genre.name == "Horror" %}
+                    {% elif genre == "Horror" %}
                     <span class="text-xs font-bold bg-red-100 bg-opacity-10 text-red-300 py-1 px-2 rounded-full">
-                    {% elif genre.name == "Mahou Shoujo" %}
+                    {% elif genre == "Mahou Shoujo" %}
                     <span class="text-xs font-bold bg-teal-100 bg-opacity-10 text-teal-300 py-1 px-2 rounded-full">
-                    {% elif genre.name == "Mecha" %}
+                    {% elif genre == "Mecha" %}
                     <span class="text-xs font-bold bg-indigo-100 bg-opacity-10 text-indigo-300 py-1 px-2 rounded-full">
-                    {% elif genre.name == "Music" %}
+                    {% elif genre == "Music" %}
                     <span class="text-xs font-bold bg-pink-100 bg-opacity-10 text-pink-300 py-1 px-2 rounded-full">
-                    {% elif genre.name == "Mystery" %}
+                    {% elif genre == "Mystery" %}
                     <span class="text-xs font-bold bg-purple-100 bg-opacity-10 text-purple-300 py-1 px-2 rounded-full">
-                    {% elif genre.name == "Psychological" %}
+                    {% elif genre == "Psychological" %}
                     <span class="text-xs font-bold bg-blue-100 bg-opacity-10 text-blue-300 py-1 px-2 rounded-full">
-                    {% elif genre.name == "Romance" %}
+                    {% elif genre == "Romance" %}
                     <span class="text-xs font-bold bg-yellow-100 bg-opacity-10 text-yellow-300 py-1 px-2 rounded-full">
-                    {% elif genre.name == "Sci-Fi" %}
+                    {% elif genre == "Sci-Fi" %}
                     <span class="text-xs font-bold bg-red-100 bg-opacity-10 text-red-300 py-1 px-2 rounded-full">
-                    {% elif genre.name == "Slice of Life" %}
+                    {% elif genre == "Slice of Life" %}
                     <span class="text-xs font-bold bg-teal-100 bg-opacity-10 text-teal-300 py-1 px-2 rounded-full">
-                    {% elif genre.name == "Sports" %}
+                    {% elif genre == "Sports" %}
                     <span class="text-xs font-bold bg-indigo-100 bg-opacity-10 text-indigo-300 py-1 px-2 rounded-full">
-                    {% elif genre.name == "Supernatural" %}
+                    {% elif genre == "Supernatural" %}
                     <span class="text-xs font-bold bg-green-100 bg-opacity-10 text-green-300 py-1 px-2 rounded-full">
-                    {% elif genre.name == "Thriller" %}
+                    {% elif genre == "Thriller" %}
                     <span class="text-xs font-bold bg-orange-100 bg-opacity-10 text-orange-300 py-1 px-2 rounded-full">
                     {% else %}
                     <span class="text-xs font-bold bg-white bg-opacity-10 text-white py-1 px-2 rounded-full">
                     {% endif %}
-                        {{ genre.name }}
+                        {{ genre }}
                     </span>
                     {% endfor %}
                 </span>
