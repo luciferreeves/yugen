@@ -51,7 +51,7 @@ class GlobalMetaMiddleware:
             request.meta["title"] = "Profile | Yugen"
             request.meta["description"] = "Explore your profile on Yugen. Stream and watch the latest anime episodes. Read manga and discover the most popular anime."
         
-        if '/detail/' in full_path:
+        if '/anime/' in full_path:
             requested_id = request.path.split("/")[2]
             anime_info = get_anime_data(requested_id)
             title, description = self.get_anime_title_description(anime_info)
