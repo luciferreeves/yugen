@@ -1286,7 +1286,7 @@
         logLevel: 'warn',
         crossOrigin: true,
         playsInline: true,
-        title: decodeHTMLEntities('{% if user.preferences.title_language == "english" and anime.title.english %}{{ anime.title.english }}{% elif user.preferences.title_language == "native" and anime.title.native %}{{ anime.title.native }}{% else %}{{ anime.title.romaji }}{% endif %} — {{ current_episode.title }}'),
+        title: decodeHTMLEntities('{% if user.preferences.title_language == "english" and anime.title.english %}{{ anime.title.english }}{% elif user.preferences.title_language == "native" and anime.title.native %}{{ anime.title.native }}{% else %}{{ anime.title.romaji }}{% endif %} — {% if current_episode.metadata.title %}{{ current_episode.metadata.title}}{% else %}{{ current_episode.title }}{% endif %}'),
         subtitlePreference: {
             lang: 'English',
         },
@@ -1317,16 +1317,16 @@
 
         const chapters = [
             { startTime: introStart, endTime: introEnd, title: 'Intro' },
-            { startTime: introEnd, endTime: outroStart, title: decodeHTMLEntities('{% if user.preferences.title_language == "english" and anime.title.english %}{{ anime.title.english }}{% elif user.preferences.title_language == "native" and anime.title.native %}{{ anime.title.native }}{% else %}{{ anime.title.romaji }}{% endif %} — {{ current_episode.title }}') },
+            { startTime: introEnd, endTime: outroStart, title: decodeHTMLEntities('{% if user.preferences.title_language == "english" and anime.title.english %}{{ anime.title.english }}{% elif user.preferences.title_language == "native" and anime.title.native %}{{ anime.title.native }}{% else %}{{ anime.title.romaji }}{% endif %} — {% if current_episode.metadata.title %}{{ current_episode.metadata.title}}{% else %}{{ current_episode.title }}{% endif %}') },
             { startTime: outroStart, endTime: outroEnd, title: 'Outro' }
         ];
     
         if (introStart > 0 && introStart < introEnd) {
-            chapters.unshift({ startTime: 0, endTime: introStart, title: decodeHTMLEntities('{% if user.preferences.title_language == "english" and anime.title.english %}{{ anime.title.english }}{% elif user.preferences.title_language == "native" and anime.title.native %}{{ anime.title.native }}{% else %}{{ anime.title.romaji }}{% endif %} — {{ current_episode.title }}') });
+            chapters.unshift({ startTime: 0, endTime: introStart, title: decodeHTMLEntities('{% if user.preferences.title_language == "english" and anime.title.english %}{{ anime.title.english }}{% elif user.preferences.title_language == "native" and anime.title.native %}{{ anime.title.native }}{% else %}{{ anime.title.romaji }}{% endif %} — {% if current_episode.metadata.title %}{{ current_episode.metadata.title}}{% else %}{{ current_episode.title }}{% endif %}') });
         }
 
         if (outroEnd > 0 && outroStart < outroEnd && duration > outroEnd) {
-            chapters.push({ startTime: outroEnd, endTime: duration, title: decodeHTMLEntities('{% if user.preferences.title_language == "english" and anime.title.english %}{{ anime.title.english }}{% elif user.preferences.title_language == "native" and anime.title.native %}{{ anime.title.native }}{% else %}{{ anime.title.romaji }}{% endif %} — {{ current_episode.title }}') });
+            chapters.push({ startTime: outroEnd, endTime: duration, title: decodeHTMLEntities('{% if user.preferences.title_language == "english" and anime.title.english %}{{ anime.title.english }}{% elif user.preferences.title_language == "native" and anime.title.native %}{{ anime.title.native }}{% else %}{{ anime.title.romaji }}{% endif %} — {% if current_episode.metadata.title %}{{ current_episode.metadata.title}}{% else %}{{ current_episode.title }}{% endif %}') });
         }
         
         const chaptersTrack = new TextTrack({
@@ -1343,7 +1343,7 @@
         }
         
         if (introStart === 0 && introEnd === 0 && outroStart === 0 && outroEnd === 0) {
-            chaptersTrack.addCue(new VTTCue(0, duration, decodeHTMLEntities('{% if user.preferences.title_language == "english" and anime.title.english %}{{ anime.title.english }}{% elif user.preferences.title_language == "native" and anime.title.native %}{{ anime.title.native }}{% else %}{{ anime.title.romaji }}{% endif %} — {{ current_episode.title }}')));    
+            chaptersTrack.addCue(new VTTCue(0, duration, decodeHTMLEntities('{% if user.preferences.title_language == "english" and anime.title.english %}{{ anime.title.english }}{% elif user.preferences.title_language == "native" and anime.title.native %}{{ anime.title.native }}{% else %}{{ anime.title.romaji }}{% endif %} — {% if current_episode.metadata.title %}{{ current_episode.metadata.title}}{% else %}{{ current_episode.title }}{% endif %}')));    
         }
 
         player.textTracks.add(chaptersTrack);
