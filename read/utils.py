@@ -14,7 +14,10 @@ def get_manga_info(manga_id):
     if "message" in manga_data:
         return None
     else:
-        mangadex_id = fetch_mangadex_id(manga_data['title']['romaji'])
+        manga_title = manga_data["title"]["english"]
+        if not manga_title:
+            manga_title = manga_data["title"]["romaji"]
+        mangadex_id = fetch_mangadex_id(manga_title)
         print(f"Mangadex ID: {mangadex_id}")
         if mangadex_id:
             manga_data["mangadex_id"] = mangadex_id
