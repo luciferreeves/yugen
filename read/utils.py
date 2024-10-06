@@ -84,5 +84,5 @@ def get_chapter_pages(provider, chapter_id):
     print(f"Trying URL: {base_url}")
 
     response = requests.get(base_url, timeout=10)
-    return response.json() if response.status_code == 200 else None
+    return response.json()
 
