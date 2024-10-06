@@ -12,13 +12,21 @@ def get_manga_data(manga_id):
     manga_data = get_from_redis_cache(cache_key)
 
     if not manga_data:
-        base_url = f"{os.getenv('CONSUMET_URL')}/meta/anilist-manga/info/{manga_id}"
+        base_url = f"{os.getenv('CONSUMET_URL')}/meta/anilist-manga/info/{manga_id}?provider=mangareader"
         print(f"Trying URL: {base_url}")
         response = requests.get(base_url, timeout=10)
         manga_data = response.json()
 
         if "message" in manga_data:
-            return None
+            base_url = f"{os.getenv('CONSUMET_URL')}/meta/anilist-manga/info/{manga_id}"
+            print(f"Trying URL: {base_url}")
+            response = requests.get(base_url, timeout=10)
+            manga_data = response.json()
+
+            if "message" in manga_data:
+                return None
+        else:
+            manga_data["chapters"] = list(filter(lambda x: "/en/" in x["id"], manga_data["chapters"]))
         
         if "status" in manga_data and manga_data["status"] == "Completed":
             store_in_redis_cache(cache_key, json.dumps(manga_data), 3600 * 24 * 30)
