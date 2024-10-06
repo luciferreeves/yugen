@@ -20,10 +20,12 @@
         justify-content: center;
     }
     .swiper-slide.double-page {
-        justify-content: space-between;
+        justify-content: center;
     }
     .swiper-slide.double-page img {
-        max-width: 49%;
+        max-width: 50%;
+        height: 100%;
+        object-fit: contain;
     }
 </style>
 {% endblock css %}
@@ -34,20 +36,20 @@
             <!-- Slides will be dynamically added here -->
         </div>
     </div>
-    <div id="settings-bar" class="bg-{{ user.preferences.accent_colour }}-900 text-white p-4 sticky bottom-0 left-0 right-0">
+    <div id="settings-bar" class="bg-{{ user.preferences.accent_colour }}-900 bg-opacity-30 text-white p-4 sticky bottom-0 left-0 right-0">
         <div class="flex justify-start items-center gap-2">
-            <button id="prev-page" class="px-4 py-2 outline-none bg-{{ user.preferences.accent_colour }}-600 rounded flex flex-row gap-2 items-center">
+            <button id="next-page" class="px-4 py-2 outline-none bg-{{ user.preferences.accent_colour }}-600 rounded flex flex-row gap-2 items-center">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M9 15 3 9m0 0 6-6M3 9h12a6 6 0 0 1 0 12h-3" />
                 </svg>
-                <span>Prev</span>
+                <span>Next</span>
             </button>
             <span id="page-info" class="text-sm"></span>
-            <button id="next-page" class="px-4 py-2 outline-none bg-{{ user.preferences.accent_colour }}-600 rounded flex flex-row gap-2 items-center">
+            <button id="prev-page" class="px-4 py-2 outline-none bg-{{ user.preferences.accent_colour }}-600 rounded flex flex-row gap-2 items-center">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4">
                     <path stroke-linecap="round" stroke-linejoin="round" d="m15 15 6-6m0 0-6-6m6 6H9a6 6 0 0 0 0 12h3" />
                 </svg>
-                <span>Next</span>
+                <span>Prev</span>
             </button>
             <button id="fullscreen-toggle" class="px-4 py-2 bg-{{ user.preferences.accent_colour }}-600 rounded flex flex-row gap-2 items-center">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
@@ -62,7 +64,15 @@
 {% block scripts %}
 <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
 <script>
-    const pagesData = {{ pages|safe }}; // Assuming pagesData is an array of image URLs
+const pagesData = {{ pages|safe }};
+{% if next_chapter %}
+const nextUrl = `{% url "read:read" manga.id next_chapter.id %}`;
+{% endif %}
+{% if prev_chapter %}
+const prevUrl = `{% url "read:read" manga.id prev_chapter.id %}`;
+{% endif %}
+</script>
+<script>
     const reader = document.getElementById('manga-reader');
     const pageInfo = document.getElementById('page-info');
     const fullscreenToggle = document.getElementById('fullscreen-toggle');
@@ -78,7 +88,7 @@
             slidesPerView: 1,
             spaceBetween: 0,
             resistance: false,
-            allowTouchMove: !isDesktop,
+            allowTouchMove: true,
             speed: 300,
         });
     
@@ -92,21 +102,31 @@
         const reversedPages = [...pagesData].reverse();
         let slides = [];
         
-        if (reversedPages.length % 2 !== 0) {
-            slides.push(
-                `<div class="swiper-slide single-page">
-                    <img src="${reversedPages[0].img}" alt="Page ${pagesData.length}">
-                </div>`
-            );
-        }
+        if (isDesktop) {
+            if (reversedPages.length % 2 !== 0) {
+                slides.push(
+                    `<div class="swiper-slide single-page">
+                        <img src="${reversedPages[0].img}" alt="Page ${pagesData.length}">
+                    </div>`
+                );
+            }
 
-        for (let i = reversedPages.length % 2; i < reversedPages.length; i += 2) {
-            slides.push(
-                `<div class="swiper-slide double-page">
-                    <img src="${reversedPages[i].img}" alt="Page ${pagesData.length - i}">
-                    <img src="${reversedPages[i + 1].img}" alt="Page ${pagesData.length - i - 1}">
-                </div>`
-            );
+            for (let i = reversedPages.length % 2; i < reversedPages.length; i += 2) {
+                slides.push(
+                    `<div class="swiper-slide double-page">
+                        <img src="${reversedPages[i].img}" alt="Page ${pagesData.length - i}">
+                        <img src="${reversedPages[i + 1].img}" alt="Page ${pagesData.length - i - 1}">
+                    </div>`
+                );
+            }
+        } else {
+            for (let i = 0; i < reversedPages.length; i++) {
+                slides.push(
+                    `<div class="swiper-slide single-page">
+                        <img src="${reversedPages[i].img}" alt="Page ${pagesData.length - i}">
+                    </div>`
+                );
+            }
         }
 
         swiper.appendSlide(slides);
@@ -116,16 +136,19 @@
     function updatePageInfo() {
         const totalSlides = swiper.slides.length;
         const currentSlide = totalSlides - swiper.activeIndex;
-        const isFirstSlide = currentSlide === 1;
         const isLastSlide = currentSlide === totalSlides;
 
         let startPage, endPage;
 
-        if (isFirstSlide && pagesData.length % 2 !== 0) {
-            startPage = endPage = pagesData.length;
+        if (isDesktop) {
+            if (isLastSlide && pagesData.length % 2 !== 0) {
+                startPage = endPage = pagesData.length;
+            } else {
+                endPage = Math.min((currentSlide - 1) * 2 + 2, pagesData.length);
+                startPage = Math.max(1, endPage - 1);
+            }
         } else {
-            endPage = pagesData.length - (currentSlide - 1) * 2;
-            startPage = Math.max(1, endPage - 1);
+            startPage = endPage = pagesData.length - (currentSlide - 1);
         }
 
         pageInfo.textContent = `Page${startPage !== endPage ? 's' : ''} ${startPage}${startPage !== endPage ? '-' + endPage : ''} of ${pagesData.length}`;
@@ -142,12 +165,28 @@
     function nextPage() {
         if (swiper.activeIndex > 0) {
             swiper.slidePrev();
+        } else if (nextUrl) {
+            goToNextChapter();
         }
     }
 
     function prevPage() {
         if (swiper.activeIndex < swiper.slides.length - 1) {
             swiper.slideNext();
+        } else if (prevUrl) {
+            window.location.href = prevUrl;
+        }
+    }
+
+    function goToPrevChapter() {
+        if (prevUrl) {
+            window.location.href = prevUrl;
+        }
+    }
+
+    function goToNextChapter() {
+        if (nextUrl) {
+            window.location.href = nextUrl;
         }
     }
 
@@ -164,9 +203,8 @@
         const wasDesktop = isDesktop;
         isDesktop = window.innerWidth >= 768;
         if (wasDesktop !== isDesktop) {
-            swiper.params.allowTouchMove = !isDesktop;
-            swiper.update();
-            updatePageInfo();
+            swiper.destroy();
+            initSwiper();
         }
     });
 

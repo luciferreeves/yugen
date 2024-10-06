@@ -322,9 +322,9 @@
             </section>
             <section id="chapters" class="w-full flex-wrap flex justify-start max-h-[540px] overflow-auto">
                 {% for chapter in manga.chapters %}
-                <a href="{% url "read:read" chapter.encoded_id %}" class="w-full px-2 mb-2 flex flex-row gap-4 justify-between items-center bg-white bg-opacity-10 p-2 rounded hover:bg-{{ user.preferences.accent_colour }}-600 hover:bg-opacity-30 mb-2">
-                    {% if chapter.title %}
-                    <span class="font-bold">{{ chapter.title }}</span>
+                <a href="{% url "read:read" manga.id chapter.id %}" class="w-full px-2 mb-2 flex flex-row gap-4 justify-between items-center bg-white bg-opacity-10 p-2 rounded hover:bg-{{ user.preferences.accent_colour }}-600 hover:bg-opacity-30 mb-2">
+                    {% if chapter.attributes.title %}
+                    <span class="font-bold">{{ chapter.attributes.chapter }}. {{ chapter.attributes.title }}</span>
                     {% else %}
                     <span class="font-bold">Chapter {{ forloop.counter }}</span>
                     {% endif %}

@@ -1,45 +1,11 @@
-import base64
 import json
 import os
-
 import requests
+from functools import lru_cache
 from watch.utils import get_from_redis_cache, store_in_redis_cache
 
-def encode_chapter_info(provider, chapter_id):
-    data = json.dumps({"p": provider, "id": chapter_id})
-    return base64.urlsafe_b64encode(data.encode()).rstrip(b'=').decode()
-
-def decode_chapter_info(encoded_info):
-    padding = 4 - (len(encoded_info) % 4)
-    encoded_info += "=" * padding
-    data = json.loads(base64.urlsafe_b64decode(encoded_info).decode())
-    return data["p"], data["id"]
-
-def process_mangareader_chapters(manga_data):
-    manga_data["chapters"] = list(filter(lambda x: "/en/" in x["id"], manga_data["chapters"]))
-    for chapter in manga_data["chapters"]:
-        chapter["encoded_id"] = encode_chapter_info("mangareader", chapter["id"])
-    return manga_data
-
-def process_generic_chapters(manga_data):
-    for chapter in manga_data["chapters"]:
-        chapter["encoded_id"] = encode_chapter_info("generic", chapter["id"])
-    return manga_data
-
-def get_data_from_managareader(manga_id):
-    base_url = f"{os.getenv('CONSUMET_URL')}/meta/anilist-manga/info/{manga_id}?provider=mangareader"
-    print(f"Trying URL: {base_url}")
-    response = requests.get(base_url, timeout=10)
-    manga_data = response.json()
-
-    if "message" in manga_data:
-        return None
-    else:
-        manga_data = process_mangareader_chapters(manga_data)
-    
-    return manga_data
-
-def get_data_from_generic(manga_id):
+@lru_cache(maxsize=128)
+def get_manga_info(manga_id):
     base_url = f"{os.getenv('CONSUMET_URL')}/meta/anilist-manga/info/{manga_id}"
     print(f"Trying URL: {base_url}")
     response = requests.get(base_url, timeout=10)
@@ -48,41 +14,107 @@ def get_data_from_generic(manga_id):
     if "message" in manga_data:
         return None
     else:
-        manga_data = process_generic_chapters(manga_data)
+        mangadex_id = fetch_mangadex_id(manga_data['title']['romaji'])
+        print(f"Mangadex ID: {mangadex_id}")
+        if mangadex_id:
+            manga_data["mangadex_id"] = mangadex_id
+            manga_data["chapters"] = fetch_mangadex_chapters(mangadex_id)
+        else:
+            manga_data["mangadex_id"] = None
     
     return manga_data
 
+@lru_cache(maxsize=128)
+def fetch_mangadex_id(title):
+    url = "https://api.mangadex.org/manga"
+    params = {
+        "title": title,
+        "limit": 1,
+        "order[relevance]": "desc",
+        "includes[]": ["cover_art"],
+        "contentRating[]": ["safe", "suggestive", "erotica", "pornographic"],
+        "hasAvailableChapters": "true"
+    }
+    response = requests.get(url, params=params)
+    if response.status_code == 200:
+        data = response.json()
+        if data["data"]:
+            return data["data"][0]["id"]
+    print(response.json())
+    return None
+
+@lru_cache(maxsize=128)
+def fetch_mangadex_chapters(mangadex_id):
+    url = f"https://api.mangadex.org/manga/{mangadex_id}/feed"
+    params = {
+        "translatedLanguage[]": ["en"],
+        "order[chapter]": "asc",
+        "limit": 500,
+        "offset": 0
+    }
+    all_chapters = []
+    total = float('inf')
+
+    while len(all_chapters) < total:
+        response = requests.get(url, params=params)
+        if response.status_code != 200:
+            print(f"Error fetching chapters: {response.status_code}")
+            print(response.json())
+            return None
+
+        data = response.json()
+        total = data['total']
+        all_chapters.extend(data['data'])
+        params['offset'] += params['limit']
+
+        if len(data['data']) < params['limit']:
+            break
+
+    filtered_chapters = []
+    seen_chapters = set()
+
+    for chapter in all_chapters:
+        if chapter["type"] == "chapter":
+            attributes = chapter["attributes"]
+            chapter_number = attributes.get("chapter")
+            pages = attributes.get("pages", 0)
+
+            if pages == 0:
+                continue
+
+            seen_chapters.add(chapter_number)
+            filtered_chapters.append(chapter)
+
+    return filtered_chapters
+
 def get_manga_data(manga_id):
     print(f"Fetching manga data: ID={manga_id}")
-
     cache_key = f"manga_{manga_id}_manga_data"
     manga_data = get_from_redis_cache(cache_key)
-    generic_only_ids = [30013,101517]
-    provider = "generic" if manga_id in generic_only_ids else "mangareader"
 
     if not manga_data:
-        manga_data = None
-        if provider == "mangareader":
-            manga_data = get_data_from_managareader(manga_id)
-
-        if not manga_data or provider == "generic":
-            manga_data = get_data_from_generic(manga_id)
+        manga_data = get_manga_info(manga_id)
         
-        if "status" in manga_data and manga_data["status"] == "Completed":
+        if manga_data and "status" in manga_data and manga_data["status"] == "Completed":
             store_in_redis_cache(cache_key, json.dumps(manga_data), 3600 * 24 * 30)
-        else:
+        elif manga_data:
             store_in_redis_cache(cache_key, json.dumps(manga_data), 3600 * 24)
     else:
         manga_data = json.loads(manga_data)
 
     return manga_data
 
-def get_chapter_pages(provider, chapter_id):
-    base_url = f"{os.getenv('CONSUMET_URL')}/meta/anilist-manga/read?chapterId={chapter_id}"
-    if provider == "mangareader":
-        base_url += "&provider=mangareader"
-    print(f"Trying URL: {base_url}")
+@lru_cache(maxsize=128)
+def get_chapter_pages(chapter_id):
+    url = f"https://api.mangadex.org/at-home/server/{chapter_id}"
+    response = requests.get(url)
+    if response.status_code != 200:
+        print(f"Failed to fetch data for chapter {chapter_id}")
+        return None
 
-    response = requests.get(base_url, timeout=10)
-    return response.json()
+    chapter_data = response.json()
+    base_url = chapter_data['baseUrl']
+    chapter_hash = chapter_data['chapter']['hash']
+    data = chapter_data['chapter']['data']
 
+    return [{"page": i + 1, "img": f"{base_url}/data/{chapter_hash}/{page}"} for i, page in enumerate(data)]
