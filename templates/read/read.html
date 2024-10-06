@@ -1,0 +1,175 @@
+{% extends "partials/base.html" %}
+{% block css %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css"/>
+<style>
+    .swiper {
+        width: 100%;
+        height: 100%;
+    }
+    .swiper-slide {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .swiper-slide img {
+        max-width: 100%;
+        max-height: 100%;
+        object-fit: contain;
+    }
+    .swiper-slide.single-page {
+        justify-content: center;
+    }
+    .swiper-slide.double-page {
+        justify-content: space-between;
+    }
+    .swiper-slide.double-page img {
+        max-width: 49%;
+    }
+</style>
+{% endblock css %}
+{% block content %}
+<div id="manga-reader" class="h-[calc(100vh-9rem)] lg:h-[calc(100vh-5rem)] flex flex-col">
+    <div class="swiper flex-grow">
+        <div class="swiper-wrapper">
+            <!-- Slides will be dynamically added here -->
+        </div>
+    </div>
+    <div id="settings-bar" class="bg-{{ user.preferences.accent_colour }}-900 text-white p-4 sticky bottom-0 left-0 right-0">
+        <div class="flex justify-start items-center gap-2">
+            <button id="prev-page" class="px-4 py-2 outline-none bg-{{ user.preferences.accent_colour }}-600 rounded flex flex-row gap-2 items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 15 3 9m0 0 6-6M3 9h12a6 6 0 0 1 0 12h-3" />
+                </svg>
+                <span>Prev</span>
+            </button>
+            <span id="page-info" class="text-sm"></span>
+            <button id="next-page" class="px-4 py-2 outline-none bg-{{ user.preferences.accent_colour }}-600 rounded flex flex-row gap-2 items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="m15 15 6-6m0 0-6-6m6 6H9a6 6 0 0 0 0 12h3" />
+                </svg>
+                <span>Next</span>
+            </button>
+            <button id="fullscreen-toggle" class="px-4 py-2 bg-{{ user.preferences.accent_colour }}-600 rounded flex flex-row gap-2 items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3.75v4.5m0-4.5h4.5m-4.5 0L9 9M3.75 20.25v-4.5m0 4.5h4.5m-4.5 0L9 15M20.25 3.75h-4.5m4.5 0v4.5m0-4.5L15 9m5.25 11.25h-4.5m4.5 0v-4.5m0 4.5L15 15" />
+                </svg>
+                <span>Fullscreen</span>
+            </button>
+        </div>
+    </div>
+</div>
+{% endblock content %}
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+<script>
+    const pagesData = {{ pages|safe }}; // Assuming pagesData is an array of image URLs
+    const reader = document.getElementById('manga-reader');
+    const pageInfo = document.getElementById('page-info');
+    const fullscreenToggle = document.getElementById('fullscreen-toggle');
+    const prevButton = document.getElementById('prev-page');
+    const nextButton = document.getElementById('next-page');
+
+    let swiper;
+    let isDesktop = window.innerWidth >= 768;
+
+    function initSwiper() {
+        swiper = new Swiper('.swiper', {
+            direction: 'horizontal',
+            slidesPerView: 1,
+            spaceBetween: 0,
+            resistance: false,
+            allowTouchMove: !isDesktop,
+            speed: 300,
+        });
+    
+        loadPages();
+        updatePageInfo();
+    
+        swiper.on('slideChange', updatePageInfo);
+    }
+    
+    function loadPages() {
+        const reversedPages = [...pagesData].reverse();
+        let slides = [];
+        
+        if (reversedPages.length % 2 !== 0) {
+            slides.push(
+                `<div class="swiper-slide single-page">
+                    <img src="${reversedPages[0].img}" alt="Page ${pagesData.length}">
+                </div>`
+            );
+        }
+
+        for (let i = reversedPages.length % 2; i < reversedPages.length; i += 2) {
+            slides.push(
+                `<div class="swiper-slide double-page">
+                    <img src="${reversedPages[i].img}" alt="Page ${pagesData.length - i}">
+                    <img src="${reversedPages[i + 1].img}" alt="Page ${pagesData.length - i - 1}">
+                </div>`
+            );
+        }
+
+        swiper.appendSlide(slides);
+        swiper.slideTo(swiper.slides.length - 1, 0);
+    }
+
+    function updatePageInfo() {
+        const totalSlides = swiper.slides.length;
+        const currentSlide = totalSlides - swiper.activeIndex;
+        const isFirstSlide = currentSlide === 1;
+        const isLastSlide = currentSlide === totalSlides;
+
+        let startPage, endPage;
+
+        if (isFirstSlide && pagesData.length % 2 !== 0) {
+            startPage = endPage = pagesData.length;
+        } else {
+            endPage = pagesData.length - (currentSlide - 1) * 2;
+            startPage = Math.max(1, endPage - 1);
+        }
+
+        pageInfo.textContent = `Page${startPage !== endPage ? 's' : ''} ${startPage}${startPage !== endPage ? '-' + endPage : ''} of ${pagesData.length}`;
+    }
+
+    function toggleFullscreen() {
+        if (!document.fullscreenElement) {
+            reader.requestFullscreen();
+        } else {
+            document.exitFullscreen();
+        }
+    }
+
+    function nextPage() {
+        if (swiper.activeIndex > 0) {
+            swiper.slidePrev();
+        }
+    }
+
+    function prevPage() {
+        if (swiper.activeIndex < swiper.slides.length - 1) {
+            swiper.slideNext();
+        }
+    }
+
+    fullscreenToggle.addEventListener('click', toggleFullscreen);
+    nextButton.addEventListener('click', nextPage);
+    prevButton.addEventListener('click', prevPage);
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowLeft') nextPage();
+        else if (e.key === 'ArrowRight') prevPage();
+    });
+
+    window.addEventListener('resize', () => {
+        const wasDesktop = isDesktop;
+        isDesktop = window.innerWidth >= 768;
+        if (wasDesktop !== isDesktop) {
+            swiper.params.allowTouchMove = !isDesktop;
+            swiper.update();
+            updatePageInfo();
+        }
+    });
+
+    initSwiper();
+</script>
+{% endblock scripts %}

@@ -23,6 +23,7 @@ urlpatterns = [
     path("", include("homepage.urls", namespace="home")),
     path("", include("detail.urls", namespace="detail")),
     path("watch", include("watch.urls", namespace="watch")),
+    path("read", include("read.urls", namespace="read")),
     path("profile", include("user_profile.urls", namespace="profile")),
     path("auth", include("authentication.urls", namespace="auth")),
     path("admin/", admin.site.urls),
