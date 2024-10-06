@@ -17,87 +17,76 @@
     }
 </style>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css"/>
 {% endblock css %}
 {% block content %}
-<div style="background-image: url('{{ anime.cover }}')" class="relative bg-center bg-cover h-32 lg:h-96 my-4 rounded-lg" >
+<div style="background-image: url('{{ manga.cover }}')" class="relative bg-center bg-cover h-32 lg:h-96 my-4 rounded-lg" >
     <div class="absolute inset-0" style="background: linear-gradient(45deg, rgb(8, 8, 8) 15%, transparent 60%), linear-gradient(0deg, rgb(8, 8, 8) 0%, transparent 60%);"></div>
     <div class="w-4/12 lg:w-2/12 absolute px-2 lg:px-8 top-16 lg:top-48">
-        <img loading="lazy" src="{{ anime.image }}" alt="{{ anime.title.english }}" class="rounded-lg" class="w-full h-full rounded-lg object-cover"/>
-        <a href="{% if anime.id %}{% url "watch:watch" anime.id %}?forward=detail{% endif %}" class="bg-{{ user.preferences.accent_colour }}-600 hover:bg-{{ user.preferences.accent_colour }}-700 text-white text-xs sm:text-sm font-bold py-1 px-2 sm:py-2 sm:px-4 rounded-lg my-2 flex flex-row items-center justify-center gap-1">
+        <img loading="lazy" src="{{ manga.image }}" alt="{{ manga.title.english }}" class="rounded-lg" class="w-full h-full rounded-lg object-cover"/>
+        <a href="#" class="bg-{{ user.preferences.accent_colour }}-600 hover:bg-{{ user.preferences.accent_colour }}-700 text-white text-xs sm:text-sm font-bold py-1 px-2 sm:py-2 sm:px-4 rounded-lg my-2 flex flex-row items-center justify-center gap-1">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-4">
                 <path fill-rule="evenodd" d="M4.5 5.653c0-1.427 1.529-2.33 2.779-1.643l11.54 6.347c1.295.712 1.295 2.573 0 3.286L7.28 19.99c-1.25.687-2.779-.217-2.779-1.643V5.653Z" clip-rule="evenodd" />
             </svg>
-            <span>Watch Now</span>
+            <span>Read Now</span>
         </a>
         <div class="flex flex-row gap-2 my-2">
-            <a href="https://anilist.co/anime/{{ anime.id }}" target="_blank" class="text-xs font-bold bg-{{ user.preferences.accent_colour }}-400 bg-opacity-30 flex-1 justify-center flex hover:bg-opacity-50 rounded px-2 py-1">
+            <a href="https://anilist.co/anime/{{ manga.id }}" target="_blank" class="text-xs font-bold bg-{{ user.preferences.accent_colour }}-400 bg-opacity-30 flex-1 justify-center flex hover:bg-opacity-50 rounded px-2 py-1">
                 <svg stroke="currentColor" fill="currentColor" stroke-width="0" role="img" viewBox="0 0 24 24" height="1.5rem" width="1.5rem" xmlns="http://www.w3.org/2000/svg"><path d="M24 17.53v2.421c0 .71-.391 1.101-1.1 1.101h-5l-.057-.165L11.84 3.736c.106-.502.46-.788 1.053-.788h2.422c.71 0 1.1.391 1.1 1.1v12.38H22.9c.71 0 1.1.392 1.1 1.101zM11.034 2.947l6.337 18.104h-4.918l-1.052-3.131H6.019l-1.077 3.131H0L6.361 2.948h4.673zm-.66 10.96-1.69-5.014-1.541 5.015h3.23z"></path></svg>
             </a>
-            <a href="https://myanimelist.net/anime/{{ anime.malId }}" target="_blank" class="ext-xs font-bold bg-{{ user.preferences.accent_colour }}-400 bg-opacity-30 flex-1 justify-center flex hover:bg-opacity-50 rounded px-2 py-1">
+            <a href="https://myanimelist.net/anime/{{ manga.malId }}" target="_blank" class="ext-xs font-bold bg-{{ user.preferences.accent_colour }}-400 bg-opacity-30 flex-1 justify-center flex hover:bg-opacity-50 rounded px-2 py-1">
                 <svg stroke="currentColor" fill="currentColor" stroke-width="0" role="img" viewBox="0 0 24 24" height="1.5rem" width="1.5rem" xmlns="http://www.w3.org/2000/svg"><path d="M8.273 7.247v8.423l-2.103-.003v-5.216l-2.03 2.404-1.989-2.458-.02 5.285H.001L0 7.247h2.203l1.865 2.545 2.015-2.546 2.19.001zm8.628 2.069l.025 6.335h-2.365l-.008-2.871h-2.8c.07.499.21 1.266.417 1.779.155.381.298.751.583 1.128l-1.705 1.125c-.349-.636-.622-1.337-.878-2.082a9.296 9.296 0 0 1-.507-2.179c-.085-.75-.097-1.471.107-2.212a3.908 3.908 0 0 1 1.161-1.866c.313-.293.749-.5 1.1-.687.351-.187.743-.264 1.107-.359a7.405 7.405 0 0 1 1.191-.183c.398-.034 1.107-.066 2.39-.028l.545 1.749H14.51c-.593.008-.878.001-1.341.209a2.236 2.236 0 0 0-1.278 1.92l2.663.033.038-1.81h2.309zm3.992-2.099v6.627l3.107.032-.43 1.775h-4.807V7.187l2.13.03z"></path></svg>
             </a>
         </div>
         <div class="flex flex-col">
             <div>
-                <span class="font-bold">Format: </span>{{ anime.type }}
+                <span class="font-bold">Format: </span>{{ manga.type }}
             </div>
             <div>
-                <span class="font-bold">Episodes: </span>{{ anime.totalEpisodes }}
+                <span class="font-bold">Chapters: </span>{{ manga.chapters|length }}
             </div>
             <div>
-                <span class="font-bold">Year: </span>{{ anime.releaseDate }}
+                <span class="font-bold">Year: </span>{{ manga.releaseDate }}
             </div>
             <div>
-                <span class="font-bold">Duration: </span>{{ anime.duration }} mins
+                <span class="font-bold">Status: </span>{{ manga.status }}
             </div>
             <div>
-                <span class="font-bold">Status: </span>{{ anime.status }}
+                <span class="font-bold">Rating: </span>{{ manga.rating }} / 100
             </div>
-            <div class="capitalize">
-                <span class="font-bold">Season: </span>{{ anime.season }}
-            </div>
-            <div>
-                <span class="font-bold">Rating: </span>{{ anime.rating }} / 100
-            </div>
-            <div>
-                <span class="font-bold">Popularity: </span>{{ anime.popularity }}
-            </div>
-            <div>
-                <span class="font-bold">Country: </span>{{ anime.countryOfOrigin }}
-            </div>
+            {% if manga.studios %}
             <div class="sm:col-span-2 lg:col-span-3">
                 <span class="font-bold">Studios: </span>
-                {% for studio in anime.studios %}
+                {% for studio in manga.studios %}
                     <span>{{ studio }}</span>{% if not forloop.last %}, {% endif %}
                 {% endfor %}
             </div>
+            {% endif %}
         </div>
     </div>
     <div class="w-8/12 lg:w-10/12 absolute top-36 lg:top-48 right-0">
         <div class="inline-flex gap-1 sm:gap-2 flex-wrap">
-            <span {% if anime.color %}style="background-color: {{ anime.color }}3a;"{% endif %} class="text-[10px] sm:text-xs font-bold bg-white bg-opacity-10 p-1 rounded flex items-center gap-1">
+            <span {% if manga.color %}style="background-color: {{ manga.color }}3a;"{% endif %} class="text-[10px] sm:text-xs font-bold bg-white bg-opacity-10 p-1 rounded flex items-center gap-1">
                 <svg stroke="currentColor" fill="none" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" class="size-3 sm:size-4">
                 <path d="M3.604 7.197l7.138 -3.109a.96 .96 0 0 1 1.27 .527l4.924 11.902a1 1 0 0 1 -.514 1.304l-7.137 3.109a.96 .96 0 0 1 -1.271 -.527l-4.924 -11.903a1 1 0 0 1 .514 -1.304z"></path>
                 <path d="M15 4h1a1 1 0 0 1 1 1v3.5"></path>
                 <path d="M20 6c.264 .112 .52 .217 .768 .315a1 1 0 0 1 .53 1.311l-2.298 5.374"></path>
                 </svg>
-                {{ anime.type }}
+                {{ manga.type }}
             </span>
-            <span {% if anime.color %}style="background-color: {{ anime.color }}3a;"{% endif %} class="text-[10px] sm:text-xs font-bold bg-white bg-opacity-10 p-1 rounded flex items-center gap-1">
+            <span {% if manga.color %}style="background-color: {{ manga.color }}3a;"{% endif %} class="text-[10px] sm:text-xs font-bold bg-white bg-opacity-10 p-1 rounded flex items-center gap-1">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-3 sm:size-4">
                 <path fill-rule="evenodd" d="M6.75 2.25A.75.75 0 0 1 7.5 3v1.5h9V3A.75.75 0 0 1 18 3v1.5h.75a3 3 0 0 1 3 3v11.25a3 3 0 0 1-3 3H5.25a3 3 0 0 1-3-3V7.5a3 3 0 0 1 3-3H6V3a.75.75 0 0 1 .75-.75Zm13.5 9a1.5 1.5 0 0 0-1.5-1.5H5.25a1.5 1.5 0 0 0-1.5 1.5v7.5a1.5 1.5 0 0 0 1.5 1.5h13.5a1.5 1.5 0 0 0 1.5-1.5v-7.5Z" clip-rule="evenodd" />
                 </svg>              
-                {{ anime.releaseDate }}
+                {{ manga.releaseDate }}
             </span>
-            <span {% if anime.color %}style="background-color: {{ anime.color }}3a;"{% endif %} class="text-[10px] sm:text-xs font-bold bg-white bg-opacity-10 p-1 rounded flex items-center gap-1">
-                {% if anime.status == "Ongoing" %}
+            <span {% if manga.color %}style="background-color: {{ manga.color }}3a;"{% endif %} class="text-[10px] sm:text-xs font-bold bg-white bg-opacity-10 p-1 rounded flex items-center gap-1">
+                {% if manga.status == "Ongoing" %}
                 <span class="text-green-500">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-2 sm:size-3">
                         <circle cx="12" cy="12" r="12" />
                     </svg>                
                 </span>
-                {% elif anime.status == "Not yet aired" %}
+                {% elif manga.status == "Not yet aired" %}
                 <span class="text-yellow-500">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-2 sm:size-3">
                         <circle cx="12" cy="12" r="12" />
@@ -110,16 +99,16 @@
                     </svg>
                 </span>
                 {% endif %}          
-                {{ anime.status }}
+                {{ manga.status }}
             </span>
-            <span {% if anime.color %}style="background-color: {{ anime.color }}3a;"{% endif %} class="text-[10px] sm:text-xs font-bold bg-white bg-opacity-10 p-1 rounded flex items-center gap-1">
+            <span {% if manga.color %}style="background-color: {{ manga.color }}3a;"{% endif %} class="text-[10px] sm:text-xs font-bold bg-white bg-opacity-10 p-1 rounded flex items-center gap-1">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-3 sm:size-4">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M11.48 3.499a.562.562 0 0 1 1.04 0l2.125 5.111a.563.563 0 0 0 .475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 0 0-.182.557l1.285 5.385a.562.562 0 0 1-.84.61l-4.725-2.885a.562.562 0 0 0-.586 0L6.982 20.54a.562.562 0 0 1-.84-.61l1.285-5.386a.562.562 0 0 0-.182-.557l-4.204-3.602a.562.562 0 0 1 .321-.988l5.518-.442a.563.563 0 0 0 .475-.345L11.48 3.5Z"/>
                 </svg>
-                {{ anime.rating }}
+                {{ manga.rating }}
             </span>
             <span class="text-xs sm:text-sm font-bold flex gap-2 flex-row flex-wrap items-center">
-                {% for genre in anime.genres %}
+                {% for genre in manga.genres %}
                 {% if genre == "Action" %}
                 <span class="text-xs font-bold bg-green-100 bg-opacity-20 text-green-300 py-1 px-2 rounded-full">
                 {% elif genre == "Adventure" %}
@@ -164,17 +153,17 @@
                 {% endfor %}
             </span>
         </div>
-        <h2 class="text-2xl lg:text-4xl font-bold text-transparent bg-clip-text my-2" style="background: linear-gradient(-45deg, {% if anime.color %}{{ anime.color }}{% else %}white{% endif %}, white); -webkit-background-clip: text; background-clip: text;">
-            {% if user.preferences.title_language == "english" and anime.title.english %}
-            {{ anime.title.english }}
-            {% elif user.preferences.title_language == "native" and anime.title.native %}
-            {{ anime.title.native }}
+        <h2 class="text-2xl lg:text-4xl font-bold text-transparent bg-clip-text my-2" style="background: linear-gradient(-45deg, {% if manga.color %}{{ manga.color }}{% else %}white{% endif %}, white); -webkit-background-clip: text; background-clip: text;">
+            {% if user.preferences.title_language == "english" and manga.title.english %}
+            {{ manga.title.english }}
+            {% elif user.preferences.title_language == "native" and manga.title.native %}
+            {{ manga.title.native }}
             {% else %}
-            {{ anime.title.romaji }}
+            {{ manga.title.romaji }}
             {% endif %}
         </h2>
         <p class="h-96 lg:max-h-24 overflow-auto my-2 text-sm text-white no-scrollbar">
-            {{ anime.description|strip_html }}
+            {{ manga.description|strip_html }}
         </p>     
         {% if mal_data %}
         <section class="flex flex-col lg:flex-row gap-4 my-2 w-fix">
@@ -271,39 +260,7 @@
             </div>
         </section>
         {% endif %}
-        {% if seasons %}
-        <div class="my-8 w-fix">
-            <h2 class="text-xl font-bold text-white uppercase flex flex-row items-center gap-1 mb-4 ">
-                Seasons
-            </h2>
-            <div class="flex flex-row gap-2 mt-4 overflow-x-auto no-scrollbar  swiper seasonSwiper">
-                <div class="swiper-wrapper">
-                    {% for season in seasons %}
-                    <a href="{% url "detail:anime" season.id %}" class="group rounded-lg aspect-video h-48 relative flex-shrink-0 overflow-hidden swiper-slide
-                                    {% if season.title.romaji == anime.title.romaji %}border-4 border-{{ user.preferences.accent_colour }}-600{% endif %}">
-                        <div class="absolute inset-0 bg-center bg-cover transition-transform group-hover:scale-110" style="background-image: url('{% if season.bannerImage %}{{ season.bannerImage }}{% else %}{{ season.coverImage }}{% endif %}')"></div>
-                        <div class="absolute inset-0 bg-{{ user.preferences.accent_colour }}-600 opacity-0 group-hover:opacity-30 transition-opacity"></div>
-                        <div class="absolute inset-0" style="background: linear-gradient(45deg, rgb(8, 8, 8) 15%, transparent 60%), linear-gradient(0deg, rgb(8, 8, 8) 0%, transparent 60%);"></div>
-                        <div class="flex flex-col justify-end h-full p-2 relative z-10">
-                            <h1 class="text-xl font-bold truncate max-w-full overflow-hidden text-ellipsis whitespace-nowrap">
-                                {{ season.format }} {% if season.startYear != 9999 %}({{ season.startYear }}){% endif %}
-                            </h1>
-                            <h2 class="font-bold truncate max-w-full overflow-hidden text-ellipsis whitespace-nowrap">
-                                {% if user.preferences.title_language == "english" and season.title.english %}
-                                {{ season.title.english }}
-                                {% elif user.preferences.title_language == "native" and season.title.native %}
-                                {{ season.title.native }}
-                                {% else %}
-                                {{ season.title.romaji }}
-                                {% endif %}
-                            </h2>
-                        </div>
-                    </a>
-                    {% endfor %}
-                </div>
-            </div>
-        </div>
-        {% endif %}
+        
         <section class="w-full flex flex-col items-center justify-center p-2 relative detail-section" id="dss">
             <section class="inline-flex w-max flex-row gap-4 rounded-full mb-8 bg-white bg-opacity-10 mx-auto">
               <button class="flex flex-row items-center focus:outline-none gap-2 text-sm font-bold py-2 px-4 rounded-full category-switch" data-target="characters">
@@ -312,11 +269,11 @@
                 </svg>          
                 <span>Characters</span>
               </button>
-              <button class="flex flex-row items-center focus:outline-none gap-2 text-sm font-bold py-2 px-4 rounded-full category-switch bg-{{ user.preferences.accent_colour }}-600" data-target="episodes">
+              <button class="flex flex-row items-center focus:outline-none gap-2 text-sm font-bold py-2 px-4 rounded-full category-switch bg-{{ user.preferences.accent_colour }}-600" data-target="chapters">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-4">
                     <path fill-rule="evenodd" d="M1.5 5.625c0-1.036.84-1.875 1.875-1.875h17.25c1.035 0 1.875.84 1.875 1.875v12.75c0 1.035-.84 1.875-1.875 1.875H3.375A1.875 1.875 0 0 1 1.5 18.375V5.625Zm1.5 0v1.5c0 .207.168.375.375.375h1.5a.375.375 0 0 0 .375-.375v-1.5a.375.375 0 0 0-.375-.375h-1.5A.375.375 0 0 0 3 5.625Zm16.125-.375a.375.375 0 0 0-.375.375v1.5c0 .207.168.375.375.375h1.5A.375.375 0 0 0 21 7.125v-1.5a.375.375 0 0 0-.375-.375h-1.5ZM21 9.375A.375.375 0 0 0 20.625 9h-1.5a.375.375 0 0 0-.375.375v1.5c0 .207.168.375.375.375h1.5a.375.375 0 0 0 .375-.375v-1.5Zm0 3.75a.375.375 0 0 0-.375-.375h-1.5a.375.375 0 0 0-.375.375v1.5c0 .207.168.375.375.375h1.5a.375.375 0 0 0 .375-.375v-1.5Zm0 3.75a.375.375 0 0 0-.375-.375h-1.5a.375.375 0 0 0-.375.375v1.5c0 .207.168.375.375.375h1.5a.375.375 0 0 0 .375-.375v-1.5ZM4.875 18.75a.375.375 0 0 0 .375-.375v-1.5a.375.375 0 0 0-.375-.375h-1.5a.375.375 0 0 0-.375.375v1.5c0 .207.168.375.375.375h1.5ZM3.375 15h1.5a.375.375 0 0 0 .375-.375v-1.5a.375.375 0 0 0-.375-.375h-1.5a.375.375 0 0 0-.375.375v1.5c0 .207.168.375.375.375Zm0-3.75h1.5a.375.375 0 0 0 .375-.375v-1.5A.375.375 0 0 0 4.875 9h-1.5A.375.375 0 0 0 3 9.375v1.5c0 .207.168.375.375.375Zm4.125 0a.75.75 0 0 0 0 1.5h9a.75.75 0 0 0 0-1.5h-9Z" clip-rule="evenodd" />
                 </svg>
-                <span>Episodes</span>
+                <span>Chapters</span>
               </button>      
               <button class="flex flex-row items-center focus:outline-none gap-2 text-sm font-bold py-2 px-4 rounded-full category-switch" data-target="trailer">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-4">
@@ -327,7 +284,7 @@
             </section>
             <section id="characters" class="w-full hidden">
                 <div class="flex flex-wrap">
-                    {% for character in anime.characters %}
+                    {% for character in manga.characters %}
                     <div class="w-full lg:w-1/2 px-4 py-2 flex justify-between">
                         <div class="flex flex-row gap-2 items-center">
                             <img loading="lazy"loading="lazy"src="{{ character.image }}" alt="{{ character.name }}" class="rounded-full w-16 h-16 object-cover"/>
@@ -363,88 +320,25 @@
                     {% endfor %}
                 </div>
             </section>
-            <section id="episodes" class="w-full flex-wrap flex justify-start">
-                {% for episode in episodes %}
-                <a href="{% url "watch:watch_episode" anime.id episode.number %}" class="w-full lg:w-1/2 px-2 mb-2 episode-item">
-                    <div class="flex flex-col lg:flex-row w-full bg-neutral-950 rounded hover:bg-{{ user.preferences.accent_colour }}-600 hover:bg-opacity-30 p-2 gap-4">
-                        <div class="w-full lg:w-auto lg:flex-shrink-0">
-                            <img loading="lazy" src="{% if episode.metadata.image %}{{ episode.metadata.image }}{% else %}{{ anime.cover}}{% endif %}" alt="{{ episode.title }}" class="w-full lg:w-48 lg:h-28 object-cover rounded-lg"/>
-                        </div>
-                        <div class="flex flex-col gap-2">
-                            <h2 class="font-bold">{{episode.number}}. {% if episode.metadata.title %}{{ episode.metadata.title }}{% else %}{{ episode.title }}{% endif %}</h2>
-                            <p class="text-sm">{{ episode.metadata.description|truncatewords:50 }}</p>
-                        </div>
-                    </div>
+            <section id="chapters" class="w-full flex-wrap flex justify-start max-h-[540px] overflow-auto">
+                {% for chapter in manga.chapters %}
+                <a href="#" class="w-full px-2 mb-2 flex flex-row gap-4 justify-between items-center bg-white bg-opacity-10 p-2 rounded hover:bg-{{ user.preferences.accent_colour }}-600 hover:bg-opacity-30 mb-2">
+                    {% if chapter.title %}
+                    <span class="font-bold">{{ chapter.title }}</span>
+                    {% else %}
+                    <span class="font-bold">Chapter {{ forloop.counter }}</span>
+                    {% endif %}
                 </a>
                 {% endfor %}
-                {% if not episodes %}
+                {% if not manga.chapters %}
                 <div class="w-full h-96 flex flex-col gap-2 items-center justify-center">
-                    <p>No Episodes Available</p>
+                    <p>No Chapters Available</p>
                 </div>
-                {% endif %}
-                {% if nextAiringEpisode %}
-                <p class="w-full text-center my-2" id="nextAiringEpisodeMessage"></p>
-                <script>
-                    const nextAiringEpisode = {
-                        airingTime: {{ nextAiringEpisode.airingTime }},
-                        timeUntilAiring: {{ nextAiringEpisode.timeUntilAiring }},
-                        episode: {{ nextAiringEpisode.episode }}
-                    };
-                
-                    function formatNextEpisode(nextAiringEpisode) {
-                        const airingTime = nextAiringEpisode.airingTime * 1000; // Convert to milliseconds
-                        const episodeNumber = nextAiringEpisode.episode;
-                
-                        function updateCountdown() {
-                            const now = new Date().getTime();
-                            const timeUntilAiring = airingTime - now;
-                        
-                            if (timeUntilAiring <= 0) {
-                                return `Episode ${episodeNumber} has aired.`;
-                            }
-                        
-                            const days = Math.floor(timeUntilAiring / (1000 * 60 * 60 * 24));
-                            const hours = Math.floor((timeUntilAiring % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-                            const minutes = Math.floor((timeUntilAiring % (1000 * 60 * 60)) / (1000 * 60));
-                            const seconds = Math.floor((timeUntilAiring % (1000 * 60)) / 1000);
-                        
-                            const airingDate = new Date(airingTime);
-                            const formattedDate = airingDate.toLocaleDateString('en-US', {
-                                weekday: 'short',
-                                year: 'numeric',
-                                month: 'short',
-                                day: 'numeric',
-                            });
-                            const formattedTime = airingDate.toLocaleTimeString('en-US', {
-                                hour: 'numeric',
-                                minute: '2-digit',
-                                second: '2-digit',
-                                hour12: true
-                            });
-                        
-                            return `Episode <strong>${episodeNumber}</strong> will air on ${formattedDate} at ${formattedTime} ` +
-                                `<strong class="text-{{ user.preferences.accent_colour }}-600">(${days} days, ${hours} hours, ${minutes} minutes, ${seconds} seconds)</strong>`;
-                        }
-                
-                        const countdownElement = document.getElementById('nextAiringEpisodeMessage');
-                        countdownElement.innerHTML = updateCountdown();
-                
-                        // Update countdown every second
-                        setInterval(() => {
-                            countdownElement.innerHTML = updateCountdown();
-                        }, 1000);
-                    }
-                
-                    // Call the function when the page loads
-                    document.addEventListener('DOMContentLoaded', function() {
-                        formatNextEpisode(nextAiringEpisode);
-                    });
-                </script>
                 {% endif %}
             </section>
             <section id="trailer" class="w-full hidden">
-                {% if anime.trailer and anime.trailer.site == "youtube" %}
-                <iframe src="https://www.youtube.com/embed/{{ anime.trailer.id }}" title="{{ anime.title.english }} Trailer" class="w-full aspect-video" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" credentialless allowfullscreen></iframe>
+                {% if manga.trailer and manga.trailer.site == "youtube" %}
+                <iframe src="https://www.youtube.com/embed/{{ manga.trailer.id }}" title="{{ manga.title.english }} Trailer" class="w-full aspect-video" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" credentialless allowfullscreen></iframe>
                 {% else %}
                 <div class="w-full h-96 flex items-center justify-center">
                     <span>No Trailer Available</span>
@@ -460,8 +354,8 @@
             </div>
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-2">
                 {% for related in related|slice:":5" %}
-                {% if related.id and related.type == "TV" or related.type == "MOVIE" or related.type == "OVA" or related.type == "ONA" or related.type == "SPECIAL" or related.type == "TV_SHORT" or related.type == "MANGA" or related.type == "NOVEL" %}
-                <a {% if related.type == "TV" or related.type == "MOVIE" or related.type == "OVA" or related.type == "ONA" or related.type == "SPECIAL" or related.type == "TV_SHORT" %}href="{% url 'detail:anime' related.id %}"{% elif related.type == "MANGA" %}href="{% url 'detail:manga' related.id %}"{% else %}onClick="showToast('{% if related.type == "MANGA" %}Manga{% else %}Novel{% endif %} reading is not supported yet!', false)"{% endif %} class="cursor-pointer flex flex-row w-full gap-4 bg-white bg-opacity-10 p-2 rounded hover:bg-{{ user.preferences.accent_colour }}-600 hover:bg-opacity-30">
+                {% if related.type == "TV" or related.type == "MOVIE" or related.type == "OVA" or related.type == "ONA" or related.type == "SPECIAL" or related.type == "TV_SHORT" or related.type == "MANGA" or related.type == "NOVEL" %}
+                <a {% if related.type == "TV" or related.type == "MOVIE" or related.type == "OVA" or related.type == "ONA" or related.type == "SPECIAL" or related.type == "TV_SHORT" %}href="{% url 'detail:anime' related.id %}"{% elif related.type == "MANGA" %}href="{% url 'detail:manga' related.id %}"{% else %}onClick="showToast('{% if related.type == "MANGA" %}Manga{% else %}Novel{% endif %} reading is not supported yet!', false)"{% endif %} class="cursor-pointer flex flex-row w-full gap-4 bg-white bg-opacity-10 p-2 rounded hover:bg-{{ user.preferences.accent_colour }}-600 hover:bg-opacity-30">       
                     <img loading="lazy" src="{{ related.image }}" alt="{{ related.title.english }}" class="rounded-lg w-12 h-16 object-cover"/>
                     <div class="flex flex-col gap-2">
                         <span class="font-bold flex gap-2 flex-row items-center">
@@ -542,7 +436,7 @@
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-2">
                 {% for recommendation in recommendations|slice:":10" %}
                 {% if recommendation.id and recommendation.type == "TV" or recommendation.type == "MOVIE" or recommendation.type == "OVA" or recommendation.type == "ONA" or recommendation.type == "SPECIAL" or recommendation.type == "TV_SHORT" or recommendation.type == "MANGA" or recommendation.type == "NOVEL" %}
-                <a {% if recommendation.type == "TV" or recommendation.type == "MOVIE" or recommendation.type == "OVA" or recommendation.type == "ONA" or recommendation.type == "SPECIAL" or recommendation.type == "TV_SHORT" %}href="{% url 'detail:anime' recommendation.id %}"{% elif recommendation.type == "MANGA" %}href="{% url 'detail:manga' recommendation.id %}"{% else %}onClick="showToast('{% if related.type == "MANGA" %}Manga{% else %}Novel{% endif %} reading is not supported yet!', false)"{% endif %} class="cursor-pointer flex flex-row w-full gap-4 bg-white bg-opacity-10 p-2 rounded hover:bg-{{ user.preferences.accent_colour }}-600 hover:bg-opacity-30">   
+                <a href="{% if recommendation.type == "TV" or recommendation.type == "MOVIE" or recommendation.type == "OVA" or recommendation.type == "ONA" or recommendation.type == "SPECIAL" or recommendation.type == "TV_SHORT" %}{% url 'detail:anime' recommendation.id %}{% elif recommendation.type == "MANGA" or recommendation.type == "NOVEL" %}{% url 'detail:manga' recommendation.id %}{% else %}{% url 'detail:manga' recommendation.id %}{% endif %}" class="flex flex-row w-full gap-4 bg-white bg-opacity-10 p-2 rounded hover:bg-{{ user.preferences.accent_colour }}-600 hover:bg-opacity-30">        
                     <img loading="lazy" src="{{ recommendation.image }}" alt="{{ recommendation.title.english }}" class="rounded-lg w-12 h-16 object-cover"/>
                     <div class="flex flex-col gap-2 max-w-[calc(100%-4rem)]">
                         <span class="font-bold flex gap-2 flex-row items-center">
@@ -600,6 +494,14 @@
                                 {{ recommendation.episodes }}
                             </span>
                             {% endif %}
+                            {% if recommendation.chapters %}
+                            <span class="text-xs font-bold bg-white bg-opacity-10 p-1 rounded flex items-center gap-1">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M5.25 8.25h15m-16.5 7.5h15m-1.8-13.5-3.9 19.5m-2.1-19.5-3.9 19.5"/>
+                                </svg>
+                                {{ recommendation.chapters }}
+                            </span>
+                            {% endif %}
                         </span>
                         {% endif %}
                     </div>
@@ -626,7 +528,7 @@
         button.classList.add("bg-{{ user.preferences.accent_colour }}-600");
   
         const target = button.getAttribute("data-target");
-        const sections = [document.getElementById("characters"), document.getElementById("episodes"), document.getElementById("trailer")];
+        const sections = [document.getElementById("characters"), document.getElementById("chapters"), document.getElementById("trailer")];
         sections.forEach((section) => {
           section.classList.add("hidden");
           section.classList.remove("flex");
@@ -740,128 +642,5 @@
     observer.observe(scoreSelect, {childList: true, characterData: true});
     observer.observe(episodesSelect, {childList: true, characterData: true});
     {% endif %}
-</script>
-<script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
-<script>
-    const seasonSwiper = new Swiper(".seasonSwiper", {
-      slidesPerView: 'auto',
-      spaceBetween: 8,
-      freeMode: true,
-    });
-</script>
-<script>
-    // Configuration
-    const EPISODES_PER_PAGE = 10;
-
-    // Get all episodes
-    const allEpisodes = Array.from(document.querySelectorAll('#episodes > a'));
-    let currentPage = 1;
-    let totalPages = Math.ceil(allEpisodes.length / EPISODES_PER_PAGE);
-
-    function showEpisodesForPage(page) {
-        const startIndex = (page - 1) * EPISODES_PER_PAGE;
-        const endIndex = startIndex + EPISODES_PER_PAGE;
-
-        allEpisodes.forEach((episode, index) => {
-            episode.style.display = (index >= startIndex && index < endIndex) ? '' : 'none';
-        });
-    }
-
-    function createPaginationControls() {
-        // Create a container for pagination that's separate from the episodes
-        const paginationContainer = document.createElement('div');
-        paginationContainer.className = 'w-full'; // Ensure it takes full width
-
-        const section = document.createElement('section');
-        section.className = 'flex justify-center items-center my-8';
-
-        const nav = document.createElement('nav');
-        nav.className = 'inline-flex rounded-md shadow-sm transform scale-[0.80] sm:scale-100';
-        nav.style.transformOrigin = 'center';
-        nav.setAttribute('aria-label', 'Pagination');
-
-        const buttons = [
-            { text: 'First', condition: () => currentPage > 1, page: 1 },
-            { text: 'Previous', condition: () => currentPage > 1, page: currentPage - 1 },
-            { text: `${currentPage} of ${totalPages}`, condition: null },
-            { text: 'Next', condition: () => currentPage < totalPages, page: currentPage + 1 },
-            { text: 'Last', condition: () => currentPage < totalPages, page: totalPages }
-        ];
-
-        buttons.forEach((button, index) => {
-            const element = button.condition !== null
-                ? createButton(button.text, button.condition(), button.page, index)
-                : createSpan(button.text, index);
-            nav.appendChild(element);
-        });
-
-        section.appendChild(nav);
-        paginationContainer.appendChild(section);
-
-        // Insert the pagination container after the episodes container
-        const episodesSection = document.getElementById('episodes');
-        episodesSection.parentNode.insertBefore(paginationContainer, episodesSection.nextSibling);
-    }
-
-    function createButton(text, isEnabled, page, index) {
-        const element = isEnabled ? document.createElement('a') : document.createElement('span');
-        let className = `w-24 px-3 py-2 text-sm font-medium flex items-center justify-center `;
-
-        if (index === 0) className += 'rounded-l-md ';
-        if (index === 4) className += 'rounded-r-md ';
-
-        if (isEnabled) {
-            className += `bg-{{ user.preferences.accent_colour }}-600 bg-opacity-30 text-white hover:bg-opacity-40 `;
-            if (index === 1 || index === 3) {
-                className += 'text-opacity-90 hover:text-opacity-100 ';
-            }
-            element.href = '#';
-            element.addEventListener('click', (e) => {
-                e.preventDefault();
-                goToPage(page);
-            });
-        } else {
-            className += 'bg-{{ user.preferences.accent_colour }}-600 bg-opacity-10 text-white text-opacity-30 cursor-not-allowed';
-        }
-
-        element.className = className;
-        element.textContent = text;
-        return element;
-    }
-
-    function createSpan(text) {
-        const span = document.createElement('span');
-        span.className = 'w-28 px-3 py-2 bg-{{ user.preferences.accent_colour }}-600 bg-opacity-50 text-sm font-medium text-white flex items-center justify-center';
-        span.textContent = text;
-        return span;
-    }
-
-    function smoothScrollToEpisodes() {
-        const episodesSection = document.getElementById('dss');
-        episodesSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
-    
-    function goToPage(page) {
-        if (page >= 1 && page <= totalPages && page !== currentPage) {
-            currentPage = page;
-            updatePagination();
-            smoothScrollToEpisodes();
-        }
-    }
-
-    function updatePagination() {
-        showEpisodesForPage(currentPage);
-        const paginationContainer = document.querySelector('#episodes + div');
-        if (paginationContainer) {
-            paginationContainer.remove();
-        }
-        createPaginationControls();
-    }
-    
-    // Initialize pagination
-    document.addEventListener('DOMContentLoaded', function() {
-        createPaginationControls();
-        showEpisodesForPage(currentPage);
-    });
 </script>
 {% endblock scripts %}

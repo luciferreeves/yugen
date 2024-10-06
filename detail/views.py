@@ -1,6 +1,7 @@
 from django.shortcuts import redirect, render
 from authentication.utils import get_single_anime_mal
-from watch.utils import attach_episode_metadata, get_anime_data, get_anime_seasons, get_seasons_by_zid
+from read.utils import get_manga_data
+from watch.utils import attach_episode_metadata, get_anime_data, get_anime_seasons
 
 def index(request):
     return redirect("home:index")
@@ -39,3 +40,17 @@ def anime(request, anime_id):
         context["nextAiringEpisode"] = anime_data["nextAiringEpisode"]
 
     return render(request, "detail/detail.html", context)
+
+def manga(request, manga_id):
+    manga_data = get_manga_data(manga_id)
+
+    if not manga_data:
+        return redirect("home:index")
+    
+    context = {
+        "manga": manga_data,
+        "related": manga_data.get("relations", []),
+        "recommendations": manga_data.get("recommendations", []),
+    }
+
+    return render(request, "detail/manga.html", context)
