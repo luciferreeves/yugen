@@ -57,7 +57,7 @@ def get_manga_data(manga_id):
 
     cache_key = f"manga_{manga_id}_manga_data"
     manga_data = get_from_redis_cache(cache_key)
-    generic_only_ids = [30013]
+    generic_only_ids = [30013,101517]
     provider = "generic" if manga_id in generic_only_ids else "mangareader"
 
     if not manga_data:
