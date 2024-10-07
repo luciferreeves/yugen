@@ -27,6 +27,24 @@
         height: 100%;
         object-fit: contain;
     }
+    #settings-bar {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        transition: transform 0.3s ease-in-out;
+        transform: translateY(100%);
+        z-index: 1000;
+    }
+    #settings-bar.visible {
+        transform: translateY(0);
+    }
+    @media (max-width: 767px) {
+        #settings-bar {
+            position: sticky;
+            transform: none;
+        }
+    }
 </style>
 {% endblock css %}
 {% block content %}
@@ -36,7 +54,7 @@
             <!-- Slides will be dynamically added here -->
         </div>
     </div>
-    <div id="settings-bar" class="bg-{{ user.preferences.accent_colour }}-900 bg-opacity-30 text-white p-4 sticky bottom-0 left-0 right-0">
+    <div id="settings-bar" class="bg-{{ user.preferences.accent_colour }}-900 bg-opacity-30 text-white p-4">
         <div class="flex justify-start items-center gap-2">
             <button id="next-page" class="px-4 py-2 outline-none bg-{{ user.preferences.accent_colour }}-600 rounded flex flex-row gap-2 items-center">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4">
@@ -78,9 +96,12 @@ const prevUrl = `{% url "read:read" manga.id prev_chapter.id %}`;
     const fullscreenToggle = document.getElementById('fullscreen-toggle');
     const prevButton = document.getElementById('prev-page');
     const nextButton = document.getElementById('next-page');
+    const settingsBar = document.getElementById('settings-bar');
 
     let swiper;
     let isDesktop = window.innerWidth >= 768;
+    let mouseTimer;
+    let isHovering = false;
 
     function initSwiper() {
         swiper = new Swiper('.swiper', {
@@ -90,10 +111,12 @@ const prevUrl = `{% url "read:read" manga.id prev_chapter.id %}`;
             resistance: false,
             allowTouchMove: true,
             speed: 300,
+            loop: false,
         });
     
         loadPages();
         updatePageInfo();
+        showSettingsBar();
     
         swiper.on('slideChange', updatePageInfo);
     }
@@ -148,7 +171,7 @@ const prevUrl = `{% url "read:read" manga.id prev_chapter.id %}`;
                 startPage = Math.max(1, endPage - 1);
             }
         } else {
-            startPage = endPage = pagesData.length - (currentSlide - 1);
+            startPage = endPage = pagesData.length - swiper.activeIndex;
         }
 
         pageInfo.textContent = `Page${startPage !== endPage ? 's' : ''} ${startPage}${startPage !== endPage ? '-' + endPage : ''} of ${pagesData.length}`;
@@ -190,23 +213,59 @@ const prevUrl = `{% url "read:read" manga.id prev_chapter.id %}`;
         }
     }
 
+    function showSettingsBar() {
+        if (isDesktop) {
+            settingsBar.classList.add('visible');
+            clearTimeout(mouseTimer);
+            if (!isHovering) {
+                mouseTimer = setTimeout(() => {
+                    if (!isHovering) {
+                        settingsBar.classList.remove('visible');
+                    }
+                }, 3000);
+            }
+        }
+    }
+    
+    function handleSettingsBarHover() {
+        isHovering = true;
+        clearTimeout(mouseTimer);
+        settingsBar.classList.add('visible');
+    }
+    
+    function handleSettingsBarLeave() {
+        isHovering = false;
+        showSettingsBar();
+    }
+    
     fullscreenToggle.addEventListener('click', toggleFullscreen);
     nextButton.addEventListener('click', nextPage);
     prevButton.addEventListener('click', prevPage);
-
+    
     document.addEventListener('keydown', (e) => {
         if (e.key === 'ArrowLeft') nextPage();
         else if (e.key === 'ArrowRight') prevPage();
+        else if (e.key === 'f' || e.key === 'F') toggleFullscreen();
     });
-
+    
+    // Update your resize event listener
     window.addEventListener('resize', () => {
         const wasDesktop = isDesktop;
         isDesktop = window.innerWidth >= 768;
         if (wasDesktop !== isDesktop) {
             swiper.destroy();
             initSwiper();
+            if (isDesktop) {
+                showSettingsBar();
+            } else {
+                settingsBar.classList.remove('visible');
+            }
         }
     });
+        
+    reader.addEventListener('mousemove', showSettingsBar);
+    settingsBar.addEventListener('mouseenter', handleSettingsBarHover);
+    settingsBar.addEventListener('mouseleave', handleSettingsBarLeave);
 
     initSwiper();
 </script>
