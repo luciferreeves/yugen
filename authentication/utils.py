@@ -1,11 +1,24 @@
+import time
 import dotenv
 import os
 import requests
 import secrets
 from authentication.models import User
 from user_profile.models import UserPreferences
+from pypresence import Client
 
 dotenv.load_dotenv()
+
+user_clients = {}
+
+def get_or_create_client(user):
+    if user.id not in user_clients:
+        client_id = os.environ.get("DISCORD_CLIENT_ID")
+        RPC = Client(client_id)
+        RPC.start()
+        RPC.authenticate(user.discord_access_token)
+        user_clients[user.id] = RPC
+    return user_clients[user.id]
 
 def generate_mal_code_challenge():
     # 128 bytes PKCE code challenge
@@ -28,9 +41,42 @@ def get_redirect_uri():
     # Only Authenticated Users who are in our Discord Server can access the website
     discord_client_id = os.environ.get("DISCORD_CLIENT_ID")
     discord_redirect_uri = os.environ.get("DISCORD_REDIRECT_URI")
-    discord_scope = "identify guilds guilds.members.read"
+    discord_scope = "identify guilds guilds.members.read rpc"
     redirect_uri = f"https://discord.com/oauth2/authorize?client_id={discord_client_id}&response_type=code&redirect_uri={discord_redirect_uri}&scope={discord_scope}"
     return redirect_uri
+
+def update_discord_rpc(user, anime_title, episode, time_watched):
+    if not user.discord_access_token:
+            return  # Skip if user hasn't connected Discord
+
+    try:
+        RPC = get_or_create_client(user)
+        RPC.set_activity(
+            state=episode,
+            activity_type=3,
+            details=anime_title,
+            start=int(time.time()) - time_watched,
+            large_image="yugen",
+            large_text="Yugen: The Streaming Service for the Elite",
+        )
+        
+        print(f"Successfully updated Discord RPC for user {user.username}: Watching {anime_title} {episode} for {time_watched} seconds")
+    except Exception as e:
+        print(f"Failed to update Discord RPC for user {user.username}: {str(e)}")
+
+def clear_discord_rpc(user):
+    if not user.discord_access_token:
+        return  # Skip if user hasn't connected Discord
+
+    if user.id in user_clients:
+        try:
+            RPC = user_clients[user.id]
+            RPC.clear_activity()
+            RPC.close()
+            del user_clients[user.id]
+            print(f"Successfully cleared Discord RPC for user {user.username}")
+        except Exception as e:
+            print(f"Failed to clear Discord RPC for user {user.username}: {str(e)}")
 
 def exchange_mal_code(code, code_verifier):
     mal_client_id = os.environ.get("MAL_CLIENT_ID")
@@ -65,7 +111,7 @@ def exchange_code(code):
         "grant_type": "authorization_code",
         "code": code,
         "redirect_uri": discord_redirect_uri,
-        "scope": "identify guilds guilds.members.read",
+        "scope": "identify guilds guilds.members.read rpc",
     }
 
     headers = {"Content-Type": "application/x-www-form-urlencoded"}

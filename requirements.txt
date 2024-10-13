@@ -8,3 +8,4 @@ gunicorn
 pytz
 bbcode
 bs4
+https://github.com/qwertyquerty/pypresence/archive/master.zip

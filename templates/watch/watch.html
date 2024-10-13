@@ -1466,4 +1466,28 @@
     fetch(nextEpisodeUrl.href);
 {% endif %}
 </script>
+<script>
+    function clearDiscordStatus() {
+        const url = '{% url "watch:clear_discord_status" %}';
+        const data = new FormData();
+        data.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+    
+        if (navigator.sendBeacon) {
+            // Use sendBeacon for page unload or tab close
+            navigator.sendBeacon(url, data);
+        } else {
+            // Fallback for fetch if sendBeacon is not available
+            fetch(url, {
+                method: 'POST',
+                body: data,
+            });
+        }
+    }
+    
+    // Trigger on page unload and navigation events
+    window.addEventListener('beforeunload', clearDiscordStatus);
+    window.addEventListener('popstate', clearDiscordStatus);
+    window.addEventListener('unload', clearDiscordStatus);
+    
+</script>
 {% endblock scripts %}

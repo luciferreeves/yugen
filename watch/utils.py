@@ -24,8 +24,8 @@ r = redis.Redis(
     password=os.getenv("REDIS_PASSWORD"),
 )
 
-r.flushall()
-print("Redis cache flushed")
+# r.flushall()
+# print("Redis cache flushed")
 
 def get_episode_metadata(anime_data, episode):
     episode_metadata = get_all_episode_metadata(anime_data)
@@ -454,6 +454,8 @@ def update_anime_user_history(user, anime, episode, time_watched, additional_dat
             history.episode_title = f"Episode {episode}"
 
     history.save()
+
+    return history
 
 def get_anime_user_history(user, anime):
     history = UserHistory.objects.filter(user=user, anime=anime)

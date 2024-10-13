@@ -2,9 +2,11 @@ from django.http import JsonResponse
 from django.urls import reverse
 import dotenv
 from django.shortcuts import render, redirect
-from authentication.utils import get_single_anime_mal
+from authentication.utils import clear_discord_rpc, get_single_anime_mal, update_discord_rpc
 from user_profile.models import UserHistory
 from watch.utils import attach_episode_metadata, get_anime_seasons, get_anime_data, get_anime_user_history, get_gogo_episode_streaming_data, get_zoro_episode_streaming_data, update_anime_user_history, get_mal_episode_comments
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_http_methods
 import json
 
 dotenv.load_dotenv()
@@ -137,10 +139,24 @@ def update_episode_watch_time(request):
     if request.user.is_authenticated:
         anime = int(anime)
         episode = int(episode)
-        update_anime_user_history(request.user, anime, episode, time_watched)
+        updated_history = update_anime_user_history(request.user, anime, episode, time_watched)
+        update_discord_rpc(
+                request.user,
+                updated_history.anime_title_english,
+                f"Episode {updated_history.episode} — {updated_history.episode_title}",
+                time_watched
+        )
+
         return JsonResponse({"status": "success"})
     else:
         return JsonResponse({"status": "error", "message": "User not authenticated"})
+
+@csrf_exempt
+@require_http_methods(["GET", "POST"])
+def clear_discord_status(request):
+    if request.user.is_authenticated and request.user.discord_access_token:
+        clear_discord_rpc(request.user)
+    return JsonResponse({'status': 'success'})
 
 def remove_anime_from_watchlist(request):
     if request.method != "POST":
