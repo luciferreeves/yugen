@@ -41,7 +41,7 @@ def get_redirect_uri():
     # Only Authenticated Users who are in our Discord Server can access the website
     discord_client_id = os.environ.get("DISCORD_CLIENT_ID")
     discord_redirect_uri = os.environ.get("DISCORD_REDIRECT_URI")
-    discord_scope = "identify guilds guilds.members.read rpc"
+    discord_scope = "identify guilds guilds.members.read"
     redirect_uri = f"https://discord.com/oauth2/authorize?client_id={discord_client_id}&response_type=code&redirect_uri={discord_redirect_uri}&scope={discord_scope}"
     return redirect_uri
 
@@ -111,7 +111,7 @@ def exchange_code(code):
         "grant_type": "authorization_code",
         "code": code,
         "redirect_uri": discord_redirect_uri,
-        "scope": "identify guilds guilds.members.read rpc",
+        "scope": "identify guilds guilds.members.read",
     }
 
     headers = {"Content-Type": "application/x-www-form-urlencoded"}
