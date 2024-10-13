@@ -140,12 +140,12 @@ def update_episode_watch_time(request):
         anime = int(anime)
         episode = int(episode)
         updated_history = update_anime_user_history(request.user, anime, episode, time_watched)
-        update_discord_rpc(
-                request.user,
-                updated_history.anime_title_english,
-                f"Episode {updated_history.episode} — {updated_history.episode_title}",
-                time_watched
-        )
+        # update_discord_rpc(
+        #         request.user,
+        #         updated_history.anime_title_english,
+        #         f"Episode {updated_history.episode} — {updated_history.episode_title}",
+        #         time_watched
+        # )
 
         return JsonResponse({"status": "success"})
     else:
