@@ -8,11 +8,101 @@ from watch.utils import attach_episode_metadata, get_anime_seasons, get_anime_da
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 import json
+from django.http import StreamingHttpResponse, HttpResponse
+from django.views.decorators.csrf import csrf_exempt
+import requests
+import re
+from urllib.parse import urljoin, urlparse, quote
 
 dotenv.load_dotenv()
 
 def index(request):
     return redirect("home:index")
+
+
+@csrf_exempt
+def proxy_stream(request):
+    """
+    Proxy streaming content through your server
+    """
+    url = request.GET.get('url')
+    
+    if not url:
+        return HttpResponse('No URL provided', status=400)
+    
+    try:
+        # Make the request to the target server
+        response = requests.get(
+            url,
+            stream=True,
+            headers={
+                'User-Agent': request.headers.get('User-Agent', ''),
+                'Referer': request.headers.get('Referer', ''),
+                'Origin': request.headers.get('Origin', ''),
+            }
+        )
+        
+        content_type = response.headers.get('content-type', '')
+        
+        # Handle M3U8 playlists
+        if 'm3u8' in content_type or url.endswith('.m3u8'):
+            content = response.text
+            base_url = url.rsplit('/', 1)[0] + '/'
+            
+            # Modify the playlist URLs to go through our proxy
+            modified_content = []
+            for line in content.splitlines():
+                if line.startswith('#'):
+                    modified_content.append(line)
+                elif line.strip():  # Handle content lines (URLs)
+                    # Handle both absolute and relative URLs
+                    if not line.startswith('http'):
+                        line = urljoin(base_url, line)
+                    proxy_url = f'/watch/stream?url={quote(line)}'
+                    modified_content.append(proxy_url)
+                else:
+                    modified_content.append(line)
+            
+            return HttpResponse(
+                '\n'.join(modified_content),
+                content_type='application/vnd.apple.mpegurl'
+            )
+        
+        # Handle VTT files
+        elif url.endswith('.vtt'):
+            content = response.text
+            # Regular expression to find URLs in VTT file
+            url_pattern = r'(https?://[^\s<>"]+?(?:jpg|jpeg|png|webp))'
+            
+            def replace_url(match):
+                thumbnail_url = match.group(1)
+                return f'/watch/stream?url={quote(thumbnail_url)}'
+            
+            # Replace all image URLs with proxied versions
+            modified_content = re.sub(url_pattern, replace_url, content)
+            
+            return HttpResponse(
+                modified_content,
+                content_type='text/vtt'
+            )
+        
+        # Handle images (thumbnails)
+        elif any(ext in url.lower() for ext in ['.jpg', '.jpeg', '.png', '.webp']):
+            return StreamingHttpResponse(
+                response.iter_content(chunk_size=8192),
+                content_type=response.headers.get('content-type'),
+                status=response.status_code
+            )
+
+        # For video segments and other content, stream directly
+        return StreamingHttpResponse(
+            response.iter_content(chunk_size=8192),
+            content_type=response.headers.get('content-type'),
+            status=response.status_code
+        )
+        
+    except requests.RequestException as e:
+        return HttpResponse(f"Error proxying request: {str(e)}", status=500)
 
 def watch(request, anime_id, episode=None):
     forward_detail = request.GET.get("forward") == "detail"
@@ -77,7 +167,6 @@ def watch(request, anime_id, episode=None):
     if episode_data:
         if provider == "zoro":
             streaming_data = get_zoro_episode_streaming_data(episode_data["id"], mode)
-            print(streaming_data)
         else:
             streaming_data = get_gogo_episode_streaming_data(episode_data["id"])
 

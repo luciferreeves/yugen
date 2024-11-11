@@ -11,5 +11,6 @@ urlpatterns = [
    path('/update_watch_history', views.update_episode_watch_time, name='update_watch_history'),
    # path('/clear_discord_status', views.clear_discord_status, name='clear_discord_status'),
    path('/remove_anime_from_watchlist', views.remove_anime_from_watchlist, name='remove_anime_from_watchlist'),
+   path('/stream', views.proxy_stream, name='proxy_stream'),
    # path('/malId:<int:mal_id>$zid:<str:zid>', views.watch_via_zid_mal_id, name='watch_via_zid_mal_id'), # if anilist id is not available
 ]

@@ -1211,7 +1211,7 @@
     const layout = new VidstackPlayerLayout({
         {% for track in streaming_data.tracks %}
             {% if track.kind == 'thumbnails' %}
-                thumbnails: "{{ track.file }}",
+                thumbnails: "/watch/stream?url={{ track.file|urlencode }}",
             {% endif %}
         {% endfor %}
     });
@@ -1219,7 +1219,7 @@
     const player = await VidstackPlayer.create({
         target: '#video-player',
         autoStartLoad: true,
-        src: '{{ stream_url }}',
+        src: "/watch/stream?url={{ stream_url|urlencode}}",
         viewType: 'video',
         streamType: 'on-demand',
         logLevel: 'warn',
