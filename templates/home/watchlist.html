@@ -4,7 +4,7 @@
 {% endblock css %}
 {% block content %}
 <h1 class="text-2xl font-bold mt-4">Currently Watching</h1>
-<section class="flex flex-col lg:flex-row flex-wrap my-4 gap-4 justify-center">
+<section class="flex flex-col lg:flex-row flex-wrap my-4 gap-4 justify-center items-start">
     {% for history in watchlist %}
     <a href="{% url "watch:watch_episode" history.anime history.episode %}" class="group rounded-lg aspect-video h-48 relative flex-shrink-0 overflow-hidden">
         <div class="absolute inset-0 bg-center bg-cover transition-transform group-hover:scale-110" style="background-image: url('{{ history.anime_cover_image }}')"></div>

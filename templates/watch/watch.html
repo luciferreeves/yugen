@@ -187,7 +187,7 @@
 </div>
 <div class="flex flex-col lg:flex-row my-4 gap-2">
     <div class="w-full lg:w-3/4">
-        <div class="flex flex-row gap-2 items-center justify-between">
+        <div class="flex flex-col lg:flex-row gap-2 items-center justify-between">
             {% if current_episode %}<h2 class="text-xl font-bold truncate max-w-full overflow-hidden text-ellipsis whitespace-nowrap">Episode {{ current_episode.number }} — {{ episode.number }}
                 {% if current_episode.metadata.title %}
                     {{ current_episode.metadata.title }}
@@ -196,7 +196,7 @@
                 {% else %}
                     Episode {{ current_episode.number }}
             {% endif %}</h2>{% endif %}
-            <div class="flex flex-row gap-1 items-center">
+            <div class="flex max-w-[100vw] flex-row lg:gap-1 items-start lg:items-center">
                 <span class="font-bold">Episode Provider: </span>
                 <a href="{% url "watch:watch_episode" anime.id current_episode.number %}?mode={{ mode }}&provider=zoro" 
                    class="{% if provider == "zoro" %}bg-{{ user.preferences.accent_colour }}-600{% else %}bg-white bg-opacity-10{% endif %} text-white text-sm font-bold px-4 py-2 rounded">Zoro</a>
@@ -1211,7 +1211,7 @@
     const layout = new VidstackPlayerLayout({
         {% for track in streaming_data.tracks %}
             {% if track.kind == 'thumbnails' %}
-                thumbnails: "https://proxy-worker.bobbyskhs.workers.dev?url={{ track.file }}",
+                thumbnails: "{{ track.file }}",
             {% endif %}
         {% endfor %}
     });

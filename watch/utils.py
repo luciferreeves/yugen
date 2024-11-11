@@ -109,13 +109,15 @@ def find_zoro_server (episode_id, mode):
     if server_id:
         return server_id, mode
 
-    base_url = f"{os.getenv('ZORO_URL')}/anime/servers?episodeId={episode_id}"
+    base_url = f"{os.getenv('ZORO_URL')}/api/v2/hianime/episode/servers?animeEpisodeId={episode_id}"
     print(base_url)
     response = requests.get(base_url)
     response = response.json()
 
     if "message" in response:
         return None, mode
+    
+    response = response["data"]
 
     if mode == "dub" and "dub" in response and len(response["dub"]) > 0:
         server_id = response["dub"][0]["serverName"]
@@ -141,12 +143,13 @@ def get_zoro_episode_streaming_data(episode_url, mode="sub"):
     category = "dub" if dub else "sub"
     server, category = find_zoro_server(episode_url, category)
     if not episode_data:
-        base_url = f"{os.getenv('ZORO_URL')}/anime/episode-srcs?id={episode_url}&category={category}&server={server}"
+        base_url = f"{os.getenv('ZORO_URL')}/api/v2/hianime/episode/sources?animeEpisodeId={episode_url}&category={category}&server={server}"
         print(f"Trying URL: {base_url}")
         response = requests.get(base_url, timeout=10)
         episode_data = response.json()
 
         if "message" not in episode_data:
+            episode_data = episode_data["data"]
             store_in_redis_cache(cache_key, json.dumps(episode_data), 3600 * 12)
     else:
         episode_data = json.loads(episode_data)
@@ -352,7 +355,7 @@ def get_info_by_zid(zid):
         anime_selected = get_from_redis_cache(cache_key)
         anime_selected = json.loads(anime_selected)
     except:
-        base_url = f"{os.getenv('ZORO_URL')}/anime/info?id={zid}"
+        base_url = f"{os.getenv('ZORO_URL')}/api/v2/hianime/anime/{zid}"
         response = requests.get(base_url)
         anime_selected = response.json()
 
@@ -379,7 +382,7 @@ def get_episodes_by_zid(z_anime_id):
         fetched_episodes = get_from_redis_cache(cache_key)
         fetched_episodes = json.loads(fetched_episodes)
     except:
-        base_url = f"{os.getenv('ZORO_URL')}/anime/episodes/{z_anime_id}"
+        base_url = f"{os.getenv('ZORO_URL')}/api/v2/hianime/anime/{z_anime_id}/episodes"
         response = requests.get(base_url)
         fetched_episodes = response.json()
         store_in_redis_cache(cache_key, json.dumps(fetched_episodes), 3600 * 12)

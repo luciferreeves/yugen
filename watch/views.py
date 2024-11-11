@@ -77,6 +77,7 @@ def watch(request, anime_id, episode=None):
     if episode_data:
         if provider == "zoro":
             streaming_data = get_zoro_episode_streaming_data(episode_data["id"], mode)
+            print(streaming_data)
         else:
             streaming_data = get_gogo_episode_streaming_data(episode_data["id"])
 
