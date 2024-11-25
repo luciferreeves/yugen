@@ -76,7 +76,11 @@ class GlobalMetaMiddleware:
 
             requested_id = request.path.split("/")[2]
             episode = request.path.split("/")[3] if len(request.path.split("/")) > 3 else 1
-            episode = int(episode)
+            # episode = int(episode)
+            try:
+                episode = int(episode)
+            except:
+                episode = 1
             anime_info = get_anime_data(requested_id)
 
             if anime_info and len(anime_info["episodes"] or []) < episode:

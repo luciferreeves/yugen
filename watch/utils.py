@@ -24,8 +24,8 @@ r = redis.Redis(
     password=os.getenv("REDIS_PASSWORD"),
 )
 
-# r.flushall()
-# print("Redis cache flushed")
+r.flushall()
+print("Redis cache flushed")
 
 def get_episode_metadata(anime_data, episode):
     episode_metadata = get_all_episode_metadata(anime_data)
@@ -135,7 +135,7 @@ def find_zoro_server (episode_id, mode):
 
 
 @lru_cache(maxsize=100)
-def get_zoro_episode_streaming_data(episode_url, mode="sub"):
+def get_zoro_episode_streaming_data(episode_url, mode="sub", ingrain_sub_subtitles_in_dub=False):
     dub = mode == "dub"
     episode_url = episode_url.replace("$episode$", "?ep=").replace("$dub", "").replace("$sub", "")
     cache_key = f"zoro_episode_streaming_data_{episode_url}_{'dub' if dub else 'sub'}"
@@ -153,6 +153,23 @@ def get_zoro_episode_streaming_data(episode_url, mode="sub"):
             store_in_redis_cache(cache_key, json.dumps(episode_data), 3600 * 12)
     else:
         episode_data = json.loads(episode_data)
+
+    if ingrain_sub_subtitles_in_dub and dub:
+        sub_cache_key = f"zoro_episode_streaming_data_{episode_url}_sub"
+        sub_episode_data = get_from_redis_cache(sub_cache_key)
+        if not sub_episode_data:
+            base_url = f"{os.getenv('ZORO_URL')}/api/v2/hianime/episode/sources?animeEpisodeId={episode_url}&category=sub&server={server}"
+            print(f"Trying URL: {base_url}")
+            response = requests.get(base_url, timeout=10)
+            sub_episode_data = response.json()
+
+            if "message" not in sub_episode_data:
+                sub_episode_data = sub_episode_data["data"]
+                store_in_redis_cache(sub_cache_key, json.dumps(sub_episode_data), 3600 * 12)
+        else:
+            sub_episode_data = json.loads(sub_episode_data)
+
+        episode_data["tracks"] = sub_episode_data["tracks"]
 
     return episode_data
 

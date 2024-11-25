@@ -166,7 +166,7 @@ def watch(request, anime_id, episode=None):
 
     if episode_data:
         if provider == "zoro":
-            streaming_data = get_zoro_episode_streaming_data(episode_data["id"], mode)
+            streaming_data = get_zoro_episode_streaming_data(episode_data["id"], mode, request.user.preferences.ingrain_sub_subtitles_in_dub and dub)
         else:
             streaming_data = get_gogo_episode_streaming_data(episode_data["id"])
 
