@@ -71,15 +71,20 @@ def proxy_stream(request):
         # Handle VTT files
         elif url.endswith('.vtt'):
             content = response.text
-            # Regular expression to find URLs in VTT file
-            url_pattern = r'(https?://[^\s<>"]+?(?:jpg|jpeg|png|webp))'
+            base_url = url.rsplit('/', 1)[0] + '/'
+            
+            # Pattern to match both full URLs and relative paths with optional #xywh fragment
+            sprite_pattern = r'((?:https?://[^\s<>"]+?|[\w-]+\.(?:jpg|jpeg|png|webp))(?:#xywh=[\d,]+)?)'
             
             def replace_url(match):
-                thumbnail_url = match.group(1)
-                return f'/watch/stream?url={quote(thumbnail_url)}'
+                sprite_url = match.group(1)
+                # If it's not a full URL, join it with the base URL
+                if not sprite_url.startswith('http'):
+                    sprite_url = urljoin(base_url, sprite_url)
+                return f'/watch/stream?url={quote(sprite_url)}'
             
             # Replace all image URLs with proxied versions
-            modified_content = re.sub(url_pattern, replace_url, content)
+            modified_content = re.sub(sprite_pattern, replace_url, content)
             
             return HttpResponse(
                 modified_content,
