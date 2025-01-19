@@ -18,14 +18,14 @@ from watch.tmdbmapper import get_anime_episodes as gae, get_tv_episode_group_det
 
 dotenv.load_dotenv()
 
-# r = redis.Redis(
-#     host=os.getenv("REDIS_HOST"),
-#     port=os.getenv("REDIS_PORT"),
-#     password=os.getenv("REDIS_PASSWORD"),
-# )
+r = redis.Redis(
+    host=os.getenv("REDIS_HOST"),
+    port=os.getenv("REDIS_PORT"),
+    password=os.getenv("REDIS_PASSWORD"),
+)
 
-r.flushall()
-print("Redis cache flushed")
+# r.flushall()
+# print("Redis cache flushed")
 
 def get_episode_metadata(anime_data, episode):
     episode_metadata = get_all_episode_metadata(anime_data)
