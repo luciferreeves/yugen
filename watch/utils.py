@@ -57,7 +57,7 @@ def get_anime_data(anime_id, provider="gogo", dub=False):
 
         base_url = f"{os.getenv('CONSUMET_URL')}/meta/anilist/info/{anime_id}?provider={provider}"
         print(f"Trying URL: {base_url}")
-        response = requests.get(base_url, timeout=10)
+        response = requests.get(base_url, timeout=120)
         sub_data = response.json()
 
         if "message" in sub_data:
@@ -71,7 +71,7 @@ def get_anime_data(anime_id, provider="gogo", dub=False):
 
         base_url = f"{os.getenv('CONSUMET_URL')}/meta/anilist/info/{anime_id}?provider={provider}&dub=true"
         print(f"Trying URL: {base_url}")
-        response = requests.get(base_url, timeout=10)
+        response = requests.get(base_url, timeout=120)
         dub_data = response.json()
         if "status" in dub_data and dub_data["status"] == "Completed":
             store_in_redis_cache(dub_cache_key, json.dumps(dub_data), 3600 * 24 * 30)
@@ -145,7 +145,7 @@ def get_zoro_episode_streaming_data(episode_url, mode="sub", ingrain_sub_subtitl
     if not episode_data:
         base_url = f"{os.getenv('ZORO_URL')}/api/v2/hianime/episode/sources?animeEpisodeId={episode_url}&category={category}&server={server}"
         print(f"Trying URL: {base_url}")
-        response = requests.get(base_url, timeout=10)
+        response = requests.get(base_url, timeout=120)
         episode_data = response.json()
 
         if "message" not in episode_data:
@@ -160,7 +160,7 @@ def get_zoro_episode_streaming_data(episode_url, mode="sub", ingrain_sub_subtitl
         if not sub_episode_data:
             base_url = f"{os.getenv('ZORO_URL')}/api/v2/hianime/episode/sources?animeEpisodeId={episode_url}&category=sub&server={server}"
             print(f"Trying URL: {base_url}")
-            response = requests.get(base_url, timeout=10)
+            response = requests.get(base_url, timeout=120)
             sub_episode_data = response.json()
 
             if "message" not in sub_episode_data:
@@ -180,7 +180,7 @@ def get_gogo_episode_streaming_data(episode_id):
     if not episode_data:
         base_url = f"{os.getenv('CONSUMET_URL')}/meta/anilist/watch/{episode_id}"
         print(f"Trying URL: {base_url}")
-        response = requests.get(base_url, timeout=10)
+        response = requests.get(base_url, timeout=120)
         episode_data = response.json()
         store_in_redis_cache(cache_key, json.dumps(episode_data), 3600 * 12)
     else:
